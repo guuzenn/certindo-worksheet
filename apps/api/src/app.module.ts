@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { envSchema } from '@certindo/validation';
 import { AuthModule } from './auth/auth.module';
+import { CalibrationsModule } from './calibrations/calibrations.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { HealthModule } from './health/health.module';
 import { RequestLoggerMiddleware } from './common/request-logger.middleware';
@@ -20,6 +21,7 @@ import { UsersModule } from './users/users.module';
     PrismaModule,
     UsersModule,
     AuthModule,
+    CalibrationsModule,
     DashboardModule,
     HealthModule,
   ],
