@@ -30,6 +30,7 @@ Arsitektur staging:
 
 1. Di Render pilih **New > Blueprint** dan hubungkan repository yang sama.
 2. Render akan membaca `render.yaml` dan membuat service `certindo-worksheet-api`.
+   Blueprint menggunakan instance `free`; service staging akan spin down ketika idle.
 3. Isi secret/environment berikut:
    - `DATABASE_URL`: pooled URL branch Neon staging
    - `JWT_SECRET`: dibuat acak secara otomatis oleh Render Blueprint

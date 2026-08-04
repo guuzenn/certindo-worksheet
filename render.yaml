@@ -2,6 +2,7 @@ services:
   - type: web
     name: certindo-worksheet-api
     runtime: node
+    plan: free
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @certindo/api build
     startCommand: pnpm --filter @certindo/api start
     healthCheckPath: /api/health
