@@ -1,6 +1,6 @@
 # Certindo Calibration Worksheet
 
-Fondasi monorepo TypeScript untuk sistem lembar kerja kalibrasi PT Certindonesia. Implementasi saat ini mencakup **Phase 1–2**: workspace, database, autentikasi, design system, application shell, dan dashboard. Dynamic form, CRUD kalibrasi, adapter Excel, serta formulir Torque Gauge akan dilanjutkan pada Phase 3–6.
+Fondasi monorepo TypeScript untuk sistem lembar kerja kalibrasi PT Certindonesia. Implementasi saat ini mencakup workspace, database, autentikasi, design system, dashboard, CRUD draft kalibrasi, dan katalog template instrumen workbook 0X–94 serta 095–163. Adapter penulisan Excel dan formulir pengukuran dinamis masih dilanjutkan bertahap.
 
 ## Arsitektur
 
@@ -40,6 +40,8 @@ Web dan API tidak digabungkan ke satu runtime. API menjadi pemilik aturan domain
 
 Web tersedia di `http://localhost:3000`, API di `http://localhost:4000/api`, dan health check di `http://localhost:4000/api/health`.
 
+Panduan staging Vercel, Render, Neon, dan private Blob tersedia di [DEPLOYMENT.md](./DEPLOYMENT.md).
+
 Data admin awal mengikuti `SEED_ADMIN_EMAIL` dan `SEED_ADMIN_PASSWORD`. Ganti password seed sebelum menggunakan environment bersama.
 
 ## Environment
@@ -67,6 +69,14 @@ pnpm build
 - `POST /api/auth/login`
 - `GET /api/auth/me`
 - `GET /api/dashboard/summary`
+- `GET /api/calibrations`
+- `GET /api/calibrations/options`
+- `GET /api/calibrations/:id`
+- `POST /api/calibrations`
+- `PATCH /api/calibrations/:id`
+- `DELETE /api/calibrations/:id`
+- `POST /api/calibrations/:id/generate`
+- `GET /api/calibrations/:id/download`
 - `GET /api/health`
 
 Endpoint dashboard dan profil membutuhkan bearer token. Login dibatasi lima percobaan per menit per client.
@@ -75,6 +85,8 @@ Endpoint dashboard dan profil membutuhkan bearer token. Login dibatasi lima perc
 
 Schema awal menyediakan `User`, `Company`, `InstrumentForm`, `CalibrationRecord`, dan `CalibrationRevision`, termasuk role `ADMIN`, `TECHNICIAN`, `REVIEWER`, `APPROVER` dan seluruh status workflow. Migrasi tidak memerlukan database lokal; gunakan branch Neon terpisah untuk pengembangan dan produksi.
 
-## Fase berikutnya
+## Template instrumen
 
-Phase 3 akan mendefinisikan `FormSchema`/`ExcelMapping` dengan Zod, renderer formulir dinamis, dan measurement table keyboard-friendly. Setelah itu CRUD dan revision history, abstraksi storage/Excel, Torque Gauge CCI-KAL-FOM-152, pengujian integrasi, serta dokumentasi deployment akan ditambahkan secara inkremental.
+Seed katalog saat ini menghubungkan setiap instrumen aktif ke workbook lokal `storage/templates/Lembar Kerja 0X-94.xlsx` atau `storage/templates/Lembar Kerja 095-163.xlsx` dan nama sheet-nya melalui `mappingJson`. Sheet kosong tidak dimasukkan. Daftar field identitas mengikuti isi setiap sheet dan ditampilkan dalam urutan No. Sertifikat, Nama Alat, Merk, Type/Model, No. Seri, No. Identitas, Kapasitas, lalu Resolusi; field yang tidak ada pada template tidak ditampilkan. Nomor sertifikat selalu memakai prefix tetap `CTD/CAL/`. Template dengan kapasitas minimum/maksimum atau temperatur ruangan awal/tengah/akhir mendapatkan field terpisah sesuai lembar kerja. Template yang metadata sumbernya masih tidak konsisten ditandai `needsTemplateReview` agar tidak dianggap siap ekspor final.
+
+Mapping Torque Gauge sudah mencakup identitas, kondisi ruangan, 10 titik Clockwise, dan 11 titik Counter Clockwise dengan masing-masing lima pembacaan standar. Mapping Dissolved Oxygen Meter mencakup identitas, lokasi kalibrasi, temperatur dan kelembaban awal/akhir, serta empat baris Standar DO dengan pembacaan DO1–DO3. API menghasilkan workbook terisi yang hanya berisi sheet instrumen terpilih tanpa mengubah master multi-sheet, dan UI menyediakan tombol pembuatan sekaligus unduh Excel. Fase berikutnya adalah memperluas mapping dan tabel pengukuran ke jenis alat lain.

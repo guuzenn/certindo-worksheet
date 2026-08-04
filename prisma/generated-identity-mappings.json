@@ -1,0 +1,3624 @@
+{
+  "CCI-KAL-FOM-0XX": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ]
+  },
+  "CCI-KAL-FOM-010": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "G7"
+    ],
+    "instrument.name": [
+      "C8",
+      "C18"
+    ],
+    "calibrationLocation": [
+      "G8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "G10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.temperatureStart": [
+      "G14"
+    ],
+    "environment.temperatureEnd": [
+      "H14"
+    ],
+    "environment.humidityStart": [
+      "G15"
+    ],
+    "environment.humidityEnd": [
+      "H15"
+    ]
+  },
+  "CCI-KAL-FOM-027": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "I6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "I7"
+    ],
+    "instrument.manufacturer": [
+      "C8"
+    ],
+    "instrument.model": [
+      "C9"
+    ],
+    "instrument.serialNumber": [
+      "C10"
+    ],
+    "instrument.identityNumber": [
+      "C11"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "I13"
+    ],
+    "environment.temperatureEnd": [
+      "K13"
+    ],
+    "instrument.resolution": [
+      "B14"
+    ]
+  },
+  "CCI-KAL-FOM-028": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "H13"
+    ],
+    "environment.temperatureEnd": [
+      "I13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "H14"
+    ],
+    "environment.humidityEnd": [
+      "I14"
+    ]
+  },
+  "CCI-KAL-FOM-028-B": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "H6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "H7"
+    ],
+    "instrument.manufacturer": [
+      "C8"
+    ],
+    "instrument.model": [
+      "C9"
+    ],
+    "company.name": [
+      "H9"
+    ],
+    "instrument.serialNumber": [
+      "C10"
+    ],
+    "instrument.identityNumber": [
+      "C11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "environment.temperatureStart": [
+      "H12"
+    ],
+    "environment.temperatureEnd": [
+      "I12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ],
+    "environment.humidityStart": [
+      "H13"
+    ],
+    "environment.humidityEnd": [
+      "I13"
+    ]
+  },
+  "CCI-KAL-FOM-033": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "I10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "I13"
+    ],
+    "environment.temperatureEnd": [
+      "K13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "I14"
+    ],
+    "environment.humidityEnd": [
+      "K14"
+    ]
+  },
+  "CCI-KAL-FOM-053": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "I10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "I13"
+    ],
+    "environment.temperatureEnd": [
+      "K13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "I14"
+    ],
+    "environment.humidityEnd": [
+      "K14"
+    ]
+  },
+  "CCI-KAL-FOM-054": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "G7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "G8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "G10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "G13"
+    ],
+    "environment.temperatureEnd": [
+      "H13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "G14"
+    ],
+    "environment.humidityEnd": [
+      "H14"
+    ]
+  },
+  "CCI-KAL-FOM-055": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ]
+  },
+  "CCI-KAL-FOM-056": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "G7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "G8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "G10"
+    ],
+    "instrument.model": [
+      "C11"
+    ],
+    "instrument.manufacturer": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "G13"
+    ],
+    "environment.temperatureEnd": [
+      "H13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "G14"
+    ],
+    "environment.humidityEnd": [
+      "H14"
+    ]
+  },
+  "CCI-KAL-FOM-057": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "company.name": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "calibrationDate": [
+      "I10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "environment.temperatureStart": [
+      "I12"
+    ],
+    "environment.temperatureMiddle": [
+      "J12"
+    ],
+    "environment.temperatureEnd": [
+      "K12"
+    ],
+    "instrument.capacityMin": [
+      "C13"
+    ],
+    "environment.humidityStart": [
+      "I13"
+    ],
+    "environment.humidityMiddle": [
+      "J13"
+    ],
+    "environment.humidityEnd": [
+      "K13"
+    ],
+    "instrument.capacityMax": [
+      "C14"
+    ]
+  },
+  "CCI-KAL-FOM-057-B": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "company.name": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "calibrationDate": [
+      "I10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "environment.temperatureStart": [
+      "I12"
+    ],
+    "environment.temperatureMiddle": [
+      "J12"
+    ],
+    "environment.temperatureEnd": [
+      "K12"
+    ],
+    "instrument.capacityMin": [
+      "C13"
+    ],
+    "environment.humidityStart": [
+      "I13"
+    ],
+    "environment.humidityMiddle": [
+      "J13"
+    ],
+    "environment.humidityEnd": [
+      "K13"
+    ],
+    "instrument.capacityMax": [
+      "C14"
+    ]
+  },
+  "CCI-KAL-FOM-058": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "G7"
+    ],
+    "instrument.name": [
+      "C8",
+      "C18"
+    ],
+    "calibrationLocation": [
+      "G8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "G10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.temperatureStart": [
+      "G14"
+    ],
+    "environment.temperatureEnd": [
+      "H14"
+    ],
+    "environment.humidityStart": [
+      "G15"
+    ],
+    "environment.humidityEnd": [
+      "H15"
+    ]
+  },
+  "CCI-KAL-FOM-059": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "company.name": [
+      "I9"
+    ],
+    "instrument.manufacturer": [
+      "C10"
+    ],
+    "instrument.model": [
+      "C11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "I13"
+    ],
+    "environment.temperatureEnd": [
+      "K13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "I14"
+    ],
+    "environment.humidityEnd": [
+      "K14"
+    ]
+  },
+  "CCI-KAL-FOM-060": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "I10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "I13"
+    ],
+    "environment.temperatureEnd": [
+      "J13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "I14"
+    ],
+    "environment.humidityEnd": [
+      "J14"
+    ]
+  },
+  "CCI-KAL-FOM-061": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "G7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "G8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "G10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "G13"
+    ],
+    "environment.temperatureEnd": [
+      "H13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "G14"
+    ],
+    "environment.humidityEnd": [
+      "H14"
+    ]
+  },
+  "CCI-KAL-FOM-062": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "G7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "G8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "G10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "G13"
+    ],
+    "environment.temperatureEnd": [
+      "H13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "G14"
+    ],
+    "environment.humidityEnd": [
+      "H14"
+    ]
+  },
+  "CCI-KAL-FOM-063": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "I10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "I13"
+    ],
+    "environment.temperatureEnd": [
+      "J13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "I14"
+    ],
+    "environment.humidityEnd": [
+      "J14"
+    ]
+  },
+  "CCI-KAL-FOM-064": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.manufacturer": [
+      "C10"
+    ],
+    "company.name": [
+      "I10"
+    ],
+    "instrument.model": [
+      "C11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "I13"
+    ],
+    "environment.temperatureEnd": [
+      "K13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "I14"
+    ],
+    "environment.humidityEnd": [
+      "K14"
+    ]
+  },
+  "CCI-KAL-FOM-065": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "G7"
+    ],
+    "instrument.name": [
+      "C8",
+      "C17"
+    ],
+    "calibrationLocation": [
+      "G8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "G10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "G13"
+    ],
+    "environment.temperatureEnd": [
+      "H13"
+    ],
+    "instrument.resolution": [
+      "C14",
+      "D17"
+    ],
+    "environment.humidityStart": [
+      "G14"
+    ],
+    "environment.humidityEnd": [
+      "H14"
+    ]
+  },
+  "CCI-KAL-FOM-066": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "I10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ]
+  },
+  "CCI-KAL-FOM-067": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "I10"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ]
+  },
+  "CCI-KAL-FOM-068": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "I10"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ]
+  },
+  "CCI-KAL-FOM-069": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "J7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "J8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.manufacturer": [
+      "C10"
+    ],
+    "company.name": [
+      "J10"
+    ],
+    "instrument.identityNumber": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "J13"
+    ],
+    "environment.temperatureEnd": [
+      "M13"
+    ],
+    "instrument.resolution": [
+      "C14",
+      "F17"
+    ],
+    "environment.humidityStart": [
+      "J14"
+    ],
+    "environment.humidityEnd": [
+      "M14"
+    ]
+  },
+  "CCI-KAL-FOM-071": {
+    "certificateNumber": [
+      "C7",
+      "C67"
+    ],
+    "calibrationDate": [
+      "G7",
+      "H67"
+    ],
+    "instrument.name": [
+      "C8",
+      "C68"
+    ],
+    "calibrationLocation": [
+      "G8",
+      "H68"
+    ],
+    "instrument.manufacturer": [
+      "C9",
+      "C69"
+    ],
+    "instrument.model": [
+      "C10",
+      "C70"
+    ],
+    "company.name": [
+      "G10",
+      "H70"
+    ],
+    "instrument.identityNumber": [
+      "C11",
+      "C71"
+    ],
+    "instrument.serialNumber": [
+      "C12",
+      "C72"
+    ],
+    "instrument.capacity": [
+      "C13",
+      "C73"
+    ],
+    "environment.temperatureStart": [
+      "G13",
+      "H73"
+    ],
+    "environment.temperatureEnd": [
+      "H13",
+      "I73"
+    ],
+    "instrument.resolution": [
+      "C14",
+      "C74"
+    ],
+    "environment.humidityStart": [
+      "G14",
+      "H74"
+    ],
+    "environment.humidityEnd": [
+      "H14",
+      "I74"
+    ]
+  },
+  "CCI-KAL-FOM-072": {
+    "certificateNumber": [
+      "C7",
+      "C67"
+    ],
+    "calibrationDate": [
+      "G7",
+      "H67"
+    ],
+    "instrument.name": [
+      "C8",
+      "C68"
+    ],
+    "calibrationLocation": [
+      "G8",
+      "H68"
+    ],
+    "instrument.manufacturer": [
+      "C9",
+      "C69"
+    ],
+    "instrument.model": [
+      "C10",
+      "C70"
+    ],
+    "company.name": [
+      "G10",
+      "H70"
+    ],
+    "instrument.identityNumber": [
+      "C11",
+      "C71"
+    ],
+    "instrument.serialNumber": [
+      "C12",
+      "C72"
+    ],
+    "instrument.capacity": [
+      "C13",
+      "C73"
+    ],
+    "environment.temperatureStart": [
+      "G13",
+      "H73"
+    ],
+    "environment.temperatureEnd": [
+      "H13",
+      "I73"
+    ],
+    "instrument.resolution": [
+      "C14",
+      "C74"
+    ],
+    "environment.humidityStart": [
+      "G14",
+      "H74"
+    ],
+    "environment.humidityEnd": [
+      "H14",
+      "I74"
+    ]
+  },
+  "CCI-KAL-FOM-073": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.identityNumber": [
+      "C11"
+    ],
+    "instrument.serialNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "H13"
+    ],
+    "environment.temperatureEnd": [
+      "I13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "H14"
+    ],
+    "environment.humidityEnd": [
+      "I14"
+    ]
+  },
+  "CCI-KAL-FOM-074": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.identityNumber": [
+      "C11"
+    ],
+    "instrument.serialNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "H13"
+    ],
+    "environment.temperatureEnd": [
+      "I13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "H14"
+    ],
+    "environment.humidityEnd": [
+      "I14"
+    ]
+  },
+  "CCI-KAL-FOM-075": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "L7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "L8"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "company.name": [
+      "L10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ]
+  },
+  "CCI-KAL-FOM-076": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "J7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "J8"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "company.name": [
+      "J10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ]
+  },
+  "CCI-KAL-FOM-077": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "I7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "I8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.manufacturer": [
+      "C10"
+    ],
+    "company.name": [
+      "I10"
+    ],
+    "instrument.model": [
+      "C11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C14"
+    ],
+    "environment.temperatureStart": [
+      "I14"
+    ],
+    "environment.temperatureEnd": [
+      "K14"
+    ],
+    "instrument.resolution": [
+      "C15"
+    ],
+    "environment.humidityStart": [
+      "I15"
+    ],
+    "environment.humidityEnd": [
+      "K15"
+    ]
+  },
+  "CCI-KAL-FOM-078": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "I6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "I7"
+    ],
+    "instrument.serialNumber": [
+      "C8"
+    ],
+    "instrument.identityNumber": [
+      "C9"
+    ],
+    "company.name": [
+      "I9"
+    ],
+    "instrument.manufacturer": [
+      "C10"
+    ],
+    "instrument.model": [
+      "C11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ]
+  },
+  "CCI-KAL-FOM-079": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "I6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "I7"
+    ],
+    "instrument.serialNumber": [
+      "C8"
+    ],
+    "instrument.identityNumber": [
+      "C9"
+    ],
+    "company.name": [
+      "I9"
+    ],
+    "instrument.manufacturer": [
+      "C10"
+    ],
+    "instrument.model": [
+      "C11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ]
+  },
+  "CCI-KAL-FOM-080": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "I6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "I7"
+    ],
+    "instrument.manufacturer": [
+      "C8"
+    ],
+    "instrument.model": [
+      "C9"
+    ],
+    "company.name": [
+      "I9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "environment.temperatureStart": [
+      "I12"
+    ],
+    "environment.temperatureEnd": [
+      "J12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ],
+    "environment.humidityStart": [
+      "I13"
+    ],
+    "environment.humidityEnd": [
+      "J13"
+    ]
+  },
+  "CCI-KAL-FOM-081": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "I6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "I7"
+    ],
+    "instrument.manufacturer": [
+      "C8"
+    ],
+    "instrument.model": [
+      "C9"
+    ],
+    "company.name": [
+      "I9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "environment.temperatureStart": [
+      "I12"
+    ],
+    "environment.temperatureEnd": [
+      "J12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ],
+    "environment.humidityStart": [
+      "I13"
+    ],
+    "environment.humidityEnd": [
+      "J13"
+    ]
+  },
+  "CCI-KAL-FOM-082": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "I6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "I7"
+    ],
+    "instrument.manufacturer": [
+      "C8"
+    ],
+    "instrument.model": [
+      "C9"
+    ],
+    "company.name": [
+      "I9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "environment.temperatureStart": [
+      "I12"
+    ],
+    "environment.temperatureEnd": [
+      "K12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ],
+    "environment.humidityStart": [
+      "I13"
+    ],
+    "environment.humidityEnd": [
+      "K13"
+    ]
+  },
+  "CCI-KAL-FOM-084": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "I6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "I7"
+    ],
+    "instrument.manufacturer": [
+      "C8"
+    ],
+    "instrument.model": [
+      "C9"
+    ],
+    "company.name": [
+      "I9"
+    ],
+    "instrument.capacity": [
+      "C11"
+    ],
+    "instrument.resolution": [
+      "C12"
+    ]
+  },
+  "CCI-KAL-FOM-085": {
+    "certificateNumber": [
+      "D6"
+    ],
+    "calibrationDate": [
+      "L6"
+    ],
+    "instrument.name": [
+      "D7"
+    ],
+    "calibrationLocation": [
+      "L7"
+    ],
+    "instrument.manufacturer": [
+      "D8"
+    ],
+    "instrument.model": [
+      "D9"
+    ],
+    "company.name": [
+      "L9"
+    ],
+    "instrument.serialNumber": [
+      "D10"
+    ],
+    "instrument.identityNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "environment.temperatureStart": [
+      "L12"
+    ],
+    "environment.temperatureEnd": [
+      "N12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ],
+    "environment.humidityStart": [
+      "L13"
+    ],
+    "environment.humidityEnd": [
+      "N13"
+    ]
+  },
+  "CCI-KAL-FOM-087": {
+    "certificateNumber": [
+      "D6"
+    ],
+    "calibrationDate": [
+      "J6"
+    ],
+    "instrument.name": [
+      "D7"
+    ],
+    "calibrationLocation": [
+      "J7"
+    ],
+    "instrument.manufacturer": [
+      "D8"
+    ],
+    "instrument.model": [
+      "D9"
+    ],
+    "company.name": [
+      "J9"
+    ],
+    "instrument.serialNumber": [
+      "D10"
+    ],
+    "instrument.identityNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "environment.temperatureStart": [
+      "J12"
+    ],
+    "environment.temperatureEnd": [
+      "L12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ],
+    "environment.humidityStart": [
+      "J13"
+    ],
+    "environment.humidityEnd": [
+      "L13"
+    ]
+  },
+  "CCI-KAL-FOM-088": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "company.name": [
+      "I6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "I7"
+    ],
+    "instrument.manufacturer": [
+      "C8"
+    ],
+    "instrument.identityNumber": [
+      "C9"
+    ],
+    "calibrationDate": [
+      "I9"
+    ],
+    "instrument.serialNumber": [
+      "C10"
+    ],
+    "instrument.model": [
+      "C11"
+    ],
+    "environment.temperatureStart": [
+      "I11"
+    ],
+    "environment.temperatureMiddle": [
+      "J11"
+    ],
+    "environment.temperatureEnd": [
+      "K11"
+    ],
+    "instrument.capacityMin": [
+      "C12"
+    ],
+    "environment.humidityStart": [
+      "I12"
+    ],
+    "environment.humidityMiddle": [
+      "J12"
+    ],
+    "environment.humidityEnd": [
+      "K12"
+    ],
+    "instrument.capacityMax": [
+      "C13"
+    ]
+  },
+  "CCI-KAL-FOM-089": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "I6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "I7"
+    ],
+    "instrument.serialNumber": [
+      "C8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "company.name": [
+      "I9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "instrument.identityNumber": [
+      "C11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "environment.temperatureStart": [
+      "I12"
+    ],
+    "environment.temperatureEnd": [
+      "K12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ],
+    "environment.humidityStart": [
+      "I13"
+    ],
+    "environment.humidityEnd": [
+      "K13"
+    ]
+  },
+  "CCI-KAL-FOM-090": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "J6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "J7"
+    ],
+    "instrument.serialNumber": [
+      "C8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "company.name": [
+      "J9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "instrument.capacity": [
+      "C11"
+    ],
+    "instrument.resolution": [
+      "C12",
+      "G15"
+    ]
+  },
+  "CCI-KAL-FOM-091": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "I6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "I7"
+    ],
+    "instrument.serialNumber": [
+      "C8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "company.name": [
+      "I9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "instrument.capacity": [
+      "C11"
+    ],
+    "instrument.resolution": [
+      "C12"
+    ]
+  },
+  "CCI-KAL-FOM-094": {
+    "certificateNumber": [
+      "C6"
+    ],
+    "calibrationDate": [
+      "J6"
+    ],
+    "instrument.name": [
+      "C7"
+    ],
+    "calibrationLocation": [
+      "J7"
+    ],
+    "instrument.serialNumber": [
+      "C8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "company.name": [
+      "J9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "instrument.capacity": [
+      "C11"
+    ],
+    "instrument.resolution": [
+      "C12"
+    ]
+  },
+  "CCI-KAL-FOM-095": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-096": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-098": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-099": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "calibrationDate": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "company.name": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "instrument.resolution": [
+      "D14"
+    ]
+  },
+  "CCI-KAL-FOM-100": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ]
+  },
+  "CCI-KAL-FOM-101": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ]
+  },
+  "CCI-KAL-FOM-102": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "instrument.resolution": [
+      "D14"
+    ]
+  },
+  "CCI-KAL-FOM-103": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-103-B": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-104": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-105": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-106": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "D13"
+    ],
+    "environment.temperatureStart": [
+      "H13"
+    ],
+    "environment.temperatureEnd": [
+      "I13"
+    ],
+    "instrument.resolution": [
+      "D14"
+    ],
+    "environment.humidityStart": [
+      "H14"
+    ],
+    "environment.humidityEnd": [
+      "I14"
+    ]
+  },
+  "CCI-KAL-FOM-109": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ]
+  },
+  "CCI-KAL-FOM-111": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ]
+  },
+  "CCI-KAL-FOM-112": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ]
+  },
+  "CCI-KAL-FOM-113": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ]
+  },
+  "CCI-KAL-FOM-114": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "environment.temperatureStart": [
+      "H12"
+    ],
+    "environment.temperatureEnd": [
+      "I12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ],
+    "environment.humidityStart": [
+      "H13"
+    ],
+    "environment.humidityEnd": [
+      "I13"
+    ]
+  },
+  "CCI-KAL-FOM-115": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-116": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "environment.temperatureStart": [
+      "H12"
+    ],
+    "environment.temperatureEnd": [
+      "I12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ],
+    "environment.humidityStart": [
+      "H13"
+    ],
+    "environment.humidityEnd": [
+      "I13"
+    ]
+  },
+  "CCI-KAL-FOM-118": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-119": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-120": {
+    "certificateNumber": [
+      "D8"
+    ],
+    "company.name": [
+      "H8"
+    ],
+    "instrument.name": [
+      "D9"
+    ],
+    "calibrationLocation": [
+      "H9"
+    ],
+    "instrument.manufacturer": [
+      "D10"
+    ],
+    "instrument.model": [
+      "D11"
+    ],
+    "calibrationDate": [
+      "H11"
+    ],
+    "instrument.serialNumber": [
+      "D12"
+    ],
+    "instrument.identityNumber": [
+      "D13"
+    ],
+    "instrument.capacityMin": [
+      "D14"
+    ],
+    "instrument.capacityMax": [
+      "D15"
+    ]
+  },
+  "CCI-KAL-FOM-122": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "environment.temperatureStart": [
+      "H12"
+    ],
+    "environment.temperatureEnd": [
+      "I12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ],
+    "environment.humidityStart": [
+      "H13"
+    ],
+    "environment.humidityEnd": [
+      "I13"
+    ]
+  },
+  "CCI-KAL-FOM-125": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ]
+  },
+  "CCI-KAL-FOM-129": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ]
+  },
+  "CCI-KAL-FOM-130": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.capacity": [
+      "D12"
+    ],
+    "instrument.resolution": [
+      "D13"
+    ]
+  },
+  "CCI-KAL-FOM-134": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "calibrationDate": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "company.name": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.identityNumber": [
+      "D12"
+    ],
+    "instrument.capacity": [
+      "D13"
+    ],
+    "environment.temperatureStart": [
+      "H13"
+    ],
+    "environment.temperatureEnd": [
+      "I13"
+    ],
+    "instrument.resolution": [
+      "D14"
+    ],
+    "environment.humidityStart": [
+      "H14"
+    ],
+    "environment.humidityEnd": [
+      "I14"
+    ]
+  },
+  "CCI-KAL-FOM-135": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "company.name": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "calibrationDate": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.identityNumber": [
+      "D12"
+    ],
+    "instrument.capacityMin": [
+      "D13"
+    ],
+    "instrument.capacityMax": [
+      "D14"
+    ]
+  },
+  "CCI-KAL-FOM-140": {
+    "certificateNumber": [
+      "D7",
+      "D56"
+    ],
+    "calibrationDate": [
+      "H7",
+      "H56"
+    ],
+    "instrument.name": [
+      "D8",
+      "D57"
+    ],
+    "calibrationLocation": [
+      "H8",
+      "H57"
+    ],
+    "instrument.manufacturer": [
+      "D9",
+      "D58"
+    ],
+    "instrument.model": [
+      "D10",
+      "D59"
+    ],
+    "company.name": [
+      "H10",
+      "H59"
+    ],
+    "environment.temperatureStart": [
+      "H12",
+      "H61"
+    ],
+    "environment.temperatureEnd": [
+      "I12",
+      "I61"
+    ],
+    "environment.humidityStart": [
+      "H13",
+      "H62"
+    ],
+    "environment.humidityEnd": [
+      "I13",
+      "I62"
+    ],
+    "instrument.identityNumber": [
+      "E15",
+      "E66"
+    ]
+  },
+  "CCI-KAL-FOM-141": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "instrument.name": [
+      "F7"
+    ],
+    "calibrationDate": [
+      "C8"
+    ],
+    "instrument.manufacturer": [
+      "F9",
+      "C11"
+    ],
+    "company.name": [
+      "F12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ],
+    "instrument.model": [
+      "C16",
+      "F16"
+    ]
+  },
+  "CCI-KAL-FOM-142": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "E7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "E8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "E10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ]
+  },
+  "CCI-KAL-FOM-143": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ]
+  },
+  "CCI-KAL-FOM-144": {
+    "certificateNumber": [
+      "D7"
+    ],
+    "company.name": [
+      "H7"
+    ],
+    "instrument.name": [
+      "D8"
+    ],
+    "calibrationLocation": [
+      "H8"
+    ],
+    "instrument.manufacturer": [
+      "D9"
+    ],
+    "instrument.model": [
+      "D10"
+    ],
+    "calibrationDate": [
+      "H10"
+    ],
+    "instrument.serialNumber": [
+      "D11"
+    ],
+    "instrument.identityNumber": [
+      "D12"
+    ],
+    "instrument.capacityMin": [
+      "D13"
+    ],
+    "instrument.capacityMax": [
+      "D14"
+    ]
+  },
+  "CCI-KAL-FOM-146": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "environment.temperatureStart": [
+      "F12"
+    ],
+    "environment.temperatureEnd": [
+      "G12"
+    ],
+    "environment.humidityStart": [
+      "F13"
+    ],
+    "environment.humidityEnd": [
+      "G13"
+    ]
+  },
+  "CCI-KAL-FOM-147": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.capacity": [
+      "C12"
+    ],
+    "environment.temperatureStart": [
+      "F12"
+    ],
+    "environment.temperatureEnd": [
+      "G12"
+    ],
+    "instrument.resolution": [
+      "C13"
+    ],
+    "environment.humidityStart": [
+      "F13"
+    ],
+    "environment.humidityEnd": [
+      "G13"
+    ]
+  },
+  "CCI-KAL-FOM-148": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "F13"
+    ],
+    "environment.temperatureEnd": [
+      "G13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "F14"
+    ],
+    "environment.humidityEnd": [
+      "G14"
+    ]
+  },
+  "CCI-KAL-FOM-149": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "F13"
+    ],
+    "environment.temperatureEnd": [
+      "G13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "F14"
+    ],
+    "environment.humidityEnd": [
+      "G14"
+    ]
+  },
+  "CCI-KAL-FOM-150": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.model": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "F13"
+    ],
+    "environment.temperatureEnd": [
+      "G13"
+    ],
+    "environment.humidityStart": [
+      "F14"
+    ],
+    "environment.humidityEnd": [
+      "G14"
+    ]
+  },
+  "CCI-KAL-FOM-152": {
+    "certificateNumber": [
+      "C7",
+      "C44"
+    ],
+    "calibrationDate": [
+      "F7",
+      "F44"
+    ],
+    "instrument.name": [
+      "C8",
+      "C45"
+    ],
+    "calibrationLocation": [
+      "F8",
+      "F45"
+    ],
+    "instrument.manufacturer": [
+      "C9",
+      "C46"
+    ],
+    "instrument.model": [
+      "C10",
+      "C47"
+    ],
+    "company.name": [
+      "F10",
+      "F47"
+    ],
+    "instrument.serialNumber": [
+      "C11",
+      "C48"
+    ],
+    "instrument.identityNumber": [
+      "C12",
+      "C49"
+    ],
+    "instrument.capacity": [
+      "C13",
+      "C50"
+    ],
+    "environment.temperatureStart": [
+      "F13",
+      "F50"
+    ],
+    "environment.temperatureEnd": [
+      "G13",
+      "G50"
+    ],
+    "instrument.resolution": [
+      "C14",
+      "C51"
+    ],
+    "environment.humidityStart": [
+      "F14",
+      "F51"
+    ],
+    "environment.humidityEnd": [
+      "G14",
+      "G51"
+    ]
+  },
+  "CCI-KAL-FOM-153": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.model": [
+      "C11"
+    ],
+    "instrument.manufacturer": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "F13"
+    ],
+    "environment.temperatureEnd": [
+      "G13"
+    ],
+    "instrument.resolution": [
+      "C14",
+      "E17"
+    ],
+    "environment.humidityStart": [
+      "F14"
+    ],
+    "environment.humidityEnd": [
+      "G14"
+    ]
+  },
+  "CCI-KAL-FOM-157": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.temperatureStart": [
+      "F14"
+    ],
+    "environment.temperatureEnd": [
+      "G14"
+    ],
+    "environment.humidityStart": [
+      "F15"
+    ],
+    "environment.humidityEnd": [
+      "G15"
+    ]
+  },
+  "CCI-KAL-FOM-160": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.model": [
+      "C11"
+    ],
+    "instrument.manufacturer": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "F13"
+    ],
+    "environment.temperatureEnd": [
+      "G13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "F14"
+    ],
+    "environment.humidityEnd": [
+      "G14"
+    ]
+  },
+  "CCI-KAL-FOM-161": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.manufacturer": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "F13"
+    ],
+    "environment.temperatureEnd": [
+      "G13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "F14"
+    ],
+    "environment.humidityEnd": [
+      "G14"
+    ]
+  },
+  "CCI-KAL-FOM-162": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "calibrationDate": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.serialNumber": [
+      "C9"
+    ],
+    "instrument.manufacturer": [
+      "C10"
+    ],
+    "company.name": [
+      "F10"
+    ],
+    "instrument.model": [
+      "C11"
+    ],
+    "instrument.identityNumber": [
+      "C12"
+    ],
+    "instrument.capacity": [
+      "C13"
+    ],
+    "environment.temperatureStart": [
+      "F13"
+    ],
+    "environment.temperatureEnd": [
+      "G13"
+    ],
+    "instrument.resolution": [
+      "C14"
+    ],
+    "environment.humidityStart": [
+      "F14"
+    ],
+    "environment.humidityEnd": [
+      "G14"
+    ]
+  },
+  "CCI-KAL-FOM-163": {
+    "certificateNumber": [
+      "C7"
+    ],
+    "company.name": [
+      "F7"
+    ],
+    "instrument.name": [
+      "C8"
+    ],
+    "calibrationLocation": [
+      "F8"
+    ],
+    "instrument.manufacturer": [
+      "C9"
+    ],
+    "instrument.identityNumber": [
+      "C10"
+    ],
+    "calibrationDate": [
+      "F10"
+    ],
+    "instrument.serialNumber": [
+      "C11"
+    ],
+    "instrument.model": [
+      "C12"
+    ],
+    "environment.temperatureStart": [
+      "F12"
+    ],
+    "environment.temperatureMiddle": [
+      "G12"
+    ],
+    "environment.temperatureEnd": [
+      "H12"
+    ],
+    "instrument.capacityMin": [
+      "C13"
+    ],
+    "environment.humidityStart": [
+      "F13"
+    ],
+    "environment.humidityMiddle": [
+      "G13"
+    ],
+    "environment.humidityEnd": [
+      "H13"
+    ],
+    "instrument.capacityMax": [
+      "C14"
+    ]
+  }
+}

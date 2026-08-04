@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, StreamableFile, UseGuards } from '@nestjs/common';
 import type { AuthUser, CalibrationStatus } from '@certindo/types';
 import { calibrationStatuses } from '@certindo/types';
 import { createCalibrationSchema, type CreateCalibrationInput, updateCalibrationSchema, type UpdateCalibrationInput } from '@certindo/validation';
@@ -30,6 +30,22 @@ export class CalibrationsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.calibrations.findOne(id);
+  }
+
+  @Post(':id/generate')
+  @Roles('ADMIN', 'TECHNICIAN')
+  generate(@Param('id') id: string) {
+    return this.calibrations.generateWorkbook(id);
+  }
+
+  @Get(':id/download')
+  async download(@Param('id') id: string) {
+    const file = await this.calibrations.getGeneratedWorkbook(id);
+    return new StreamableFile(file.buffer, {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: `attachment; filename="${file.fileName}"`,
+      length: file.buffer.length,
+    });
   }
 
   @Post()

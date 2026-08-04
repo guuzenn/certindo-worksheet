@@ -10,6 +10,27 @@ export const calibrationStatuses = [
 ] as const;
 export type CalibrationStatus = (typeof calibrationStatuses)[number];
 
+export const instrumentFieldKeys = [
+  'certificateNumber',
+  'name',
+  'manufacturer',
+  'model',
+  'serialNumber',
+  'identityNumber',
+  'capacity',
+  'capacityMin',
+  'capacityMax',
+  'resolution',
+  'ambientTemperatureStart',
+  'ambientTemperatureMiddle',
+  'ambientTemperatureEnd',
+  'calibrationLocation',
+  'ambientHumidityStart',
+  'ambientHumidityMiddle',
+  'ambientHumidityEnd',
+] as const;
+export type InstrumentFieldKey = (typeof instrumentFieldKeys)[number];
+
 export interface AuthUser {
   id: string;
   name: string;
@@ -30,15 +51,46 @@ export interface ApiError {
 
 export interface CalibrationFormData {
   calibrationDate: string;
+  calibrationLocation: string;
   instrument: {
     name: string;
     manufacturer: string;
     model: string;
     serialNumber: string;
+    identityNumber: string;
     capacity: string;
+    capacityMin: string;
+    capacityMax: string;
     resolution: string;
   };
+  environment: {
+    temperatureStart: string;
+    temperatureMiddle: string;
+    temperatureEnd: string;
+    humidityStart: string;
+    humidityMiddle: string;
+    humidityEnd: string;
+  };
+  measurements: {
+    clockwise: TorqueMeasurementRow[];
+    counterClockwise: TorqueMeasurementRow[];
+    dissolvedOxygen: DissolvedOxygenMeasurementRow[];
+    tables: Record<string, Array<Record<string, string>>>;
+  };
+  additionalFields: Record<string, string>;
   notes: string;
+}
+
+export interface TorqueMeasurementRow {
+  indication: string;
+  readings: string[];
+}
+
+export interface DissolvedOxygenMeasurementRow {
+  number: string;
+  standard: string;
+  resolution: string;
+  readings: string[];
 }
 
 export interface CalibrationRecordSummary {
@@ -59,5 +111,33 @@ export interface CalibrationRecordDetail extends CalibrationRecordSummary {
 
 export interface CalibrationOptions {
   companies: Array<{ id: string; name: string }>;
-  instrumentForms: Array<{ id: string; code: string; name: string; revision: string }>;
+  instrumentForms: Array<{
+    id: string;
+    code: string;
+    name: string;
+    revision: string;
+    fields: InstrumentFieldKey[];
+    additionalFields: DynamicFieldDefinition[];
+    measurementTables: MeasurementTableDefinition[];
+  }>;
+}
+
+export interface DynamicFieldDefinition {
+  key: string;
+  label: string;
+  inputType?: 'text' | 'date' | 'textarea';
+  placeholder?: string;
+}
+
+export interface MeasurementTableColumnDefinition {
+  key: string;
+  label: string;
+  lockedValues?: string[];
+}
+
+export interface MeasurementTableDefinition {
+  id: string;
+  title: string;
+  rowCount: number;
+  columns: MeasurementTableColumnDefinition[];
 }

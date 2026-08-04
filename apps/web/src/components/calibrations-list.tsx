@@ -3,10 +3,10 @@
 import type { CalibrationRecordSummary, CalibrationStatus } from '@certindo/types';
 import { Badge, Button, Card, CardContent } from '@certindo/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FilePlus2, Pencil, Search, Trash2 } from 'lucide-react';
+import { FilePlus2, FileSpreadsheet, Pencil, Search, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { apiRequest } from '@/lib/api';
+import { apiDownload, apiRequest } from '@/lib/api';
 import { formatIndonesianDate } from '@/lib/format';
 
 const statusLabel: Record<CalibrationStatus, string> = {
@@ -26,6 +26,13 @@ export function CalibrationsList() {
   const remove = useMutation({
     mutationFn: (id: string) => apiRequest<{ id: string }>(`/calibrations/${id}`, { method: 'DELETE' }),
     onSuccess: () => client.invalidateQueries({ queryKey: ['calibrations'] }),
+  });
+  const generate = useMutation({
+    mutationFn: (record: CalibrationRecordSummary) => apiRequest<{ fileName: string }>(`/calibrations/${record.id}/generate`, { method: 'POST' }),
+    onSuccess: async (result, record) => {
+      await apiDownload(`/calibrations/${record.id}/download`, result.fileName);
+      await client.invalidateQueries({ queryKey: ['calibrations'] });
+    },
   });
 
   function removeDraft(record: CalibrationRecordSummary): void {
@@ -50,11 +57,12 @@ export function CalibrationsList() {
       </Card>
       <Card>
         <CardContent className="overflow-x-auto p-0">
-          {query.isError ? <div className="m-5 rounded-[10px] bg-[#FDEBEC] p-4 text-sm text-[#B9151B]">Data gagal dimuat. Pastikan API berjalan.</div> : (
+          {(query.isError || generate.isError) && <div className="m-5 rounded-[10px] bg-[#FDEBEC] p-4 text-sm text-[#B9151B]">{generate.error instanceof Error ? generate.error.message : 'Data gagal dimuat. Pastikan API berjalan.'}</div>}
+          {!query.isError && (
             <table className="w-full min-w-[900px] text-left text-sm">
               <thead className="bg-[#F8FAFB] text-xs uppercase tracking-wide text-slate-400"><tr><th className="px-6 py-3.5">No. Rekaman</th><th className="px-5 py-3.5">Alat</th><th className="px-5 py-3.5">Perusahaan</th><th className="px-5 py-3.5">Status</th><th className="px-5 py-3.5">Diperbarui</th><th className="px-6 py-3.5 text-right">Aksi</th></tr></thead>
               <tbody className="divide-y divide-[#E3E8ED]">
-                {query.data?.map((record) => <tr key={record.id} className="hover:bg-[#F8FAFB]"><td className="px-6 py-4 font-semibold text-[#183247]">{record.recordNumber}</td><td className="px-5 py-4"><span className="block font-medium">{record.instrumentForm.name}</span><span className="text-xs text-slate-400">{record.instrumentForm.code} · {record.instrumentForm.revision}</span></td><td className="px-5 py-4">{record.company.name}</td><td className="px-5 py-4"><Badge variant={statusVariant[record.status]}>{statusLabel[record.status]}</Badge></td><td className="px-5 py-4 text-slate-500">{formatIndonesianDate(record.updatedAt)}</td><td className="px-6 py-4"><div className="flex justify-end gap-1">{record.status === 'DRAFT' && <><Link href={`/calibrations/${record.id}/edit`} className="inline-flex size-9 items-center justify-center rounded-lg text-[#1F5F8B] hover:bg-[#EEF5FA]" aria-label="Edit"><Pencil className="size-4" /></Link><Button variant="ghost" className="size-9 px-0 text-[#B9151B] hover:bg-[#FDEBEC]" onClick={() => removeDraft(record)} disabled={remove.isPending} aria-label="Hapus"><Trash2 className="size-4" /></Button></>}</div></td></tr>)}
+                {query.data?.map((record) => <tr key={record.id} className="hover:bg-[#F8FAFB]"><td className="px-6 py-4 font-semibold text-[#183247]">{record.recordNumber}</td><td className="px-5 py-4"><span className="block font-medium">{record.instrumentForm.name}</span><span className="text-xs text-slate-400">{record.instrumentForm.code} · {record.instrumentForm.revision}</span></td><td className="px-5 py-4">{record.company.name}</td><td className="px-5 py-4"><Badge variant={statusVariant[record.status]}>{statusLabel[record.status]}</Badge></td><td className="px-5 py-4 text-slate-500">{formatIndonesianDate(record.updatedAt)}</td><td className="px-6 py-4"><div className="flex justify-end gap-1"><Button variant="ghost" className="size-9 px-0 text-emerald-700 hover:bg-emerald-50" onClick={() => generate.mutate(record)} disabled={generate.isPending} aria-label="Buat dan unduh Excel"><FileSpreadsheet className="size-4" /></Button>{record.status === 'DRAFT' && <><Link href={`/calibrations/${record.id}/edit`} className="inline-flex size-9 items-center justify-center rounded-lg text-[#1F5F8B] hover:bg-[#EEF5FA]" aria-label="Edit"><Pencil className="size-4" /></Link><Button variant="ghost" className="size-9 px-0 text-[#B9151B] hover:bg-[#FDEBEC]" onClick={() => removeDraft(record)} disabled={remove.isPending} aria-label="Hapus"><Trash2 className="size-4" /></Button></>}</div></td></tr>)}
                 {!query.isLoading && !query.data?.length && <tr><td colSpan={6} className="px-6 py-14 text-center text-slate-400">Belum ada rekaman yang sesuai.</td></tr>}
                 {query.isLoading && <tr><td colSpan={6} className="px-6 py-14 text-center text-slate-400">Memuat data...</td></tr>}
               </tbody>

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { PrismaClient, UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { currentWorkbookPath, earlyWorkbookPath, getInstrumentCellMappings, getInstrumentFields, getWorksheetTableMappings, instrumentForms } from './instrument-forms';
 
 const prisma = new PrismaClient();
 
@@ -26,25 +27,75 @@ async function main(): Promise<void> {
     },
   });
 
-  await prisma.instrumentForm.upsert({
-    where: { code_revision: { code: 'TORQUE-GAUGE', revision: 'DRAFT-1' } },
-    update: { isActive: true },
-    create: {
-      code: 'TORQUE-GAUGE',
-      name: 'Torque Gauge',
-      revision: 'DRAFT-1',
-      description: 'Schema awal untuk input data. Mapping Excel dilengkapi setelah template final tersedia.',
-      templateFilePath: 'storage/templates/certindo-master.xlsx',
-      schemaJson: {
-        version: 1,
-        sections: [
-          { id: 'instrument', label: 'Identitas Alat' },
-          { id: 'calibration', label: 'Data Kalibrasi' },
-        ],
-      },
-      mappingJson: { version: 1, sheet: null, cells: {} },
-    },
+  await prisma.instrumentForm.updateMany({
+    where: { code: 'TORQUE-GAUGE', revision: 'DRAFT-1' },
+    data: { code: 'CCI-KAL-FOM-152' },
   });
+
+  for (const form of instrumentForms) {
+    const workbook = form.workbook ?? currentWorkbookPath;
+    const templateFilePath = process.env.STORAGE_DRIVER === 'blob'
+      ? workbook === earlyWorkbookPath
+        ? process.env.TEMPLATE_EARLY_URL ?? workbook
+        : process.env.TEMPLATE_CURRENT_URL ?? workbook
+      : workbook;
+    const fields = getInstrumentFields(form);
+    const description = form.needsTemplateReview
+      ? 'Template terhubung dan dapat digunakan untuk draft. Metadata sumber perlu ditinjau sebelum ekspor final.'
+      : 'Template terhubung dari katalog workbook lembar kerja Certindo.';
+    await prisma.instrumentForm.upsert({
+      where: { code_revision: { code: form.code, revision: 'DRAFT-1' } },
+      update: {
+        name: form.name,
+        description,
+        isActive: true,
+        templateFilePath,
+        mappingJson: {
+          version: 1,
+          workbook,
+          sheet: form.sheet,
+          needsTemplateReview: form.needsTemplateReview ?? false,
+          cells: getInstrumentCellMappings(form),
+          tables: getWorksheetTableMappings(form),
+        },
+        schemaJson: {
+          version: 1,
+          fields,
+          sections: [
+            { id: 'instrument', label: 'Identitas Alat' },
+            { id: 'calibration', label: 'Data Kalibrasi' },
+          ],
+          additionalFields: form.additionalFields ?? [],
+          measurementTables: form.measurementTables ?? [],
+        },
+      },
+      create: {
+        code: form.code,
+        name: form.name,
+        revision: 'DRAFT-1',
+        description,
+        templateFilePath,
+        schemaJson: {
+          version: 1,
+          fields,
+          sections: [
+            { id: 'instrument', label: 'Identitas Alat' },
+            { id: 'calibration', label: 'Data Kalibrasi' },
+          ],
+          additionalFields: form.additionalFields ?? [],
+          measurementTables: form.measurementTables ?? [],
+        },
+        mappingJson: {
+          version: 1,
+          workbook,
+          sheet: form.sheet,
+          needsTemplateReview: form.needsTemplateReview ?? false,
+          cells: getInstrumentCellMappings(form),
+          tables: getWorksheetTableMappings(form),
+        },
+      },
+    });
+  }
 }
 
 main()

@@ -24,3 +24,23 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   }
   return payload.data;
 }
+
+export async function apiDownload(path: string, fallbackFileName: string): Promise<void> {
+  const token = window.localStorage.getItem('certindo_access_token');
+  const response = await fetch(`${API_URL}${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: { message?: string } } | null;
+    throw new ApiRequestError(payload?.error?.message ?? 'File gagal diunduh', response.status);
+  }
+
+  const blobUrl = URL.createObjectURL(await response.blob());
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = fallbackFileName;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(blobUrl);
+}
