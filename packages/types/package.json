@@ -1,0 +1,9 @@
+{
+  "name": "@certindo/types",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "build": "tsc", "lint": "eslint src", "typecheck": "tsc", "test": "node -e \"process.exit(0)\"" },
+  "devDependencies": { "@certindo/tsconfig": "workspace:*", "eslint": "^9.34.0", "typescript": "^5.9.3" }
+}

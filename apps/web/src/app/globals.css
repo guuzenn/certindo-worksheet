@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+@source '../../../../packages/ui/src';
+
+:root {
+  --navy: #183247;
+  --navy-dark: #123b5d;
+  --blue: #1f5f8b;
+  --red: #d71920;
+  --red-hover: #b9151b;
+  --page: #f5f7f9;
+  --border: #e3e8ed;
+  --text: #4b5563;
+  --text-dark: #2d3a45;
+}
+
+@theme inline {
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-heading);
+}
+
+* { border-color: var(--border); }
+html { background: var(--page); }
+body { margin: 0; color: var(--text); background: var(--page); font-family: var(--font-body), sans-serif; }
+button, a, input { -webkit-tap-highlight-color: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+}

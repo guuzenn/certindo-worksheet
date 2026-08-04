@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  TECHNICIAN
+  REVIEWER
+  APPROVER
+}
+
+enum CalibrationStatus {
+  DRAFT
+  UNDER_REVIEW
+  CONFIRMED
+  POSTPONED
+  COMPLETED
+}
+
+model User {
+  id                    String                @id @default(cuid())
+  name                  String
+  email                 String                @unique
+  passwordHash          String
+  role                  UserRole              @default(TECHNICIAN)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  createdRecords        CalibrationRecord[]   @relation("RecordCreator")
+  reviewedRecords       CalibrationRecord[]   @relation("RecordReviewer")
+  approvedRecords       CalibrationRecord[]   @relation("RecordApprover")
+  calibrationRevisions  CalibrationRevision[] @relation("RevisionAuthor")
+}
+
+model Company {
+  id        String              @id @default(cuid())
+  name      String
+  address   String?
+  phone     String?
+  email     String?
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  records   CalibrationRecord[]
+
+  @@index([name])
+}
+
+model InstrumentForm {
+  id               String              @id @default(cuid())
+  code             String
+  name             String
+  revision         String
+  description      String?
+  templateFilePath String
+  schemaJson       Json                 @db.JsonB
+  mappingJson      Json                 @db.JsonB
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  records          CalibrationRecord[]
+
+  @@unique([code, revision])
+  @@index([isActive, name])
+}
+
+model CalibrationRecord {
+  id                String                @id @default(cuid())
+  recordNumber      String                @unique
+  certificateNumber String?
+  instrumentFormId  String
+  companyId         String
+  status            CalibrationStatus     @default(DRAFT)
+  formDataJson      Json                  @db.JsonB
+  generatedFilePath String?
+  createdById       String
+  reviewedById      String?
+  approvedById      String?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  instrumentForm    InstrumentForm        @relation(fields: [instrumentFormId], references: [id])
+  company           Company               @relation(fields: [companyId], references: [id])
+  createdBy         User                  @relation("RecordCreator", fields: [createdById], references: [id])
+  reviewedBy        User?                 @relation("RecordReviewer", fields: [reviewedById], references: [id])
+  approvedBy        User?                 @relation("RecordApprover", fields: [approvedById], references: [id])
+  revisions         CalibrationRevision[]
+
+  @@index([status, updatedAt])
+  @@index([instrumentFormId])
+  @@index([companyId])
+}
+
+model CalibrationRevision {
+  id                  String            @id @default(cuid())
+  calibrationRecordId String
+  revisionNumber      Int
+  formDataJson        Json              @db.JsonB
+  changedById         String
+  createdAt           DateTime          @default(now())
+  calibrationRecord   CalibrationRecord @relation(fields: [calibrationRecordId], references: [id], onDelete: Cascade)
+  changedBy           User              @relation("RevisionAuthor", fields: [changedById], references: [id])
+
+  @@unique([calibrationRecordId, revisionNumber])
+  @@index([changedById])
+}

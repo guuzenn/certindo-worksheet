@@ -1,0 +1,5 @@
+{
+  "extends": "@certindo/tsconfig/base.json",
+  "compilerOptions": { "jsx": "react-jsx", "declaration": true, "emitDeclarationOnly": true, "noEmit": false, "outDir": "dist" },
+  "include": ["src"]
+}

@@ -1,0 +1,13 @@
+node_modules/
+.next/
+dist/
+coverage/
+.turbo/
+.env
+.env.local
+*.log
+*.tsbuildinfo
+storage/templates/*
+storage/generated/*
+!storage/templates/.gitkeep
+!storage/generated/.gitkeep
