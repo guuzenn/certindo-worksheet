@@ -12,7 +12,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: JWT_EXPIRES_IN
         value: 8h
       - key: API_PORT
@@ -26,8 +26,4 @@ services:
       - key: TEMPLATE_EARLY_URL
         sync: false
       - key: TEMPLATE_CURRENT_URL
-        sync: false
-      - key: SEED_ADMIN_EMAIL
-        sync: false
-      - key: SEED_ADMIN_PASSWORD
         sync: false

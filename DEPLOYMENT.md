@@ -32,13 +32,11 @@ Arsitektur staging:
 2. Render akan membaca `render.yaml` dan membuat service `certindo-worksheet-api`.
 3. Isi secret/environment berikut:
    - `DATABASE_URL`: pooled URL branch Neon staging
-   - `JWT_SECRET`: string acak minimal 32 karakter
+   - `JWT_SECRET`: dibuat acak secara otomatis oleh Render Blueprint
    - `CORS_ORIGINS`: URL production deployment web Vercel, tanpa trailing slash
    - `BLOB_READ_WRITE_TOKEN`: token private Blob
    - `TEMPLATE_EARLY_URL`: URL hasil upload workbook 0X-94
    - `TEMPLATE_CURRENT_URL`: URL hasil upload workbook 095-163
-   - `SEED_ADMIN_EMAIL`: email admin staging
-   - `SEED_ADMIN_PASSWORD`: password admin staging yang kuat
 4. Deploy dan pastikan `https://<render-host>/api/health` mengembalikan status `ok`.
 
 ## 4. Hubungkan web ke API
