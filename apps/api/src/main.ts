@@ -9,7 +9,7 @@ import { ResponseInterceptor } from './common/response.interceptor';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const config = app.get(ConfigService);
-  const port = config.getOrThrow<number>('API_PORT');
+  const port = config.get<number>('PORT') ?? config.getOrThrow<number>('API_PORT');
   const origins = config
     .getOrThrow<string>('CORS_ORIGINS')
     .split(',')
@@ -21,7 +21,7 @@ async function bootstrap(): Promise<void> {
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.enableShutdownHooks();
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   Logger.log(`API berjalan di http://localhost:${port}/api`, 'Bootstrap');
 }
 

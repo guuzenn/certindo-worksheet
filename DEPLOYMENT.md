@@ -3,7 +3,7 @@
 Arsitektur staging:
 
 - Web Next.js: Vercel
-- API NestJS: Render
+- API NestJS: Railway
 - Database: Neon PostgreSQL
 - Template dan hasil Excel: private Vercel Blob
 
@@ -26,26 +26,28 @@ Arsitektur staging:
    - `pnpm db:seed`
 4. Gunakan email dan password admin staging yang berbeda dari default repository.
 
-## 3. Render API
+## 3. Railway API
 
-1. Di Render pilih **New > Blueprint** dan hubungkan repository yang sama.
-2. Render akan membaca `render.yaml` dan membuat service `certindo-worksheet-api`.
-   Blueprint menggunakan instance `free`; service staging akan spin down ketika idle.
-3. Isi secret/environment berikut:
+1. Di Railway pilih **New Project > Deploy from GitHub repo** dan hubungkan repository yang sama.
+2. Buat satu service untuk API. Railway akan membaca `railway.json` dari root repository.
+3. Isi environment berikut pada service API:
    - `DATABASE_URL`: pooled URL branch Neon staging
-   - `JWT_SECRET`: dibuat acak secara otomatis oleh Render Blueprint
+   - `JWT_SECRET`: string acak minimal 32 karakter, berbeda dari password admin
+   - `JWT_EXPIRES_IN`: `8h`
    - `CORS_ORIGINS`: URL production deployment web Vercel, tanpa trailing slash
+   - `STORAGE_DRIVER`: `blob`
    - `BLOB_READ_WRITE_TOKEN`: token private Blob
    - `TEMPLATE_EARLY_URL`: URL hasil upload workbook 0X-94
    - `TEMPLATE_CURRENT_URL`: URL hasil upload workbook 095-163
-4. Deploy dan pastikan `https://<render-host>/api/health` mengembalikan status `ok`.
+4. Di **Settings > Networking**, buat public domain untuk service.
+5. Deploy dan pastikan `https://<railway-host>/api/health` mengembalikan status `ok`.
 
 ## 4. Hubungkan web ke API
 
 1. Kembali ke Vercel Project Settings > Environment Variables.
-2. Ubah `NEXT_PUBLIC_API_URL` menjadi `https://<render-host>/api`.
+2. Ubah `NEXT_PUBLIC_API_URL` menjadi `https://<railway-host>/api`.
 3. Redeploy web.
-4. Jika URL production Vercel berubah, perbarui `CORS_ORIGINS` di Render lalu redeploy API.
+4. Jika URL production Vercel berubah, perbarui `CORS_ORIGINS` di Railway lalu redeploy API.
 
 ## 5. Smoke test
 

@@ -6,6 +6,7 @@ export const envSchema = z.object({
   DATABASE_URL: z.string().url().or(z.string().startsWith('postgresql://')),
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('8h'),
+  PORT: z.coerce.number().int().positive().optional(),
   API_PORT: z.coerce.number().int().positive().default(4000),
   CORS_ORIGINS: z.string().default('http://localhost:3000'),
   STORAGE_DRIVER: z.enum(['local', 'blob']).default('local'),
