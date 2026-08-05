@@ -14,6 +14,8 @@ Aplikasi internal PT Certindonesia untuk mengisi lembar kerja kalibrasi, menjala
 
 Satu kode formulir dapat memiliki lebih dari satu revisi. Contohnya, Timbangan menggunakan kode resmi `CCI-KAL-FOM-028` dengan revisi `04` dan `05`; masing-masing tetap memiliki sheet dan mapping sel sendiri.
 
+Template dengan revision yang sama juga dapat memiliki varian standar acuan. Mikrometer revision `03` mempertahankan dua template terpisah karena ketertelusuran SI-nya berbeda: `LK-054-IDN / JCC (Taiwan)` dan `LK-032-IDN / LK-070-IDN`.
+
 ## Tech stack
 
 - Next.js 16, React 19, Tailwind CSS 4

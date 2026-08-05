@@ -42,6 +42,10 @@ async function main(): Promise<void> {
     where: { code: 'CCI-KAL-FOM-028-B', revision: 'DRAFT-1' },
     data: { code: 'CCI-KAL-FOM-028', revision: '04' },
   });
+  await prisma.instrumentForm.updateMany({
+    where: { code: { in: ['CCI-KAL-FOM-057', 'CCI-KAL-FOM-057-B'] }, revision: 'DRAFT-1' },
+    data: { revision: '03' },
+  });
 
   for (const form of instrumentForms) {
     const revision = form.revision ?? 'DRAFT-1';

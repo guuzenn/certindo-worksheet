@@ -25,4 +25,16 @@ describe('metadata template instrumen', () => {
     expect(torqueGauge).toBeDefined();
     expect(torqueGauge?.needsTemplateReview).not.toBe(true);
   });
+
+  it('mempertahankan dua Mikrometer revision 03 berdasarkan ketertelusuran SI', () => {
+    const micrometers = instrumentForms.filter((form) => form.code.startsWith('CCI-KAL-FOM-057'));
+
+    expect(micrometers).toHaveLength(2);
+    expect(micrometers.map((form) => form.revision)).toEqual(['03', '03']);
+    expect(micrometers.map((form) => form.name)).toEqual([
+      'Mikrometer — LK-054-IDN / JCC (Taiwan)',
+      'Mikrometer — LK-032-IDN / LK-070-IDN',
+    ]);
+    expect(micrometers.every((form) => !form.needsTemplateReview)).toBe(true);
+  });
 });
