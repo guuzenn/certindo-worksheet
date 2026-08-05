@@ -10,9 +10,6 @@ export class InstrumentFormsService {
     const forms = await this.prisma.instrumentForm.findMany({
       where: {
         isActive: true,
-        ...(needsReviewOnly
-          ? { mappingJson: { path: ['needsTemplateReview'], equals: true } }
-          : {}),
         ...(term
           ? {
               OR: [
@@ -36,7 +33,7 @@ export class InstrumentFormsService {
       },
     });
 
-    return forms.map((form) => {
+    const mapped = forms.map((form) => {
       const mapping = (form.mappingJson && typeof form.mappingJson === 'object' && !Array.isArray(form.mappingJson))
         ? (form.mappingJson as Record<string, unknown>)
         : {};
@@ -63,6 +60,12 @@ export class InstrumentFormsService {
         updatedAt: form.updatedAt,
       };
     });
+
+    if (needsReviewOnly) {
+      return mapped.filter((item) => item.needsTemplateReview);
+    }
+
+    return mapped;
   }
 
   async findOne(id: string) {
