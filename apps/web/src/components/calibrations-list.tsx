@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FilePlus2, FileSpreadsheet, Pencil, Search, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { ConfirmDeleteModal } from '@/components/confirm-delete-modal';
 import { apiDownload, apiRequest } from '@/lib/api';
 import { formatIndonesianDate } from '@/lib/format';
 
@@ -18,6 +19,8 @@ export function CalibrationsList() {
   const client = useQueryClient();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [deletingRecord, setDeletingRecord] = useState<CalibrationRecordSummary | null>(null);
+
   const queryString = new URLSearchParams({ ...(search ? { search } : {}), ...(status ? { status } : {}) }).toString();
   const query = useQuery({
     queryKey: ['calibrations', search, status],
@@ -25,7 +28,10 @@ export function CalibrationsList() {
   });
   const remove = useMutation({
     mutationFn: (id: string) => apiRequest<{ id: string }>(`/calibrations/${id}`, { method: 'DELETE' }),
-    onSuccess: () => client.invalidateQueries({ queryKey: ['calibrations'] }),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ['calibrations'] });
+      setDeletingRecord(null);
+    },
   });
   const generate = useMutation({
     mutationFn: (record: CalibrationRecordSummary) => apiRequest<{ fileName: string }>(`/calibrations/${record.id}/generate`, { method: 'POST' }),
@@ -62,7 +68,7 @@ export function CalibrationsList() {
             <table className="w-full min-w-[900px] text-left text-sm">
               <thead className="bg-[#F8FAFB] text-xs uppercase tracking-wide text-slate-400"><tr><th className="px-6 py-3.5">No. Rekaman</th><th className="px-5 py-3.5">Alat</th><th className="px-5 py-3.5">Perusahaan</th><th className="px-5 py-3.5">Status</th><th className="px-5 py-3.5">Diperbarui</th><th className="px-6 py-3.5 text-right">Aksi</th></tr></thead>
               <tbody className="divide-y divide-[#E3E8ED]">
-                {query.data?.map((record) => <tr key={record.id} className="hover:bg-[#F8FAFB]"><td className="px-6 py-4 font-semibold text-[#183247]">{record.recordNumber}</td><td className="px-5 py-4"><span className="block font-medium">{record.instrumentForm.name}</span><span className="text-xs text-slate-400">{record.instrumentForm.code} · {record.instrumentForm.revision}</span></td><td className="px-5 py-4">{record.company.name}</td><td className="px-5 py-4"><Badge variant={statusVariant[record.status]}>{statusLabel[record.status]}</Badge></td><td className="px-5 py-4 text-slate-500">{formatIndonesianDate(record.updatedAt)}</td><td className="px-6 py-4"><div className="flex justify-end gap-1"><Button variant="ghost" className="size-9 px-0 text-emerald-700 hover:bg-emerald-50" onClick={() => generate.mutate(record)} disabled={generate.isPending} aria-label="Buat dan unduh Excel"><FileSpreadsheet className="size-4" /></Button>{record.status === 'DRAFT' && <><Link href={`/calibrations/${record.id}/edit`} className="inline-flex size-9 items-center justify-center rounded-lg text-[#1F5F8B] hover:bg-[#EEF5FA]" aria-label="Edit"><Pencil className="size-4" /></Link><Button variant="ghost" className="size-9 px-0 text-[#B9151B] hover:bg-[#FDEBEC]" onClick={() => removeDraft(record)} disabled={remove.isPending} aria-label="Hapus"><Trash2 className="size-4" /></Button></>}</div></td></tr>)}
+                {query.data?.map((record) => <tr key={record.id} className="hover:bg-[#F8FAFB]"><td className="px-6 py-4 font-semibold text-[#183247]">{record.recordNumber}</td><td className="px-5 py-4"><span className="block font-medium">{record.instrumentForm.name}</span><span className="text-xs text-slate-400">{record.instrumentForm.code} · {record.instrumentForm.revision}</span></td><td className="px-5 py-4">{record.company.name}</td><td className="px-5 py-4"><Badge variant={statusVariant[record.status]}>{statusLabel[record.status]}</Badge></td><td className="px-5 py-4 text-slate-500">{formatIndonesianDate(record.updatedAt)}</td><td className="px-6 py-4"><div className="flex justify-end gap-1"><Button variant="ghost" className="size-9 px-0 text-emerald-700 hover:bg-emerald-50" onClick={() => generate.mutate(record)} disabled={generate.isPending} aria-label="Buat dan unduh Excel"><FileSpreadsheet className="size-4" /></Button>{record.status === 'DRAFT' && <><Link href={`/calibrations/${record.id}/edit`} className="inline-flex size-9 items-center justify-center rounded-lg text-[#1F5F8B] hover:bg-[#EEF5FA]" aria-label="Edit"><Pencil className="size-4" /></Link><Button variant="ghost" className="size-9 px-0 text-[#B9151B] hover:bg-[#FDEBEC]" onClick={() => setDeletingRecord(record)} disabled={remove.isPending} aria-label="Hapus"><Trash2 className="size-4" /></Button></>}</div></td></tr>)}
                 {!query.isLoading && !query.data?.length && <tr><td colSpan={6} className="px-6 py-14 text-center text-slate-400">Belum ada rekaman yang sesuai.</td></tr>}
                 {query.isLoading && <tr><td colSpan={6} className="px-6 py-14 text-center text-slate-400">Memuat data...</td></tr>}
               </tbody>
@@ -70,6 +76,15 @@ export function CalibrationsList() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDeleteModal
+        isOpen={Boolean(deletingRecord)}
+        title="Hapus Draft Kalibrasi"
+        description={`Apakah Anda yakin ingin menghapus draft lembar kerja kalibrasi ${deletingRecord?.recordNumber ?? ''}? Data yang dihapus tidak dapat dikembalikan.`}
+        isLoading={remove.isPending}
+        onConfirm={() => deletingRecord && remove.mutate(deletingRecord.id)}
+        onClose={() => setDeletingRecord(null)}
+      />
     </div>
   );
 }

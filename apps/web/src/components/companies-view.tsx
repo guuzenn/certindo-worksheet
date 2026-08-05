@@ -21,6 +21,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { companySchema, type CreateCompanyInput } from '@certindo/validation';
+import { ConfirmDeleteModal } from '@/components/confirm-delete-modal';
 import { apiRequest } from '@/lib/api';
 
 export function CompaniesView() {
@@ -29,6 +30,7 @@ export function CompaniesView() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<CompanyItem | null>(null);
+  const [deletingCompany, setDeletingCompany] = useState<CompanyItem | null>(null);
 
   const queryParams = search ? `?search=${encodeURIComponent(search)}` : '';
 
@@ -65,6 +67,7 @@ export function CompaniesView() {
     mutationFn: (id: string) => apiRequest(`/companies/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
+      setDeletingCompany(null);
     },
   });
 
@@ -237,11 +240,7 @@ export function CompaniesView() {
                       type="button"
                       disabled={company.recordsCount > 0 || deleteMutation.isPending}
                       className="grid size-9 place-items-center rounded-lg border border-red-100 text-[#D71920] hover:bg-red-50 disabled:opacity-30"
-                      onClick={() => {
-                        if (confirm(`Hapus perusahaan ${company.name}?`)) {
-                          deleteMutation.mutate(company.id);
-                        }
-                      }}
+                      onClick={() => setDeletingCompany(company)}
                       title={
                         company.recordsCount > 0
                           ? 'Perusahaan memiliki riwayat kalibrasi dan tidak dapat dihapus'
@@ -419,6 +418,15 @@ export function CompaniesView() {
           </div>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        isOpen={Boolean(deletingCompany)}
+        title="Hapus Perusahaan Klien"
+        description={`Apakah Anda yakin ingin menghapus perusahaan ${deletingCompany?.name ?? ''}? Data perusahaan yang dihapus tidak dapat dikembalikan.`}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => deletingCompany && deleteMutation.mutate(deletingCompany.id)}
+        onClose={() => setDeletingCompany(null)}
+      />
     </div>
   );
 }

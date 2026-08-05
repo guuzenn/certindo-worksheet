@@ -23,6 +23,7 @@ import {
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { createUserSchema, updateUserSchema, type CreateUserInput, type UpdateUserInput } from '@certindo/validation';
+import { ConfirmDeleteModal } from '@/components/confirm-delete-modal';
 import { apiRequest } from '@/lib/api';
 
 const roleLabels: Record<UserItem['role'], string> = {
@@ -45,6 +46,7 @@ export function UsersView() {
   const [roleFilter, setRoleFilter] = useState<string>('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);
+  const [deletingUser, setDeletingUser] = useState<UserItem | null>(null);
 
   const queryParams = new URLSearchParams({
     ...(search ? { search } : {}),
@@ -91,6 +93,7 @@ export function UsersView() {
     mutationFn: (id: string) => apiRequest(`/users/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      setDeletingUser(null);
     },
   });
 
@@ -309,11 +312,7 @@ export function UsersView() {
                         type="button"
                         disabled={u.createdRecordsCount > 0 || deleteMutation.isPending}
                         className="grid size-9 place-items-center rounded-lg border border-red-100 text-[#D71920] hover:bg-red-50 disabled:opacity-30"
-                        onClick={() => {
-                          if (confirm(`Hapus pengguna ${u.name}?`)) {
-                            deleteMutation.mutate(u.id);
-                          }
-                        }}
+                        onClick={() => setDeletingUser(u)}
                         title={
                           u.createdRecordsCount > 0
                             ? 'Pengguna pernah membuat lembar kerja dan tidak dapat dihapus'
@@ -491,6 +490,15 @@ export function UsersView() {
           </div>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        isOpen={Boolean(deletingUser)}
+        title="Hapus Pengguna Staf"
+        description={`Apakah Anda yakin ingin menghapus akun pengguna ${deletingUser?.name ?? ''} (${deletingUser?.email ?? ''})? Data yang dihapus tidak dapat dikembalikan.`}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => deletingUser && deleteMutation.mutate(deletingUser.id)}
+        onClose={() => setDeletingUser(null)}
+      />
     </div>
   );
 }
