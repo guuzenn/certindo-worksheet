@@ -198,8 +198,18 @@ export class CalibrationsService {
       const rows: unknown[] = Array.isArray(rawRows) && rawRows.length
         ? rawRows
         : legacyWorksheetRows(rawMeasurements, table.id);
-      return { ...table, rows, rowCount: Math.max(1, rows.length) };
+      const rowCount = Math.max(1, rows.length);
+      return {
+        ...table,
+        rows,
+        rowCount,
+        renderedRowCount: worksheetTableRenderedRowCount(table, rowCount),
+      };
     });
+    const cellShiftLayouts = tableLayouts.map((table) => ({
+      ...table,
+      rowCount: table.renderedRowCount,
+    }));
 
     for (const [dataPath, rawTargets] of Object.entries(rawCells)) {
       if (dataPath.startsWith('measurements.tables.')) continue;
@@ -213,7 +223,9 @@ export class CalibrationsService {
           ? `${cellValue} %RH`
           : cellValue;
       for (const target of rawTargets) {
-        if (typeof target === 'string') cellsToWrite[shiftCellReference(target, tableLayouts)] = value;
+        if (typeof target === 'string') {
+          cellsToWrite[shiftCellReference(target, cellShiftLayouts)] = value;
+        }
       }
     }
 
@@ -227,7 +239,7 @@ export class CalibrationsService {
           if (value) cellsToWrite[`${column}${outputFirstRow + rowIndex}`] = value;
         }
       }
-      precedingOffset += table.rowCount - table.templateRowCount;
+      precedingOffset += table.renderedRowCount - table.templateRowCount;
     }
 
     const output = await this.workbooks.fillTemplateBuffer(
@@ -237,7 +249,7 @@ export class CalibrationsService {
       tableLayouts.map((table) => ({
         firstRow: table.firstRow,
         templateRowCount: table.templateRowCount,
-        rowCount: table.rowCount,
+        rowCount: table.renderedRowCount,
       })),
     );
     const generatedFilePath = await this.storage.writeGenerated(fileName, output);
@@ -301,7 +313,15 @@ interface WorksheetTableMapping {
   id: string;
   firstRow: number;
   templateRowCount: number;
+  preserveTemplateRows?: boolean;
   columns: Record<string, string>;
+}
+
+export function worksheetTableRenderedRowCount(
+  table: Pick<WorksheetTableMapping, 'templateRowCount' | 'preserveTemplateRows'>,
+  dataRowCount: number,
+): number {
+  return table.preserveTemplateRows ? table.templateRowCount : Math.max(1, dataRowCount);
 }
 
 function legacyWorksheetRows(measurements: Record<string, unknown>, tableId: string): unknown[] {
@@ -344,7 +364,13 @@ function parseWorksheetTableMappings(value: unknown): WorksheetTableMapping[] {
       && typeof table.firstRow === 'number'
       && typeof table.templateRowCount === 'number'
       && Object.keys(columns).length
-      ? [{ id: table.id, firstRow: table.firstRow, templateRowCount: table.templateRowCount, columns }]
+      ? [{
+        id: table.id,
+        firstRow: table.firstRow,
+        templateRowCount: table.templateRowCount,
+        preserveTemplateRows: table.preserveTemplateRows === true,
+        columns,
+      }]
       : [];
   });
 }

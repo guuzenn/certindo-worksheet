@@ -1,8 +1,16 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
-import { calibrationTransitionData } from '../src/calibrations/calibrations.service';
+import {
+  calibrationTransitionData,
+  worksheetTableRenderedRowCount,
+} from '../src/calibrations/calibrations.service';
 
 describe('calibrationTransitionData', () => {
+  it('mempertahankan area 14 baris workbook ketika UI baru berisi satu baris', () => {
+    expect(worksheetTableRenderedRowCount({ templateRowCount: 14, preserveTemplateRows: true }, 1)).toBe(14);
+    expect(worksheetTableRenderedRowCount({ templateRowCount: 14 }, 1)).toBe(1);
+  });
+
   it('mengizinkan teknisi mengajukan draft untuk diperiksa', () => {
     expect(calibrationTransitionData('DRAFT', 'UNDER_REVIEW', undefined, { id: 'tech-1', role: 'TECHNICIAN' })).toEqual({
       status: 'UNDER_REVIEW',

@@ -2,9 +2,11 @@
 
 import {
   getMeasurementTableLeafColumns,
+  isMeasurementTableLeafColumn,
   type CalibrationOptions,
   type CalibrationRecordDetail,
   type MeasurementTableDefinition,
+  type MeasurementTableLeafColumnDefinition,
 } from '@certindo/types';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from '@certindo/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -236,6 +238,16 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
   const selectedInstrumentFormId = useWatch({ control: form.control, name: 'instrumentFormId' });
   const selectedTemplate = options.data?.instrumentForms.find((item) => item.id === selectedInstrumentFormId);
   const visibleFields = new Set(selectedTemplate?.fields ?? []);
+  const inlineAdditionalFields = selectedTemplate?.additionalFields.filter((field) => !field.section) ?? [];
+  const additionalFieldSections = Array.from(
+    (selectedTemplate?.additionalFields ?? []).reduce((sections, field) => {
+      if (!field.section) return sections;
+      const fields = sections.get(field.section) ?? [];
+      fields.push(field);
+      sections.set(field.section, fields);
+      return sections;
+    }, new Map<string, InstrumentFormOption['additionalFields']>()),
+  );
   const watchedMeasurementTables = useWatch({ control: form.control, name: 'formData.measurements.tables' }) ?? {};
   const isReadOnly = Boolean(recordId && record.data?.status !== 'DRAFT');
 
@@ -279,6 +291,22 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
     );
   }
 
+  function renderMeasurementInput(
+    table: MeasurementTableDefinition,
+    column: MeasurementTableLeafColumnDefinition,
+    rowIndex: number,
+  ) {
+    const lockedValue = lockedColumnValue(column.lockedValues, rowIndex);
+    const fieldName = `formData.measurements.tables.${table.id}.${rowIndex}.${column.key}` as const;
+    if (lockedValue !== undefined) {
+      return <><span className="block min-h-10 rounded-[10px] bg-slate-50 px-3 py-2.5 text-center text-slate-600">{lockedValue}</span><input type="hidden" value={lockedValue} {...form.register(fieldName)} /></>;
+    }
+    if (column.inputType === 'select') {
+      return <select className="h-10 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3 text-sm outline-none focus:border-[#1F5F8B]" aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)}><option value="">Pilih</option>{column.options?.map((option) => <option key={option} value={option}>{option}</option>)}</select>;
+    }
+    return <Input inputMode={column.inputType === 'number' ? 'decimal' : 'text'} aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)} />;
+  }
+
   return (
     <form className="space-y-6" onSubmit={(event) => void form.handleSubmit((input) => save.mutate(input))(event)}>
       <div className="flex items-center justify-between gap-4"><Link href="/calibrations" className="inline-flex items-center gap-2 text-sm font-semibold text-[#1F5F8B] hover:underline"><ArrowLeft className="size-4" /> Kembali</Link>{!isReadOnly && <Button type="submit" disabled={save.isPending || options.isLoading || record.isLoading}><Save className="size-4" /> {save.isPending ? 'Menyimpan...' : 'Simpan Draft'}</Button>}</div>
@@ -305,7 +333,7 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
         {visibleFields.has('capacityMin') && <label className={inputClass}>7a. Kapasitas Min.<Input {...form.register('formData.instrument.capacityMin')} /></label>}
         {visibleFields.has('capacityMax') && <label className={inputClass}>7b. Kapasitas Max.<Input {...form.register('formData.instrument.capacityMax')} /></label>}
         {visibleFields.has('resolution') && <label className={inputClass}>8. Resolusi<Input placeholder="Contoh: 0,01 N·m" {...form.register('formData.instrument.resolution')} /></label>}
-        {selectedTemplate?.additionalFields.map((field) => <label key={field.key} className={`${inputClass} ${field.inputType === 'textarea' ? 'md:col-span-2' : ''}`}>{field.label}{field.inputType === 'textarea' ? <textarea className="min-h-28 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 py-3 text-sm font-normal outline-none focus:border-[#1F5F8B]" placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} /> : <Input type={field.inputType === 'date' ? 'date' : 'text'} placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} />}</label>)}
+        {inlineAdditionalFields.map((field) => <label key={field.key} className={`${inputClass} ${field.inputType === 'textarea' ? 'md:col-span-2' : ''}`}>{field.label}{field.inputType === 'textarea' ? <textarea className="min-h-28 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 py-3 text-sm font-normal outline-none focus:border-[#1F5F8B]" placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} /> : <Input type={field.inputType === 'date' ? 'date' : 'text'} placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} />}</label>)}
         {(visibleFields.has('ambientTemperatureStart') || visibleFields.has('ambientTemperatureMiddle') || visibleFields.has('ambientTemperatureEnd') || visibleFields.has('ambientHumidityStart') || visibleFields.has('ambientHumidityMiddle') || visibleFields.has('ambientHumidityEnd')) && <div className="border-t border-[#E7EDF1] pt-5 md:col-span-2"><h3 className="text-sm font-semibold text-[#2D3A45]">Kondisi Ruangan</h3><div className="mt-4 grid gap-5 md:grid-cols-3">{visibleFields.has('ambientTemperatureStart') && <label className={inputClass}>Temperatur Awal (°C)<Input inputMode="decimal" {...form.register('formData.environment.temperatureStart')} /></label>}{visibleFields.has('ambientTemperatureMiddle') && <label className={inputClass}>Temperatur Tengah (°C)<Input inputMode="decimal" {...form.register('formData.environment.temperatureMiddle')} /></label>}{visibleFields.has('ambientTemperatureEnd') && <label className={inputClass}>Temperatur Akhir (°C)<Input inputMode="decimal" {...form.register('formData.environment.temperatureEnd')} /></label>}{visibleFields.has('ambientHumidityStart') && <label className={inputClass}>Kelembaban Awal (%RH)<Input inputMode="decimal" {...form.register('formData.environment.humidityStart')} /></label>}{visibleFields.has('ambientHumidityMiddle') && <label className={inputClass}>Kelembaban Tengah (%RH)<Input inputMode="decimal" {...form.register('formData.environment.humidityMiddle')} /></label>}{visibleFields.has('ambientHumidityEnd') && <label className={inputClass}>Kelembaban Akhir (%RH)<Input inputMode="decimal" {...form.register('formData.environment.humidityEnd')} /></label>}</div></div>}
         <label className={`${inputClass} md:col-span-2`}>Catatan<textarea className="min-h-28 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 py-3 text-sm font-normal outline-none focus:border-[#1F5F8B]" {...form.register('formData.notes')} /></label>
       </CardContent></Card>
@@ -316,21 +344,19 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
         const minimumRows = measurementTableMinimumRowCount(table);
         const maximumRows = measurementTableMaximumRowCount(table);
         const showRowActions = !table.fixedRows;
+        if (table.layout === 'record-grid') return <Card key={table.id}>
+          <CardHeader className="flex-row items-center justify-between gap-4 border-b"><div><CardTitle>{table.title}</CardTitle><p className="mt-1 text-sm text-slate-400">{table.description}</p></div>{showRowActions && <Button type="button" onClick={() => addMeasurementRow(table)} disabled={maximumRows !== undefined && rows.length >= maximumRows}><Plus className="size-4" /> Tambah Baris</Button>}</CardHeader>
+          <CardContent className="space-y-4 pt-6">{rows.map((_, rowIndex) => <section key={rowIndex} className="rounded-[10px] border border-[#DDE5EA] bg-white p-4"><div className="mb-4 flex items-center justify-between"><h4 className="text-sm font-semibold text-[#183247]">Baris {rowIndex + 1}</h4>{showRowActions && <button type="button" aria-label={`Hapus baris ${rowIndex + 1}`} disabled={rows.length <= minimumRows} className="inline-flex size-8 items-center justify-center rounded-lg text-[#D71920] hover:bg-[#FDEBEC] disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent" onClick={() => removeMeasurementRow(table, rowIndex)}><Trash2 className="size-4" /></button>}</div><div className="grid gap-4 lg:grid-cols-2">{table.columns.map((column, columnIndex) => isMeasurementTableLeafColumn(column) ? <label key={column.key} className={`${inputClass} lg:col-span-2`}>{column.label}{renderMeasurementInput(table, column, rowIndex)}</label> : <fieldset key={`${column.label}-${columnIndex}`} className="rounded-[10px] bg-[#F8FAFB] p-3"><legend className="px-1 text-xs font-semibold text-[#526575]">{column.label}</legend><div className="grid grid-cols-5 gap-2">{getMeasurementTableLeafColumns(column.children).map((leaf) => <label key={leaf.key} className="space-y-1 text-center text-xs font-semibold text-slate-500"><span>{leaf.label}</span>{renderMeasurementInput(table, leaf, rowIndex)}</label>)}</div></fieldset>)}</div></section>)}</CardContent>
+        </Card>;
         return <Card key={table.id}>
         <CardHeader className="flex-row items-center justify-between gap-4 border-b"><div><CardTitle>{table.title}</CardTitle><p className="mt-1 text-sm text-slate-400">{table.description ?? (table.fixedRows ? `Tabel mengikuti ${rows.length} baris tetap pada workbook.` : 'Baris Excel akan mengikuti jumlah baris yang diisi di sini.')}</p></div>{showRowActions && <Button type="button" onClick={() => addMeasurementRow(table)} disabled={maximumRows !== undefined && rows.length >= maximumRows}><Plus className="size-4" /> Tambah Baris</Button>}</CardHeader>
         <CardContent className="pt-6">
           <div className="overflow-x-auto rounded-[10px] border border-[#DDE5EA]">
             <table className="w-full min-w-max border-collapse text-sm">
-              <thead className="bg-[#F8FAFB] text-[#526575]">{headerRows.map((headerRow, headerRowIndex) => <tr key={headerRowIndex}>{headerRow.map((cell) => <th key={cell.id} colSpan={cell.colSpan} rowSpan={cell.rowSpan} scope={cell.column ? 'col' : 'colgroup'} className="min-w-28 border-b border-r border-[#DDE5EA] px-3 py-3 text-center align-middle"><span className="font-semibold">{cell.label}</span>{cell.column?.unit && <span className="mt-0.5 block text-[11px] font-normal text-slate-400">({cell.column.unit})</span>}</th>)}{headerRowIndex === 0 && showRowActions && <th rowSpan={headerRows.length} className="w-20 border-b border-[#DDE5EA] px-3 py-3 text-center align-middle">Aksi</th>}</tr>)}</thead>
+              <thead className="bg-[#F8FAFB] text-[#526575]">{headerRows.map((headerRow, headerRowIndex) => <tr key={headerRowIndex}>{headerRow.map((cell) => <th key={cell.id} colSpan={cell.colSpan} rowSpan={cell.rowSpan} scope={cell.column ? 'col' : 'colgroup'} className="min-w-20 border-b border-r border-[#DDE5EA] px-2 py-2.5 text-center align-middle"><span className="font-semibold">{cell.label}</span>{cell.column?.unit && <span className="mt-0.5 block text-[11px] font-normal text-slate-400">({cell.column.unit})</span>}</th>)}{headerRowIndex === 0 && showRowActions && <th rowSpan={headerRows.length} className="w-16 border-b border-[#DDE5EA] px-2 py-2.5 text-center align-middle">Aksi</th>}</tr>)}</thead>
               <tbody>{rows.map((_, rowIndex) => <tr key={rowIndex}>{columns.map((column) => {
-                const lockedValue = lockedColumnValue(column.lockedValues, rowIndex);
-                const fieldName = `formData.measurements.tables.${table.id}.${rowIndex}.${column.key}` as const;
                 return <td key={column.key} className="border-b border-r border-[#DDE5EA] p-2 last:border-r-0">
-                  {lockedValue !== undefined
-                    ? <><span className="block min-h-10 px-2 py-2.5 text-center text-slate-600">{lockedValue}</span><input type="hidden" value={lockedValue} {...form.register(fieldName)} /></>
-                    : column.inputType === 'select'
-                      ? <select className="h-10 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3 text-sm outline-none focus:border-[#1F5F8B]" aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)}><option value="">Pilih</option>{column.options?.map((option) => <option key={option} value={option}>{option}</option>)}</select>
-                      : <Input inputMode={column.inputType === 'number' ? 'decimal' : 'text'} aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)} />}
+                  {renderMeasurementInput(table, column, rowIndex)}
                 </td>;
               })}{showRowActions && <td className="border-b border-[#DDE5EA] p-2 text-center"><button type="button" aria-label={`Hapus baris ${rowIndex + 1}`} disabled={rows.length <= minimumRows} className="inline-flex size-9 items-center justify-center rounded-lg text-[#D71920] hover:bg-[#FDEBEC] disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent" onClick={() => removeMeasurementRow(table, rowIndex)}><Trash2 className="size-4" /></button></td>}</tr>)}</tbody>
             </table>
@@ -338,6 +364,7 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
         </CardContent>
       </Card>;
       })}
+      {additionalFieldSections.map(([section, fields]) => <Card key={section}><CardHeader className="border-b"><CardTitle>{section}</CardTitle><p className="text-sm text-slate-400">Data pendukung ini dipetakan ke tabel yang sama pada workbook sumber.</p></CardHeader><CardContent className="grid gap-5 pt-6 md:grid-cols-2">{fields.map((field) => <label key={field.key} className={`${inputClass} ${field.inputType === 'textarea' ? 'md:col-span-2' : ''}`}>{field.label}{field.inputType === 'textarea' ? <textarea className="min-h-28 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 py-3 text-sm font-normal outline-none focus:border-[#1F5F8B]" placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} /> : <Input type={field.inputType === 'date' ? 'date' : 'text'} placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} />}</label>)}</CardContent></Card>)}
       </fieldset>
     </form>
   );

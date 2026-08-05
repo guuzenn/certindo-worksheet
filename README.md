@@ -113,7 +113,9 @@ Metadata template berada di `prisma/instrument-forms.ts`. Setiap entri menentuka
 
 Kombinasi `code` dan `revision` harus unik. Jika posisi sel berubah antar-revision, gunakan mapping identitas dan tabel yang sesuai untuk revision tersebut. Setelah metadata berubah, jalankan `pnpm db:seed` untuk memperbarui katalog pada database.
 
-Tabel pengukuran schema V2 dapat memakai header bertingkat melalui `children`, sehingga susunan web mengikuti grup kolom pada workbook (misalnya Parameter, UUT 1–5, dan STD 1–5). `initialRowCount` mengatur jumlah baris awal di web, sedangkan `templateRowCount` mengatur area baris sumber ketika workbook dibuat. Gunakan `fixedRows`, `minRows`, dan `maxRows` untuk mempertahankan jumlah baris yang diwajibkan template.
+Tabel pengukuran schema V2 dapat memakai header bertingkat melalui `children`, sehingga susunan web mengikuti grup kolom pada workbook (misalnya Parameter, UUT 1–5, dan STD 1–5). `layout: 'record-grid'` menyajikan tabel yang lebar sebagai kartu input ringkas tanpa mengubah mapping Excel. `initialRowCount` mengatur jumlah baris awal di web, sedangkan `templateRowCount` mengatur area baris sumber. Gunakan `fixedRows`, `minRows`, dan `maxRows` untuk batas input, serta `preserveTemplateRows` jika area kosong resmi pada workbook harus dipertahankan.
+
+Field pendukung yang secara visual membentuk tabel tersendiri pada workbook dapat diberi `section`, misalnya `Standar yang Digunakan`. Section ditampilkan sebagai kartu terpisah di web, tetapi tetap diekspor ke alamat sel asli. Data tanda tangan dan approval tidak dimodelkan sebagai input teknisi.
 
 Ekspor Excel hanya diizinkan jika metadata form memiliki `mappingVerified: true`. Template yang belum diverifikasi tetap tersedia untuk penyimpanan draft, tetapi UI menampilkan peringatan dan API menolak ekspor. Tandai mapping sebagai terverifikasi hanya setelah header, seluruh leaf column, jumlah baris, dan alamat selnya dicocokkan dengan workbook sumber serta dilindungi test ekspor.
 

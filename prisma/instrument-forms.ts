@@ -34,7 +34,7 @@ export interface InstrumentFormSeed {
   omitFields?: InstrumentFieldKey[];
   cellMappings?: Record<string, string[]>;
   mappingVerified?: boolean;
-  additionalFields?: Array<{ key: string; label: string; inputType?: 'text' | 'date' | 'textarea'; placeholder?: string }>;
+  additionalFields?: Array<{ key: string; label: string; section?: string; inputType?: 'text' | 'date' | 'textarea'; placeholder?: string }>;
   measurementTables?: MeasurementTableSeed[];
 }
 
@@ -58,12 +58,14 @@ export interface MeasurementTableSeed {
   id: string;
   title: string;
   description?: string;
+  layout?: 'table' | 'record-grid';
   rowCount: number;
   initialRowCount?: number;
   templateRowCount?: number;
   minRows?: number;
   maxRows?: number;
   fixedRows?: boolean;
+  preserveTemplateRows?: boolean;
   columns: MeasurementTableColumnSeed[];
 }
 
@@ -71,6 +73,7 @@ export interface WorksheetTableMapping {
   id: string;
   firstRow: number;
   templateRowCount: number;
+  preserveTemplateRows?: boolean;
   columns: Record<string, string>;
 }
 
@@ -93,7 +96,15 @@ export function getWorksheetTableMappings(form: InstrumentFormSeed): WorksheetTa
       firstRow ??= Number(match[2]);
     }
     return firstRow && Object.keys(columns).length
-      ? [{ id: table.id, firstRow, templateRowCount: table.templateRowCount ?? table.rowCount, columns }]
+      ? [{
+        id: table.id,
+        firstRow,
+        templateRowCount: table.templateRowCount ?? table.rowCount,
+        ...(table.preserveTemplateRows !== undefined
+          ? { preserveTemplateRows: table.preserveTemplateRows }
+          : {}),
+        columns,
+      }]
       : [];
   });
 }
@@ -283,16 +294,23 @@ export const instrumentForms: InstrumentFormSeed[] = [
   {
     code: 'CCI-KAL-FOM-0XX', revision: '02', name: 'Lembar Kerja Umum', sheet: 'Lembar Kerja Umum', workbook: earlyWorkbookPath,
     mappingVerified: true,
+    additionalFields: [
+      { key: 'standardManufacturer', label: 'Merk', section: 'Standar yang Digunakan' },
+      { key: 'standardSerialNumber', label: 'No. Seri / No. Lot', section: 'Standar yang Digunakan' },
+      { key: 'standardTraceability', label: 'Tertelusur ke SI', section: 'Standar yang Digunakan' },
+      { key: 'standardUncertainty', label: 'Ketidakpastian', section: 'Standar yang Digunakan' },
+    ],
     measurementTables: [{
       id: 'measurements',
       title: 'Titik/Parameter Ukur/Uji',
       description: 'Isi parameter pengujian, lima penunjukan alat/bahan UUT, dan lima penunjukan standar untuk setiap baris.',
       rowCount: 14,
-      initialRowCount: 14,
+      initialRowCount: 1,
       templateRowCount: 14,
-      minRows: 14,
+      minRows: 1,
       maxRows: 14,
-      fixedRows: true,
+      layout: 'record-grid',
+      preserveTemplateRows: true,
       columns: [
         { key: 'parameter', label: 'Titik/Parameter Ukur/Uji', inputType: 'text' },
         {
@@ -306,6 +324,10 @@ export const instrumentForms: InstrumentFormSeed[] = [
       ],
     }],
     cellMappings: {
+      'additionalFields.standardManufacturer': ['C35'],
+      'additionalFields.standardSerialNumber': ['C36'],
+      'additionalFields.standardTraceability': ['C37'],
+      'additionalFields.standardUncertainty': ['C38'],
       ...createGenericTableMappings('measurements', 18, 14, {
         parameter: 'A',
         uut1: 'C', uut2: 'D', uut3: 'E', uut4: 'F', uut5: 'G',

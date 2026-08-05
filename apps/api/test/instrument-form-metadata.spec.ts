@@ -40,11 +40,12 @@ describe('metadata template instrumen', () => {
     const table = general?.measurementTables?.[0];
     expect(table).toMatchObject({
       id: 'measurements',
-      initialRowCount: 14,
+      initialRowCount: 1,
       templateRowCount: 14,
-      minRows: 14,
+      minRows: 1,
       maxRows: 14,
-      fixedRows: true,
+      layout: 'record-grid',
+      preserveTemplateRows: true,
     });
     expect(getMeasurementTableLeafColumns(table?.columns ?? []).map((column) => column.key)).toEqual([
       'parameter',
@@ -55,6 +56,7 @@ describe('metadata template instrumen', () => {
       id: 'measurements',
       firstRow: 18,
       templateRowCount: 14,
+      preserveTemplateRows: true,
       columns: {
         parameter: 'A',
         uut1: 'C', uut2: 'D', uut3: 'E', uut4: 'F', uut5: 'G',
@@ -67,7 +69,17 @@ describe('metadata template instrumen', () => {
       'measurements.tables.measurements.0.standard5': ['L18'],
       'measurements.tables.measurements.13.parameter': ['A31'],
       'measurements.tables.measurements.13.standard5': ['L31'],
+      'additionalFields.standardManufacturer': ['C35'],
+      'additionalFields.standardSerialNumber': ['C36'],
+      'additionalFields.standardTraceability': ['C37'],
+      'additionalFields.standardUncertainty': ['C38'],
     });
+    expect(general?.additionalFields).toEqual([
+      { key: 'standardManufacturer', label: 'Merk', section: 'Standar yang Digunakan' },
+      { key: 'standardSerialNumber', label: 'No. Seri / No. Lot', section: 'Standar yang Digunakan' },
+      { key: 'standardTraceability', label: 'Tertelusur ke SI', section: 'Standar yang Digunakan' },
+      { key: 'standardUncertainty', label: 'Ketidakpastian', section: 'Standar yang Digunakan' },
+    ]);
   });
 
   it('mempertahankan dua Mikrometer revision 03 berdasarkan ketertelusuran SI', () => {

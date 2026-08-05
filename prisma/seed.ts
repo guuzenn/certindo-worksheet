@@ -64,6 +64,8 @@ async function main(): Promise<void> {
     const schemaVersion = form.measurementTables?.some((table) => (
       table.initialRowCount !== undefined
       || table.templateRowCount !== undefined
+      || table.layout !== undefined
+      || table.preserveTemplateRows !== undefined
       || table.columns.some((column) => 'children' in column)
     )) ? 2 : 1;
     const description = mappingVerified

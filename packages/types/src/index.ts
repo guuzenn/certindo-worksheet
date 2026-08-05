@@ -129,6 +129,7 @@ export interface CalibrationOptions {
 export interface DynamicFieldDefinition {
   key: string;
   label: string;
+  section?: string;
   inputType?: 'text' | 'date' | 'textarea';
   placeholder?: string;
 }
@@ -153,6 +154,7 @@ export interface MeasurementTableDefinition {
   id: string;
   title: string;
   description?: string;
+  layout?: 'table' | 'record-grid';
   /** @deprecated Use initialRowCount and templateRowCount for V2 definitions. */
   rowCount: number;
   initialRowCount?: number;
@@ -160,6 +162,7 @@ export interface MeasurementTableDefinition {
   minRows?: number;
   maxRows?: number;
   fixedRows?: boolean;
+  preserveTemplateRows?: boolean;
   columns: MeasurementTableColumnDefinition[];
 }
 
@@ -218,6 +221,7 @@ export interface InstrumentFormDetailItem {
       id: string;
       firstRow: number;
       templateRowCount: number;
+      preserveTemplateRows?: boolean;
       columns: Record<string, string>;
     }>;
   };
@@ -266,4 +270,3 @@ export interface UserItem {
   createdAt: string;
   updatedAt: string;
 }
-

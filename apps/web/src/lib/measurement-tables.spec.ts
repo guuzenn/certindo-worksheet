@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createMeasurementHeaderRows,
   measurementTableInitialRowCount,
+  measurementTableMaximumRowCount,
   measurementTableMinimumRowCount,
 } from './measurement-tables';
 
@@ -10,9 +11,12 @@ const generalTable: MeasurementTableDefinition = {
   id: 'measurements',
   title: 'Pengukuran',
   rowCount: 14,
-  initialRowCount: 14,
+  initialRowCount: 1,
   templateRowCount: 14,
-  fixedRows: true,
+  minRows: 1,
+  maxRows: 14,
+  layout: 'record-grid',
+  preserveTemplateRows: true,
   columns: [
     { key: 'parameter', label: 'Parameter' },
     { label: 'UUT', children: [{ key: 'uut1', label: '1' }, { key: 'uut2', label: '2' }] },
@@ -33,8 +37,9 @@ describe('measurement table V2', () => {
     expect(rows[1]?.map((cell) => cell.column?.key)).toEqual(['uut1', 'uut2', 'std1', 'std2']);
   });
 
-  it('memisahkan jumlah baris awal dan batas minimum tabel tetap', () => {
-    expect(measurementTableInitialRowCount(generalTable)).toBe(14);
-    expect(measurementTableMinimumRowCount(generalTable)).toBe(14);
+  it('memulai dari satu baris tanpa mengubah kapasitas baris workbook', () => {
+    expect(measurementTableInitialRowCount(generalTable)).toBe(1);
+    expect(measurementTableMinimumRowCount(generalTable)).toBe(1);
+    expect(measurementTableMaximumRowCount(generalTable)).toBe(14);
   });
 });
