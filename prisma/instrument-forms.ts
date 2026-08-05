@@ -227,11 +227,66 @@ function createStandardVsUutForm(
 }
 
 export const instrumentForms: InstrumentFormSeed[] = [
-  { code: 'CCI-KAL-FOM-0XX', name: 'Lembar Kerja Umum', sheet: 'Lembar Kerja Umum', workbook: earlyWorkbookPath, needsTemplateReview: true },
+  createStandardVsUutForm('CCI-KAL-FOM-0XX', 'Lembar Kerja Umum', 'Lembar Kerja Umum', 18, 5, earlyWorkbookPath),
   createPressureGaugeForm('CCI-KAL-FOM-010', 'Pressure Gauge', 'Pressure Gauge', earlyWorkbookPath),
-  { code: 'CCI-KAL-FOM-027', name: 'Anak Timbangan', sheet: ' Anak Timbangan 04', workbook: earlyWorkbookPath },
-  { code: 'CCI-KAL-FOM-028', name: 'Timbangan', sheet: 'Timbangan 05', workbook: earlyWorkbookPath },
-  { code: 'CCI-KAL-FOM-028-B', name: 'Timbangan (Varian 2)', sheet: 'TImbangan 04', workbook: earlyWorkbookPath, needsTemplateReview: true },
+  {
+    code: 'CCI-KAL-FOM-027', name: 'Anak Timbangan', sheet: ' Anak Timbangan 04', workbook: earlyWorkbookPath,
+    measurementTables: [{
+      id: 'weights', title: 'Data Pengukuran Anak Timbangan (Substitusi S1-T1-T2-S2)', rowCount: 1,
+      columns: [
+        { key: 'nominal', label: 'Nominal (g)' },
+        { key: 's1', label: 'S1 (g)' }, { key: 't1', label: 'T1 (g)' },
+        { key: 't2', label: 'T2 (g)' }, { key: 's2', label: 'S2 (g)' },
+      ],
+    }],
+    cellMappings: {
+      ...createGenericTableMappings('weights', 17, 10, {
+        nominal: 'B', s1: 'C', t1: 'D', t2: 'E', s2: 'F',
+      }),
+    },
+  },
+  {
+    code: 'CCI-KAL-FOM-028', name: 'Timbangan', sheet: 'Timbangan 05', workbook: earlyWorkbookPath,
+    measurementTables: [
+      {
+        id: 'eccentricity', title: 'A. Pengujian Pembebanan Tidak Terpusat (Eksentrisitas)', rowCount: 1,
+        columns: [{ key: 'position', label: 'Posisi Beban' }, { key: 'zi', label: 'zi (Tanpa Beban)' }, { key: 'mi', label: 'mi (Dengan Beban)' }],
+      },
+      {
+        id: 'repeatability', title: 'B. Pengujian Keberulangan Pembacaan', rowCount: 1,
+        columns: [
+          { key: 'load', label: 'Beban Nominal' },
+          { key: 'reading1', label: '1' }, { key: 'reading2', label: '2' }, { key: 'reading3', label: '3' },
+          { key: 'reading4', label: '4' }, { key: 'reading5', label: '5' },
+        ],
+      },
+    ],
+    cellMappings: {
+      ...createGenericTableMappings('eccentricity', 26, 5, { position: 'A', zi: 'B', mi: 'C' }),
+      ...createGenericTableMappings('repeatability', 39, 5, { load: 'B', reading1: 'C', reading2: 'D', reading3: 'E', reading4: 'F', reading5: 'G' }),
+    },
+  },
+  {
+    code: 'CCI-KAL-FOM-028-B', name: 'Timbangan (Varian 2)', sheet: 'TImbangan 04', workbook: earlyWorkbookPath, needsTemplateReview: true,
+    measurementTables: [
+      {
+        id: 'eccentricity', title: 'A. Pengujian Pembebanan Tidak Terpusat (Eksentrisitas)', rowCount: 1,
+        columns: [{ key: 'position', label: 'Posisi Beban' }, { key: 'zi', label: 'zi (Tanpa Beban)' }, { key: 'mi', label: 'mi (Dengan Beban)' }],
+      },
+      {
+        id: 'repeatability', title: 'B. Pengujian Keberulangan Pembacaan', rowCount: 1,
+        columns: [
+          { key: 'load', label: 'Beban Nominal' },
+          { key: 'reading1', label: '1' }, { key: 'reading2', label: '2' }, { key: 'reading3', label: '3' },
+          { key: 'reading4', label: '4' }, { key: 'reading5', label: '5' },
+        ],
+      },
+    ],
+    cellMappings: {
+      ...createGenericTableMappings('eccentricity', 23, 5, { position: 'A', zi: 'B', mi: 'C' }),
+      ...createGenericTableMappings('repeatability', 36, 5, { load: 'B', reading1: 'C', reading2: 'D', reading3: 'E', reading4: 'F', reading5: 'G' }),
+    },
+  },
   {
     code: 'CCI-KAL-FOM-033', name: 'Enklosur', sheet: 'Enklosur 03', workbook: earlyWorkbookPath,
     measurementTables: [{
@@ -249,16 +304,30 @@ export const instrumentForms: InstrumentFormSeed[] = [
       }),
     },
   },
-  { code: 'CCI-KAL-FOM-053', name: 'Thermohygrometer', sheet: 'Thermohygrometer 04', workbook: earlyWorkbookPath },
-  { code: 'CCI-KAL-FOM-054', name: 'Timer / Stopwatch', sheet: 'Timer-Stopwatch 02', workbook: earlyWorkbookPath },
-  { code: 'CCI-KAL-FOM-055', name: 'Volumetric Glassware', sheet: 'Volumetric Glassware 04', workbook: earlyWorkbookPath },
-  { code: 'CCI-KAL-FOM-056', name: 'Autoclave', sheet: 'Autoclave 04', workbook: earlyWorkbookPath },
-  { code: 'CCI-KAL-FOM-057', name: 'Mikrometer', sheet: 'Mikrometer 03', workbook: earlyWorkbookPath },
-  { code: 'CCI-KAL-FOM-057-B', name: 'Mikrometer (Varian 2)', sheet: 'Mikrometer-03', workbook: earlyWorkbookPath, needsTemplateReview: true },
+  {
+    code: 'CCI-KAL-FOM-053', name: 'Thermohygrometer', sheet: 'Thermohygrometer 04', workbook: earlyWorkbookPath,
+    measurementTables: [{
+      id: 'thermohygrometer', title: 'Data Pengukuran Suhu & Kelembaban', rowCount: 1,
+      columns: [
+        { key: 'stdTemp', label: 'Standar Suhu (°C)' }, { key: 'uutTemp', label: 'UUT Suhu (°C)' },
+        { key: 'stdRh', label: 'Standar RH (%)' }, { key: 'uutRh', label: 'UUT RH (%)' },
+      ],
+    }],
+    cellMappings: {
+      ...createGenericTableMappings('thermohygrometer', 17, 10, {
+        stdTemp: 'B', uutTemp: 'C', stdRh: 'F', uutRh: 'G',
+      }),
+    },
+  },
+  createStandardVsUutForm('CCI-KAL-FOM-054', 'Timer / Stopwatch', 'Timer-Stopwatch 02', 18, 5),
+  createStandardVsUutForm('CCI-KAL-FOM-055', 'Volumetric Glassware', 'Volumetric Glassware 04', 17, 5),
+  createStandardVsUutForm('CCI-KAL-FOM-056', 'Autoclave', 'Autoclave 04', 19, 5),
+  createDimensionalInstrumentForm('CCI-KAL-FOM-057', 'Mikrometer', 'Mikrometer 03', 25, 41, 45),
+  createDimensionalInstrumentForm('CCI-KAL-FOM-057-B', 'Mikrometer (Varian 2)', 'Mikrometer-03', 25, 41, 45),
   createPressureGaugeForm('CCI-KAL-FOM-058', 'Digital Pressure (FOM-058)', 'Digital Pressure', earlyWorkbookPath),
   createStandardVsUutForm('CCI-KAL-FOM-059', 'Thermometer Digital', 'Thermometer Digital', 18, 5),
   createStandardVsUutForm('CCI-KAL-FOM-060', 'Refractometer', 'Refractometer 03', 18, 5),
-  { code: 'CCI-KAL-FOM-061', name: 'Centrifuge (Timer)', sheet: 'Centrifuge (Timer) 02', workbook: earlyWorkbookPath },
+  createStandardVsUutForm('CCI-KAL-FOM-061', 'Centrifuge (Timer)', 'Centrifuge (Timer) 02', 18, 5),
   createStandardVsUutForm('CCI-KAL-FOM-062', 'Hydrometer', 'Hydrometer 02', 18, 5),
   createStandardVsUutForm('CCI-KAL-FOM-063', 'Stroboscope', 'Stroboscope 02', 20, 5),
   createStandardVsUutForm('CCI-KAL-FOM-064', 'Termometer Gelas', 'Termometer Gelas 03', 20, 5),
@@ -386,7 +455,27 @@ export const instrumentForms: InstrumentFormSeed[] = [
       ...createGenericTableMappings('liquidBath', 18, 20, { point: 'A', uut: 'D', std: 'E' }),
     },
   },
-  { code: 'CCI-KAL-FOM-109', name: 'Timbangan Jembatan', sheet: 'Timbangan Jembatan', workbook: currentWorkbookPath, omitFields: ['identityNumber'] },
+  {
+    code: 'CCI-KAL-FOM-109', name: 'Timbangan Jembatan', sheet: 'Timbangan Jembatan', workbook: currentWorkbookPath, omitFields: ['identityNumber'],
+    measurementTables: [
+      {
+        id: 'eccentricity', title: 'A. Pengujian Pembebanan Tidak Terpusat (Eksentrisitas)', rowCount: 1,
+        columns: [{ key: 'position', label: 'Posisi Beban' }, { key: 'zi', label: 'zi (Tanpa Beban)' }, { key: 'mi', label: 'mi (Dengan Beban)' }],
+      },
+      {
+        id: 'repeatability', title: 'B. Pengujian Keberulangan Pembacaan', rowCount: 1,
+        columns: [
+          { key: 'load', label: 'Beban Nominal' },
+          { key: 'reading1', label: '1' }, { key: 'reading2', label: '2' }, { key: 'reading3', label: '3' },
+          { key: 'reading4', label: '4' }, { key: 'reading5', label: '5' },
+        ],
+      },
+    ],
+    cellMappings: {
+      ...createGenericTableMappings('eccentricity', 20, 5, { position: 'A', zi: 'B', mi: 'C' }),
+      ...createGenericTableMappings('repeatability', 33, 5, { load: 'B', reading1: 'C', reading2: 'D', reading3: 'E', reading4: 'F', reading5: 'G' }),
+    },
+  },
   createStandardVsUutForm('CCI-KAL-FOM-111', 'Turbidity Meter', 'Turbidity Meter', 18, 5, currentWorkbookPath),
   createStandardVsUutForm('CCI-KAL-FOM-112', 'Chlorine Meter', 'Chlorine Meter', 18, 5, currentWorkbookPath),
   createStandardVsUutForm('CCI-KAL-FOM-113', 'Zahn Cup', 'Zahn Cup', 18, 5, currentWorkbookPath),
