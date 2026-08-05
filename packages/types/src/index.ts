@@ -189,3 +189,35 @@ export interface InstrumentFormDetailItem {
   updatedAt: string;
 }
 
+export interface CompanyItem {
+  id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  recordsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CompanyDetailItem extends CompanyItem {
+  records: Array<{
+    id: string;
+    recordNumber: string;
+    certificateNumber: string | null;
+    status: CalibrationStatus;
+    createdAt: string;
+    updatedAt: string;
+    instrumentForm: {
+      id: string;
+      code: string;
+      name: string;
+    };
+    createdBy: {
+      id: string;
+      name: string;
+    };
+  }>;
+}
+
+

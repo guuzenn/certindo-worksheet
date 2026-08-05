@@ -79,6 +79,15 @@ export const updateCalibrationSchema = createCalibrationSchema.omit({ instrument
   formData: calibrationFormDataSchema,
 });
 
+export const companySchema = z.object({
+  name: z.string().trim().min(2, 'Nama perusahaan minimal 2 karakter'),
+  address: z.string().trim().optional(),
+  phone: z.string().trim().optional(),
+  email: z.string().trim().email('Email tidak valid').or(z.literal('')).optional(),
+});
+
 export type CalibrationFormDataInput = z.infer<typeof calibrationFormDataSchema>;
 export type CreateCalibrationInput = z.infer<typeof createCalibrationSchema>;
 export type UpdateCalibrationInput = z.infer<typeof updateCalibrationSchema>;
+export type CreateCompanyInput = z.infer<typeof companySchema>;
+

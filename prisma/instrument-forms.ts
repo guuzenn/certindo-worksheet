@@ -226,6 +226,27 @@ function createStandardVsUutForm(
   };
 }
 
+function createEarlyDimensionalInstrumentForm(
+  code: string,
+  name: string,
+  sheet: string,
+  nominalFirstRow: number,
+  repeatabilityFirstRow: number,
+  needsTemplateReview?: boolean,
+): InstrumentFormSeed {
+  return {
+    code, name, sheet, workbook: earlyWorkbookPath, ...(needsTemplateReview ? { needsTemplateReview: true } : {}),
+    measurementTables: [
+      { id: 'nominal', title: 'A. Pengujian per Nominal', rowCount: 1, columns: fiveReadingColumns },
+      { id: 'repeatability', title: 'B. Pengujian Keberulangan', rowCount: 1, columns: tenReadingColumns },
+    ],
+    cellMappings: {
+      ...createGenericTableMappings('nominal', nominalFirstRow, 2, { nominal: 'B', reading1: 'C', reading2: 'D', reading3: 'E', reading4: 'F', reading5: 'G' }),
+      ...createGenericTableMappings('repeatability', repeatabilityFirstRow, 2, { nominal: 'B', reading1: 'C', reading2: 'D', reading3: 'E', reading4: 'F', reading5: 'G', reading6: 'H', reading7: 'I', reading8: 'J', reading9: 'K', reading10: 'L' }),
+    },
+  };
+}
+
 export const instrumentForms: InstrumentFormSeed[] = [
   createStandardVsUutForm('CCI-KAL-FOM-0XX', 'Lembar Kerja Umum', 'Lembar Kerja Umum', 18, 5, earlyWorkbookPath),
   createPressureGaugeForm('CCI-KAL-FOM-010', 'Pressure Gauge', 'Pressure Gauge', earlyWorkbookPath),
@@ -322,8 +343,8 @@ export const instrumentForms: InstrumentFormSeed[] = [
   createStandardVsUutForm('CCI-KAL-FOM-054', 'Timer / Stopwatch', 'Timer-Stopwatch 02', 18, 5),
   createStandardVsUutForm('CCI-KAL-FOM-055', 'Volumetric Glassware', 'Volumetric Glassware 04', 17, 5),
   createStandardVsUutForm('CCI-KAL-FOM-056', 'Autoclave', 'Autoclave 04', 19, 5),
-  createDimensionalInstrumentForm('CCI-KAL-FOM-057', 'Mikrometer', 'Mikrometer 03', 25, 41, 45),
-  createDimensionalInstrumentForm('CCI-KAL-FOM-057-B', 'Mikrometer (Varian 2)', 'Mikrometer-03', 25, 41, 45),
+  createEarlyDimensionalInstrumentForm('CCI-KAL-FOM-057', 'Mikrometer', 'Mikrometer 03', 25, 41),
+  createEarlyDimensionalInstrumentForm('CCI-KAL-FOM-057-B', 'Mikrometer (Varian 2)', 'Mikrometer-03', 25, 41, true),
   createPressureGaugeForm('CCI-KAL-FOM-058', 'Digital Pressure (FOM-058)', 'Digital Pressure', earlyWorkbookPath),
   createStandardVsUutForm('CCI-KAL-FOM-059', 'Thermometer Digital', 'Thermometer Digital', 18, 5),
   createStandardVsUutForm('CCI-KAL-FOM-060', 'Refractometer', 'Refractometer 03', 18, 5),
