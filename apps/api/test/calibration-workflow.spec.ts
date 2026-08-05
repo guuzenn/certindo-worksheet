@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
 import {
   calibrationTransitionData,
+  formatCellValue,
   formatDynamicFieldValue,
   worksheetTableRenderedRowCount,
 } from '../src/calibrations/calibrations.service';
@@ -10,6 +11,11 @@ describe('calibrationTransitionData', () => {
   it('memformat satuan kapasitas dan resolusi sesuai placeholder workbook umum', () => {
     expect(formatDynamicFieldValue('kg', { exportPrefix: '(', exportSuffix: ')' })).toBe('(kg)');
     expect(formatDynamicFieldValue('g')).toBe('g');
+  });
+
+  it('memformat nilai core sesuai satuan tetap pada workbook', () => {
+    expect(formatCellValue('100', { suffix: ' gram' })).toBe('100 gram');
+    expect(formatCellValue('45', {})).toBe('45');
   });
 
   it('mempertahankan area 14 baris workbook ketika UI baru berisi satu baris', () => {

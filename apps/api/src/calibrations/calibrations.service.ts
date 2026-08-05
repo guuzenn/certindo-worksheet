@@ -193,11 +193,13 @@ export class CalibrationsService {
     const sheet = typeof mapping.sheet === 'string' ? mapping.sheet : null;
     const rawCells = asObject(mapping.cells);
     const formSchema = asObject(record.instrumentForm.schemaJson);
+    const cellValueFormats = asObject(formSchema.cellValueFormats);
     const additionalFieldDefinitions = Array.isArray(formSchema.additionalFields)
       ? formSchema.additionalFields.filter(isDynamicFieldDefinition)
       : [];
     const additionalFieldDefinitionsByKey = new Map(additionalFieldDefinitions.map((field) => [field.key, field]));
     const worksheetTables = parseWorksheetTableMappings(mapping.tables);
+    const conditionalCells = parseConditionalCellMappings(mapping.conditionalCells);
     if (!sheet || !Object.keys(rawCells).length) {
       throw new BadRequestException('Mapping Excel untuk template ini belum tersedia');
     }
@@ -241,11 +243,14 @@ export class CalibrationsService {
       const rawValue = readPath(values, dataPath);
       const cellValue = toCellValue(rawValue);
       if (!cellValue) continue;
-      let value = dataPath.startsWith('environment.temperature')
-        ? `${cellValue} °C`
-        : dataPath.startsWith('environment.humidity')
-          ? `${cellValue} %RH`
-          : cellValue;
+      const hasExplicitFormat = Object.prototype.hasOwnProperty.call(cellValueFormats, dataPath);
+      let value = hasExplicitFormat
+        ? formatCellValue(cellValue, cellValueFormats[dataPath])
+        : dataPath.startsWith('environment.temperature')
+          ? `${cellValue} °C`
+          : dataPath.startsWith('environment.humidity')
+            ? `${cellValue} %RH`
+            : cellValue;
       if (dataPath.startsWith('additionalFields.')) {
         const definition = additionalFieldDefinitionsByKey.get(dataPath.slice('additionalFields.'.length));
         value = formatDynamicFieldValue(value, definition);
@@ -255,6 +260,14 @@ export class CalibrationsService {
           cellsToWrite[shiftCellReference(target, cellShiftLayouts)] = value;
         }
       }
+    }
+
+    for (const conditionalCell of conditionalCells) {
+      const selectedValue = toCellValue(readPath(values, conditionalCell.dataPath));
+      if (!selectedValue) continue;
+      const outputValue = conditionalCell.valueMap[selectedValue];
+      if (outputValue === undefined) continue;
+      cellsToWrite[shiftCellReference(conditionalCell.target, cellShiftLayouts)] = outputValue;
     }
 
     let precedingOffset = 0;
@@ -345,6 +358,12 @@ interface WorksheetTableMapping {
   columns: Record<string, string>;
 }
 
+interface ConditionalCellMapping {
+  dataPath: string;
+  target: string;
+  valueMap: Record<string, string>;
+}
+
 export function worksheetTableRenderedRowCount(
   table: Pick<WorksheetTableMapping, 'templateRowCount' | 'preserveTemplateRows'>,
   dataRowCount: number,
@@ -357,6 +376,11 @@ export function formatDynamicFieldValue(
   definition?: Pick<DynamicFieldDefinition, 'exportPrefix' | 'exportSuffix'>,
 ): string {
   return `${definition?.exportPrefix ?? ''}${value}${definition?.exportSuffix ?? ''}`;
+}
+
+export function formatCellValue(value: string, rawFormat: unknown): string {
+  const format = asObject(rawFormat);
+  return `${typeof format.prefix === 'string' ? format.prefix : ''}${value}${typeof format.suffix === 'string' ? format.suffix : ''}`;
 }
 
 function legacyWorksheetRows(measurements: Record<string, unknown>, tableId: string): unknown[] {
@@ -406,6 +430,21 @@ function parseWorksheetTableMappings(value: unknown): WorksheetTableMapping[] {
         preserveTemplateRows: table.preserveTemplateRows === true,
         columns,
       }]
+      : [];
+  });
+}
+
+function parseConditionalCellMappings(value: unknown): ConditionalCellMapping[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((rawMapping) => {
+    const mapping = asObject(rawMapping);
+    const valueMap = Object.fromEntries(
+      Object.entries(asObject(mapping.valueMap)).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
+    );
+    return typeof mapping.dataPath === 'string'
+      && typeof mapping.target === 'string'
+      && Object.keys(valueMap).length
+      ? [{ dataPath: mapping.dataPath, target: mapping.target, valueMap }]
       : [];
   });
 }

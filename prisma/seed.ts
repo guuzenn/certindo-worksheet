@@ -50,6 +50,14 @@ async function main(): Promise<void> {
     where: { code: 'CCI-KAL-FOM-0XX', revision: 'DRAFT-1' },
     data: { revision: '02' },
   });
+  await prisma.instrumentForm.updateMany({
+    where: { code: 'CCI-KAL-FOM-010', revision: 'DRAFT-1' },
+    data: { revision: '03' },
+  });
+  await prisma.instrumentForm.updateMany({
+    where: { code: 'CCI-KAL-FOM-027', revision: 'DRAFT-1' },
+    data: { revision: '04' },
+  });
 
   for (const form of instrumentForms) {
     const revision = form.revision ?? 'DRAFT-1';
@@ -86,6 +94,7 @@ async function main(): Promise<void> {
           mappingVerified,
           cells: getInstrumentCellMappings(form),
           tables: getWorksheetTableMappings(form),
+          conditionalCells: form.conditionalCellMappings ?? [],
         },
         schemaJson: {
           version: schemaVersion,
@@ -96,6 +105,7 @@ async function main(): Promise<void> {
           ],
           instrumentNameDefault: form.instrumentNameDefault ?? form.name,
           fieldLabels: form.fieldLabels ?? {},
+          cellValueFormats: form.cellValueFormats ?? {},
           additionalFields: form.additionalFields ?? [],
           measurementTables: form.measurementTables ?? [],
         },
@@ -115,6 +125,7 @@ async function main(): Promise<void> {
           ],
           instrumentNameDefault: form.instrumentNameDefault ?? form.name,
           fieldLabels: form.fieldLabels ?? {},
+          cellValueFormats: form.cellValueFormats ?? {},
           additionalFields: form.additionalFields ?? [],
           measurementTables: form.measurementTables ?? [],
         },
@@ -126,6 +137,7 @@ async function main(): Promise<void> {
           mappingVerified,
           cells: getInstrumentCellMappings(form),
           tables: getWorksheetTableMappings(form),
+          conditionalCells: form.conditionalCellMappings ?? [],
         },
       },
     });

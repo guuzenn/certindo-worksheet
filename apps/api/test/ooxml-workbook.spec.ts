@@ -154,6 +154,127 @@ describe('replaceCellValue', () => {
     }
   });
 
+  it('mengisi seluruh kolom Pressure Gauge 010 tanpa menimpa header satuan', async () => {
+    const pressureGauge = instrumentForms.find((form) => form.code === 'CCI-KAL-FOM-010');
+    expect(pressureGauge).toBeDefined();
+    const cells = Object.fromEntries(
+      [
+        'C7', 'G7', 'C8', 'G8', 'C9', 'G9', 'C10', 'G10', 'C11', 'C12', 'G12',
+        'C13', 'C14', 'G14', 'H14', 'C15', 'D15', 'G15', 'H15',
+        'C18', 'A19', 'A21', 'C21', 'D21', 'E21', 'F21', 'G21', 'H21',
+        'C40', 'C41', 'C42', 'C43', 'C44',
+      ].map((cell) => [cell, `PRESSURE-QA-${cell}`]),
+    );
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), 'certindo-pressure-'));
+    const outputPath = join(temporaryDirectory, 'pressure-gauge.xlsx');
+
+    try {
+      await new OoxmlWorkbookService().fillTemplate(
+        resolve(process.cwd(), '..', '..', pressureGauge?.workbook ?? currentWorkbookPath),
+        outputPath,
+        pressureGauge?.sheet ?? '',
+        cells,
+        [{ firstRow: 21, templateRowCount: 18, rowCount: 18 }],
+      );
+      const zip = await JSZip.loadAsync(await readFile(outputPath));
+      await expectSingleWorksheet(zip, 'Pressure Gauge');
+      const worksheet = Object.values(zip.files).find((file) => /^xl\/worksheets\/sheet\d+\.xml$/.test(file.name));
+      const worksheetXml = await worksheet!.async('string');
+      for (const cell of [
+        'C7', 'G7', 'C8', 'G8', 'G9', 'G10', 'G12', 'G14', 'H14', 'G15', 'H15',
+        'C15', 'D15', 'C18', 'A19', 'A21', 'C21', 'D21', 'E21', 'F21', 'G21', 'H21',
+        'C40', 'C41', 'C42', 'C43', 'C44',
+      ]) expect(worksheetXml).toContain(`PRESSURE-QA-${cell}`);
+      expect(worksheetXml).toContain('<row r="38"');
+      expect(worksheetXml).toContain('<row r="40"');
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it('mengisi enam tabel dan data kalibrator Anak Timbangan 027', async () => {
+    const weights = instrumentForms.find((form) => form.code === 'CCI-KAL-FOM-027');
+    expect(weights).toBeDefined();
+    const targetCells = [
+      'C6', 'I6', 'C7', 'I7', 'C8', 'I8', 'C9', 'I9', 'C10', 'C11', 'C12',
+      'C13', 'I13', 'K13', 'C14', 'I14', 'K14',
+      'B18', 'C18', 'D18', 'E18', 'F18', 'B23', 'F23',
+      'H18', 'I18', 'J18', 'K18', 'L18', 'H23', 'L23',
+      'B26', 'F31', 'H26', 'L31', 'B34', 'F39', 'H34', 'L39',
+      'A45', 'D45', 'G45', 'I45', 'K45',
+    ];
+    const cells = Object.fromEntries(targetCells.map((cell) => [cell, `WEIGHT-QA-${cell}`]));
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), 'certindo-weights-'));
+    const outputPath = join(temporaryDirectory, 'anak-timbangan.xlsx');
+
+    try {
+      await new OoxmlWorkbookService().fillTemplate(
+        resolve(process.cwd(), '..', '..', weights?.workbook ?? currentWorkbookPath),
+        outputPath,
+        weights?.sheet ?? '',
+        cells,
+        [18, 26, 34, 18, 26, 34].map((firstRow) => ({ firstRow, templateRowCount: 6, rowCount: 6 })),
+      );
+      const zip = await JSZip.loadAsync(await readFile(outputPath));
+      await expectSingleWorksheet(zip, ' Anak Timbangan 04');
+      const worksheet = Object.values(zip.files).find((file) => /^xl\/worksheets\/sheet\d+\.xml$/.test(file.name));
+      const worksheetXml = await worksheet!.async('string');
+      for (const cell of targetCells) expect(worksheetXml).toContain(`WEIGHT-QA-${cell}`);
+      expect(worksheetXml).toContain('<row r="39"');
+      expect(worksheetXml).toContain('<row r="45"');
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { revision: '05', sheet: 'Timbangan 05', rowOffset: 0 },
+    { revision: '04', sheet: 'TImbangan 04', rowOffset: -3 },
+  ])('mengisi pembacaan awal, dua repeatability, koreksi, dan eksentrisitas Timbangan revisi $revision', async ({ revision, sheet, rowOffset }) => {
+    const scale = instrumentForms.find((form) => form.code === 'CCI-KAL-FOM-028' && form.revision === revision);
+    expect(scale).toBeDefined();
+    const mappings = getInstrumentCellMappings(scale!);
+    const cells = Object.fromEntries(Object.values(mappings).flat().map((cell) => [cell, `SCALE-QA-${cell}`]));
+    if (revision === '05') {
+      cells.E17 = '☒ Ya';
+      cells.G17 = '☐ Tidak';
+    }
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), `certindo-scale-${revision}-`));
+    const outputPath = join(temporaryDirectory, `timbangan-${revision}.xlsx`);
+
+    try {
+      await new OoxmlWorkbookService().fillTemplate(
+        resolve(process.cwd(), '..', '..', scale?.workbook ?? currentWorkbookPath),
+        outputPath,
+        scale?.sheet ?? '',
+        cells,
+        getWorksheetTableMappings(scale!).map((table) => ({
+          firstRow: table.firstRow,
+          templateRowCount: table.templateRowCount,
+          rowCount: table.templateRowCount,
+          preserveTemplateRows: table.preserveTemplateRows,
+        })),
+      );
+      const zip = await JSZip.loadAsync(await readFile(outputPath));
+      await expectSingleWorksheet(zip, sheet);
+      const worksheet = Object.values(zip.files).find((file) => /^xl\/worksheets\/sheet\d+\.xml$/.test(file.name));
+      const worksheetXml = await worksheet!.async('string');
+      for (const cell of [
+        `A${21 + rowOffset}`, `I${21 + rowOffset}`,
+        `A${26 + rowOffset}`, `E${35 + rowOffset}`,
+        `G${26 + rowOffset}`, `K${35 + rowOffset}`,
+        `A${40 + rowOffset}`, `F${51 + rowOffset}`,
+        `H${40 + rowOffset}`, `J${44 + rowOffset}`,
+      ]) expect(worksheetXml).toContain(`SCALE-QA-${cell}`);
+      if (revision === '05') {
+        expect(worksheetXml).toContain('☒ Ya');
+        expect(worksheetXml).toContain('☐ Tidak');
+      }
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+
   it('mengisi seluruh mapping Dissolved Oxygen Meter pada salinan workbook', async () => {
     const dissolvedOxygen = instrumentForms.find((form) => form.code === 'CCI-KAL-FOM-153');
     expect(dissolvedOxygen?.cellMappings).toBeDefined();

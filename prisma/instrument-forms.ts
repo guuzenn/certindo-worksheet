@@ -34,14 +34,21 @@ export interface InstrumentFormSeed {
   omitFields?: InstrumentFieldKey[];
   instrumentNameDefault?: string;
   fieldLabels?: Partial<Record<InstrumentFieldKey | 'calibrationDate' | 'company', string>>;
+  cellValueFormats?: Record<string, { prefix?: string; suffix?: string }>;
+  conditionalCellMappings?: Array<{
+    dataPath: string;
+    target: string;
+    valueMap: Record<string, string>;
+  }>;
   cellMappings?: Record<string, string[]>;
   mappingVerified?: boolean;
   additionalFields?: Array<{
     key: string;
     label: string;
     section?: string;
-    inputType?: 'text' | 'date' | 'textarea';
+    inputType?: 'text' | 'date' | 'textarea' | 'select';
     placeholder?: string;
+    options?: string[];
     defaultValue?: string;
     readOnly?: boolean;
     exportPrefix?: string;
@@ -77,6 +84,8 @@ export interface MeasurementTableSeed {
   minRows?: number;
   maxRows?: number;
   fixedRows?: boolean;
+  rowGroupSize?: number;
+  headerFieldKeys?: string[];
   preserveTemplateRows?: boolean;
   columns: MeasurementTableColumnSeed[];
 }
@@ -239,7 +248,126 @@ export function getInstrumentFields(form: InstrumentFormSeed): InstrumentFieldKe
   );
 }
 
+const weightCalibrationColumns: MeasurementTableSeed['columns'] = [
+  { key: 'nominal', label: 'Nominal Kalibrasi', inputType: 'number' },
+  { key: 's1', label: 'S₁ (g)', inputType: 'number' },
+  { key: 't1', label: 'T₁ (g)', inputType: 'number' },
+  { key: 't2', label: 'T₂ (g)', inputType: 'number' },
+  { key: 's2', label: 'S₂ (g)', inputType: 'number' },
+];
+
+const weightSensitivityColumns: MeasurementTableSeed['columns'] = [
+  { key: 'nominalSensitivity', label: 'Nominal mₛₑₙₛ', inputType: 'number' },
+  { key: 'standard', label: 'S (g)', inputType: 'number' },
+  { key: 'test', label: 'T (g)', inputType: 'number' },
+  { key: 'testPlusSensitivity', label: 'T + mₛₑₙₛ (g)', inputType: 'number' },
+  { key: 'standardPlusSensitivity', label: 'S + mₛₑₙₛ (g)', inputType: 'number' },
+];
+
+function createSixRowWeightTable(
+  id: string,
+  title: string,
+  columns: MeasurementTableSeed['columns'],
+): MeasurementTableSeed {
+  return {
+    id,
+    title,
+    description: 'Enam baris tetap, dipisahkan menjadi dua kelompok berisi tiga baris seperti lembar kerja.',
+    rowCount: 6,
+    initialRowCount: 6,
+    templateRowCount: 6,
+    minRows: 6,
+    maxRows: 6,
+    fixedRows: true,
+    rowGroupSize: 3,
+    preserveTemplateRows: true,
+    columns,
+  };
+}
+
 function createPressureGaugeForm(code: string, name: string, sheet: string, workbook = earlyWorkbookPath): InstrumentFormSeed {
+  if (code === 'CCI-KAL-FOM-010') {
+    return {
+      code,
+      revision: '03',
+      name,
+      sheet,
+      workbook,
+      mappingVerified: true,
+      fieldLabels: {
+        calibrationDate: 'Tanggal Kalibrasi',
+        company: 'Nama Perusahaan',
+        certificateNumber: 'No. Sertifikat',
+        name: 'Nama Alat',
+        serialNumber: 'No. Seri',
+        identityNumber: 'No. Identitas',
+        manufacturer: 'Merk',
+        model: 'Type/Model',
+        capacity: 'Kapasitas (termasuk satuan)',
+        resolution: 'Resolusi (termasuk satuan)',
+        calibrationLocation: 'Lokasi Kalibrasi',
+        ambientTemperatureStart: 'Temperature Ruang Awal',
+        ambientTemperatureEnd: 'Temperature Ruang Akhir',
+        ambientHumidityStart: 'Kelembaban Awal',
+        ambientHumidityEnd: 'Kelembaban Akhir',
+      },
+      additionalFields: [
+        { key: 'calibrationMethod', label: 'Metode Kalibrasi' },
+        { key: 'additionalInformation', label: 'Informasi lainnya' },
+        { key: 'height1', label: 'Perbedaan ketinggian h₁ (cm)', placeholder: 'Nilai h₁', exportPrefix: 'h₁ : ', exportSuffix: ' cm' },
+        { key: 'height2', label: 'Perbedaan ketinggian h₂ (cm)', placeholder: 'Nilai h₂', exportPrefix: 'h₂ : ', exportSuffix: ' cm' },
+        { key: 'instrumentIndicationUnit', label: 'Satuan Penunjukan Alat', placeholder: 'Contoh: bar', exportPrefix: '(', exportSuffix: ')' },
+        { key: 'standardIndicationUnit', label: 'Satuan Penunjukan Standar', placeholder: 'Contoh: bar', exportPrefix: '(', exportSuffix: ')' },
+        { key: 'standardName', label: 'Standar yang digunakan', section: 'Data Standar', defaultValue: 'Pressure Gauge STD 20 bar / 700 bar' },
+        { key: 'standardManufacturer', label: 'Merk', section: 'Data Standar', defaultValue: 'Additel / Additel' },
+        { key: 'standardSerialNumber', label: 'No. Seri', section: 'Data Standar', defaultValue: '211H18830045 / 211H20070058' },
+        { key: 'standardTraceability', label: 'Tertelusur ke SI', section: 'Data Standar' },
+        { key: 'standardUncertainty', label: 'Ketidakpastian', section: 'Data Standar' },
+      ],
+      measurementTables: [{
+        id: 'pressure',
+        title: 'Data Pengukuran Tekanan',
+        description: 'Isi penunjukan alat dan tiga rangkaian penunjukan standar pada arah naik dan turun.',
+        rowCount: 18,
+        initialRowCount: 1,
+        templateRowCount: 18,
+        minRows: 1,
+        maxRows: 18,
+        preserveTemplateRows: true,
+        columns: [
+          { key: 'instrumentIndication', label: 'Penunjukan Alat', inputType: 'number' },
+          ...Array.from({ length: 3 }, (_, index) => ({
+            label: `Penunjukan Standar ${index + 1}`,
+            children: [
+              { key: `standard${index + 1}Up`, label: 'Naik', inputType: 'number' as const },
+              { key: `standard${index + 1}Down`, label: 'Turun', inputType: 'number' as const },
+            ],
+          })),
+        ],
+      }],
+      cellMappings: {
+        'instrument.name': ['C8'],
+        'additionalFields.calibrationMethod': ['G9'],
+        'additionalFields.additionalInformation': ['G12'],
+        'additionalFields.height1': ['C15'],
+        'additionalFields.height2': ['D15'],
+        'additionalFields.standardIndicationUnit': ['C18'],
+        'additionalFields.instrumentIndicationUnit': ['A19'],
+        'additionalFields.standardName': ['C40'],
+        'additionalFields.standardManufacturer': ['C41'],
+        'additionalFields.standardSerialNumber': ['C42'],
+        'additionalFields.standardTraceability': ['C43'],
+        'additionalFields.standardUncertainty': ['C44'],
+        ...createGenericTableMappings('pressure', 21, 18, {
+          instrumentIndication: 'A',
+          standard1Up: 'C', standard1Down: 'D',
+          standard2Up: 'E', standard2Down: 'F',
+          standard3Up: 'G', standard3Down: 'H',
+        }),
+      },
+    };
+  }
+
   return {
     code, name, sheet, workbook,
     measurementTables: [{
@@ -298,6 +426,194 @@ function createEarlyDimensionalInstrumentForm(
     cellMappings: {
       ...createGenericTableMappings('nominal', nominalFirstRow, 2, { nominal: 'B', reading1: 'C', reading2: 'D', reading3: 'E', reading4: 'F', reading5: 'G' }),
       ...createGenericTableMappings('repeatability', repeatabilityFirstRow, 2, { nominal: 'B', reading1: 'C', reading2: 'D', reading3: 'E', reading4: 'F', reading5: 'G', reading6: 'H', reading7: 'I', reading8: 'J', reading9: 'K', reading10: 'L' }),
+    },
+  };
+}
+
+function createFixedMeasurementTable(
+  id: string,
+  title: string,
+  rowCount: number,
+  columns: MeasurementTableSeed['columns'],
+  headerFieldKeys: string[],
+): MeasurementTableSeed {
+  return {
+    id,
+    title,
+    rowCount,
+    initialRowCount: rowCount,
+    templateRowCount: rowCount,
+    minRows: rowCount,
+    maxRows: rowCount,
+    fixedRows: true,
+    preserveTemplateRows: true,
+    headerFieldKeys,
+    columns,
+  };
+}
+
+function createScaleForm(revision: '04' | '05'): InstrumentFormSeed {
+  const isRevision05 = revision === '05';
+  const rowOffset = isRevision05 ? 0 : -3;
+  const identityOffset = isRevision05 ? 0 : -1;
+  const initialRow = 21 + rowOffset;
+  const repeatabilityRow = 26 + rowOffset;
+  const resultRow = 40 + rowOffset;
+  const repeatabilityNumbers = Array.from({ length: 10 }, (_, index) => String(index + 1));
+  const eccentricityPositions = Array.from({ length: 5 }, (_, index) => String(index + 1));
+
+  return {
+    code: 'CCI-KAL-FOM-028',
+    revision,
+    name: 'Timbangan',
+    sheet: isRevision05 ? 'Timbangan 05' : 'TImbangan 04',
+    workbook: earlyWorkbookPath,
+    ...(isRevision05 ? {} : { identityMappingKey: 'CCI-KAL-FOM-028-B' }),
+    mappingVerified: true,
+    fieldLabels: {
+      calibrationDate: 'Tanggal Kalibrasi',
+      company: 'Nama Perusahaan',
+      certificateNumber: 'No. Sertifikat',
+      name: 'Nama Alat',
+      manufacturer: 'Merk',
+      model: 'Type/Model',
+      serialNumber: 'No. Seri',
+      identityNumber: 'No. Identitas',
+      capacity: 'Kapasitas',
+      resolution: 'Resolusi',
+      calibrationLocation: 'Lokasi Kalibrasi',
+      ambientTemperatureStart: 'Temperature Ruang Awal',
+      ambientTemperatureEnd: 'Temperature Ruang Akhir',
+      ambientHumidityStart: 'Kelembaban Awal',
+      ambientHumidityEnd: 'Kelembaban Akhir',
+    },
+    cellValueFormats: {
+      'environment.temperatureStart': {},
+      'environment.temperatureEnd': {},
+      'environment.humidityStart': {},
+      'environment.humidityEnd': {},
+    },
+    additionalFields: [
+      { key: 'calibrationMethod', label: 'Metode Kalibrasi', defaultValue: 'CCI-KAL-WI-003' },
+      { key: 'capacityUnit', label: 'Satuan Kapasitas', placeholder: 'Contoh: kg', exportPrefix: '(', exportSuffix: ')' },
+      { key: 'resolutionUnit', label: 'Satuan Resolusi', placeholder: 'Contoh: g', exportPrefix: '(', exportSuffix: ')' },
+      ...(isRevision05 ? [{ key: 'preAdjustmentCheck', label: 'Pre-adjustment check', inputType: 'select' as const, options: ['Ya', 'Tidak'] }] : []),
+      { key: 'initialNominalUnit', label: 'Satuan Nominal', exportPrefix: 'Nominal (', exportSuffix: ')' },
+      { key: 'initialReadingUnit', label: 'Satuan Pembacaan Alat', exportPrefix: 'Pembacaan Alat (', exportSuffix: ')' },
+      { key: 'repeatabilityHalfNominal', label: 'Nominal pada ½ kapasitas maksimum', exportPrefix: '1.1 Repeatability pada ½ kapasitas maksimum timbangan (', exportSuffix: ')' },
+      { key: 'repeatabilityHalfZiUnit', label: 'Satuan zᵢ', exportPrefix: 'zᵢ (', exportSuffix: ')' },
+      { key: 'repeatabilityHalfMiUnit', label: 'Satuan mᵢ', exportPrefix: 'mᵢ (', exportSuffix: ')' },
+      { key: 'repeatabilityMaxNominal', label: 'Nominal pada kapasitas maksimum', exportPrefix: '1.2 Repeatability pada kapasitas maksimum timbangan (', exportSuffix: ')' },
+      { key: 'repeatabilityMaxZiUnit', label: 'Satuan zᵢ', exportPrefix: 'zᵢ (', exportSuffix: ')' },
+      { key: 'repeatabilityMaxMiUnit', label: 'Satuan mᵢ', exportPrefix: 'mᵢ (', exportSuffix: ')' },
+      { key: 'correctionNominalUnit', label: 'Satuan Nominal Koreksi', exportPrefix: 'Nominal (', exportSuffix: ')' },
+      { key: 'correctionReadingUnit', label: 'Satuan Pembacaan Alat Koreksi', exportPrefix: 'Pembacaan Alat (', exportSuffix: ')' },
+      { key: 'eccentricityNominalUnit', label: 'Satuan Nominal Eksentrisitas', exportPrefix: 'Nominal (', exportSuffix: ')' },
+      { key: 'eccentricityReadingUnit', label: 'Satuan Pembacaan Alat Eksentrisitas', exportPrefix: 'Pembacaan Alat (', exportSuffix: ')' },
+    ],
+    measurementTables: [
+      createFixedMeasurementTable(
+        'initialCheck',
+        'Pembacaan Awal (Pre-adjustment Check)',
+        1,
+        [
+          { key: 'nominal', label: 'Nominal', inputType: 'number' },
+          { key: 'z1', label: 'z₁', inputType: 'number' },
+          { key: 'm1', label: 'm₁', inputType: 'number' },
+          { key: 'm2', label: 'm₂', inputType: 'number' },
+          { key: 'z2', label: 'z₂', inputType: 'number' },
+        ],
+        [...(isRevision05 ? ['preAdjustmentCheck'] : []), 'initialNominalUnit', 'initialReadingUnit'],
+      ),
+      createFixedMeasurementTable(
+        'repeatabilityHalf',
+        '1.1 Repeatability pada ½ Kapasitas Maksimum Timbangan',
+        10,
+        [
+          { key: 'readingNumber', label: 'Pembacaan ke-', lockedValues: repeatabilityNumbers },
+          { key: 'zi', label: 'zᵢ', inputType: 'number' },
+          { key: 'mi', label: 'mᵢ', inputType: 'number' },
+          { key: 'standardIdentification', label: 'Identifikasi Standar' },
+        ],
+        ['repeatabilityHalfNominal', 'repeatabilityHalfZiUnit', 'repeatabilityHalfMiUnit'],
+      ),
+      createFixedMeasurementTable(
+        'repeatabilityMax',
+        '1.2 Repeatability pada Kapasitas Maksimum Timbangan',
+        10,
+        [
+          { key: 'readingNumber', label: 'Pembacaan ke-', lockedValues: repeatabilityNumbers },
+          { key: 'zi', label: 'zᵢ', inputType: 'number' },
+          { key: 'mi', label: 'mᵢ', inputType: 'number' },
+          { key: 'standardIdentification', label: 'Identifikasi Standar' },
+        ],
+        ['repeatabilityMaxNominal', 'repeatabilityMaxZiUnit', 'repeatabilityMaxMiUnit'],
+      ),
+      createFixedMeasurementTable(
+        'correction',
+        '2. Menentukan Koreksi Timbangan',
+        12,
+        [
+          { key: 'nominal', label: 'Nominal', inputType: 'number' },
+          { key: 'z1', label: 'z₁', inputType: 'number' },
+          { key: 'm1', label: 'm₁', inputType: 'number' },
+          { key: 'm2', label: 'm₂', inputType: 'number' },
+          { key: 'z2', label: 'z₂', inputType: 'number' },
+          { key: 'standardIdentification', label: 'Identifikasi Standar' },
+        ],
+        ['correctionNominalUnit', 'correctionReadingUnit'],
+      ),
+      createFixedMeasurementTable(
+        'eccentricity',
+        '3. Menentukan Eksentrisitas',
+        5,
+        [
+          { key: 'position', label: 'Posisi', lockedValues: eccentricityPositions },
+          { key: 'reading', label: 'Pembacaan Alat', inputType: 'number' },
+        ],
+        ['eccentricityNominalUnit', 'eccentricityReadingUnit'],
+      ),
+    ],
+    conditionalCellMappings: isRevision05 ? [
+      { dataPath: 'additionalFields.preAdjustmentCheck', target: 'E17', valueMap: { Ya: '☒ Ya', Tidak: '☐ Ya' } },
+      { dataPath: 'additionalFields.preAdjustmentCheck', target: 'G17', valueMap: { Ya: '☐ Tidak', Tidak: '☒ Tidak' } },
+    ] : [],
+    cellMappings: {
+      certificateNumber: [`C${7 + identityOffset}`],
+      calibrationDate: [`H${7 + identityOffset}`],
+      'instrument.name': [`C${8 + identityOffset}`],
+      calibrationLocation: [`H${8 + identityOffset}`],
+      'instrument.manufacturer': [`C${9 + identityOffset}`],
+      'additionalFields.calibrationMethod': [`H${9 + identityOffset}`],
+      'instrument.model': [`C${10 + identityOffset}`],
+      'company.name': [`H${10 + identityOffset}`],
+      'instrument.serialNumber': [`C${11 + identityOffset}`],
+      'instrument.identityNumber': [`C${12 + identityOffset}`],
+      'instrument.capacity': [`C${13 + identityOffset}`],
+      'additionalFields.capacityUnit': [`E${13 + identityOffset}`],
+      'environment.temperatureStart': [`H${13 + identityOffset}`],
+      'environment.temperatureEnd': [`I${13 + identityOffset}`],
+      'instrument.resolution': [`C${14 + identityOffset}`],
+      'additionalFields.resolutionUnit': [`E${14 + identityOffset}`],
+      'environment.humidityStart': [`H${14 + identityOffset}`],
+      'environment.humidityEnd': [`I${14 + identityOffset}`],
+      'additionalFields.initialNominalUnit': [`A${19 + rowOffset}`],
+      'additionalFields.initialReadingUnit': [`C${19 + rowOffset}`],
+      'additionalFields.repeatabilityHalfNominal': [`A${24 + rowOffset}`],
+      'additionalFields.repeatabilityHalfZiUnit': [`B${25 + rowOffset}`],
+      'additionalFields.repeatabilityHalfMiUnit': [`C${25 + rowOffset}`],
+      'additionalFields.repeatabilityMaxNominal': [`G${24 + rowOffset}`],
+      'additionalFields.repeatabilityMaxZiUnit': [`H${25 + rowOffset}`],
+      'additionalFields.repeatabilityMaxMiUnit': [`I${25 + rowOffset}`],
+      'additionalFields.correctionNominalUnit': [`A${38 + rowOffset}`],
+      'additionalFields.correctionReadingUnit': [`B${38 + rowOffset}`],
+      'additionalFields.eccentricityNominalUnit': [`H${38 + rowOffset}`],
+      'additionalFields.eccentricityReadingUnit': [`J${38 + rowOffset}`],
+      ...createGenericTableMappings('initialCheck', initialRow, 1, { nominal: 'A', z1: 'C', m1: 'E', m2: 'G', z2: 'I' }),
+      ...createGenericTableMappings('repeatabilityHalf', repeatabilityRow, 10, { readingNumber: 'A', zi: 'B', mi: 'C', standardIdentification: 'E' }),
+      ...createGenericTableMappings('repeatabilityMax', repeatabilityRow, 10, { readingNumber: 'G', zi: 'H', mi: 'I', standardIdentification: 'K' }),
+      ...createGenericTableMappings('correction', resultRow, 12, { nominal: 'A', z1: 'B', m1: 'C', m2: 'D', z2: 'E', standardIdentification: 'F' }),
+      ...createGenericTableMappings('eccentricity', resultRow, 5, { position: 'H', reading: 'J' }),
     },
   };
 }
@@ -391,64 +707,72 @@ export const instrumentForms: InstrumentFormSeed[] = [
   },
   createPressureGaugeForm('CCI-KAL-FOM-010', 'Pressure Gauge', 'Pressure Gauge', earlyWorkbookPath),
   {
-    code: 'CCI-KAL-FOM-027', name: 'Anak Timbangan', sheet: ' Anak Timbangan 04', workbook: earlyWorkbookPath,
-    measurementTables: [{
-      id: 'weights', title: 'Data Pengukuran Anak Timbangan (Substitusi S1-T1-T2-S2)', rowCount: 1,
-      columns: [
-        { key: 'nominal', label: 'Nominal (g)' },
-        { key: 's1', label: 'S1 (g)' }, { key: 't1', label: 'T1 (g)' },
-        { key: 't2', label: 'T2 (g)' }, { key: 's2', label: 'S2 (g)' },
-      ],
-    }],
-    cellMappings: {
-      ...createGenericTableMappings('weights', 17, 10, {
-        nominal: 'B', s1: 'C', t1: 'D', t2: 'E', s2: 'F',
-      }),
+    code: 'CCI-KAL-FOM-027', revision: '04', name: 'Anak Timbangan', sheet: ' Anak Timbangan 04', workbook: earlyWorkbookPath,
+    mappingVerified: true,
+    fieldLabels: {
+      calibrationDate: 'Tanggal Kalibrasi',
+      company: 'Nama Pemilik/Perusahaan',
+      certificateNumber: 'No. Sertifikat',
+      name: 'Nama Alat',
+      manufacturer: 'Merk',
+      model: 'Tipe Model',
+      serialNumber: 'No. Seri',
+      identityNumber: 'No. Identitas',
+      capacity: 'Kapasitas (gram)',
+      resolution: 'Resolusi (gram)',
+      calibrationLocation: 'Lokasi Kalibrasi',
+      ambientTemperatureStart: 'Temperature Ruang Awal',
+      ambientTemperatureEnd: 'Temperature Ruang Akhir',
+      ambientHumidityStart: 'Kelembaban Ruang Awal',
+      ambientHumidityEnd: 'Kelembaban Ruang Akhir',
     },
-  },
-  {
-    code: 'CCI-KAL-FOM-028', revision: '05', name: 'Timbangan', sheet: 'Timbangan 05', workbook: earlyWorkbookPath,
+    cellValueFormats: {
+      'instrument.capacity': { suffix: ' gram' },
+      'instrument.resolution': { suffix: ' gram' },
+      'environment.temperatureStart': {},
+      'environment.temperatureEnd': {},
+      'environment.humidityStart': {},
+      'environment.humidityEnd': {},
+    },
+    additionalFields: [
+      { key: 'calibrationMethod', label: 'Metode Kalibrasi', defaultValue: 'CCI-KAL-WI-002' },
+      { key: 'instrumentClass', label: 'Kelas' },
+      { key: 'calibratorName', label: 'Nama', section: 'Kalibrator yang digunakan' },
+      { key: 'calibratorManufacturer', label: 'Merk', section: 'Kalibrator yang digunakan' },
+      { key: 'calibratorSerialNumber', label: 'No. Seri', section: 'Kalibrator yang digunakan' },
+      { key: 'calibratorTraceability', label: 'Tertelusur ke SI', section: 'Kalibrator yang digunakan' },
+      { key: 'calibratorUncertainty', label: 'Ketidakpastian', section: 'Kalibrator yang digunakan' },
+    ],
     measurementTables: [
-      {
-        id: 'eccentricity', title: 'A. Pengujian Pembebanan Tidak Terpusat (Eksentrisitas)', rowCount: 1,
-        columns: [{ key: 'position', label: 'Posisi Beban' }, { key: 'zi', label: 'zi (Tanpa Beban)' }, { key: 'mi', label: 'mi (Dengan Beban)' }],
-      },
-      {
-        id: 'repeatability', title: 'B. Pengujian Keberulangan Pembacaan', rowCount: 1,
-        columns: [
-          { key: 'load', label: 'Beban Nominal' },
-          { key: 'reading1', label: '1' }, { key: 'reading2', label: '2' }, { key: 'reading3', label: '3' },
-          { key: 'reading4', label: '4' }, { key: 'reading5', label: '5' },
-        ],
-      },
+      createSixRowWeightTable('calibration1', '1A. Data Kalibrasi Anak Timbangan — Tabel 1', weightCalibrationColumns),
+      createSixRowWeightTable('calibration2', '1B. Data Kalibrasi Anak Timbangan — Tabel 2', weightCalibrationColumns),
+      createSixRowWeightTable('calibration3', '1C. Data Kalibrasi Anak Timbangan — Tabel 3', weightCalibrationColumns),
+      createSixRowWeightTable('sensitivity1', '2A. Data Sensitivitas Anak Timbangan — Tabel 1', weightSensitivityColumns),
+      createSixRowWeightTable('sensitivity2', '2B. Data Sensitivitas Anak Timbangan — Tabel 2', weightSensitivityColumns),
+      createSixRowWeightTable('sensitivity3', '2C. Data Sensitivitas Anak Timbangan — Tabel 3', weightSensitivityColumns),
     ],
     cellMappings: {
-      ...createGenericTableMappings('eccentricity', 26, 5, { position: 'A', zi: 'B', mi: 'C' }),
-      ...createGenericTableMappings('repeatability', 39, 5, { load: 'B', reading1: 'C', reading2: 'D', reading3: 'E', reading4: 'F', reading5: 'G' }),
+      'instrument.resolution': ['C14'],
+      'company.name': ['I9'],
+      'environment.humidityStart': ['I14'],
+      'environment.humidityEnd': ['K14'],
+      'additionalFields.calibrationMethod': ['I8'],
+      'additionalFields.instrumentClass': ['C12'],
+      'additionalFields.calibratorName': ['A45'],
+      'additionalFields.calibratorManufacturer': ['D45'],
+      'additionalFields.calibratorSerialNumber': ['G45'],
+      'additionalFields.calibratorTraceability': ['I45'],
+      'additionalFields.calibratorUncertainty': ['K45'],
+      ...createGenericTableMappings('calibration1', 18, 6, { nominal: 'B', s1: 'C', t1: 'D', t2: 'E', s2: 'F' }),
+      ...createGenericTableMappings('calibration2', 26, 6, { nominal: 'B', s1: 'C', t1: 'D', t2: 'E', s2: 'F' }),
+      ...createGenericTableMappings('calibration3', 34, 6, { nominal: 'B', s1: 'C', t1: 'D', t2: 'E', s2: 'F' }),
+      ...createGenericTableMappings('sensitivity1', 18, 6, { nominalSensitivity: 'H', standard: 'I', test: 'J', testPlusSensitivity: 'K', standardPlusSensitivity: 'L' }),
+      ...createGenericTableMappings('sensitivity2', 26, 6, { nominalSensitivity: 'H', standard: 'I', test: 'J', testPlusSensitivity: 'K', standardPlusSensitivity: 'L' }),
+      ...createGenericTableMappings('sensitivity3', 34, 6, { nominalSensitivity: 'H', standard: 'I', test: 'J', testPlusSensitivity: 'K', standardPlusSensitivity: 'L' }),
     },
   },
-  {
-    code: 'CCI-KAL-FOM-028', revision: '04', name: 'Timbangan', sheet: 'TImbangan 04', workbook: earlyWorkbookPath,
-    identityMappingKey: 'CCI-KAL-FOM-028-B',
-    measurementTables: [
-      {
-        id: 'eccentricity', title: 'A. Pengujian Pembebanan Tidak Terpusat (Eksentrisitas)', rowCount: 1,
-        columns: [{ key: 'position', label: 'Posisi Beban' }, { key: 'zi', label: 'zi (Tanpa Beban)' }, { key: 'mi', label: 'mi (Dengan Beban)' }],
-      },
-      {
-        id: 'repeatability', title: 'B. Pengujian Keberulangan Pembacaan', rowCount: 1,
-        columns: [
-          { key: 'load', label: 'Beban Nominal' },
-          { key: 'reading1', label: '1' }, { key: 'reading2', label: '2' }, { key: 'reading3', label: '3' },
-          { key: 'reading4', label: '4' }, { key: 'reading5', label: '5' },
-        ],
-      },
-    ],
-    cellMappings: {
-      ...createGenericTableMappings('eccentricity', 23, 5, { position: 'A', zi: 'B', mi: 'C' }),
-      ...createGenericTableMappings('repeatability', 36, 5, { load: 'B', reading1: 'C', reading2: 'D', reading3: 'E', reading4: 'F', reading5: 'G' }),
-    },
-  },
+  createScaleForm('05'),
+  createScaleForm('04'),
   {
     code: 'CCI-KAL-FOM-033', name: 'Enklosur', sheet: 'Enklosur 03', workbook: earlyWorkbookPath,
     measurementTables: [{

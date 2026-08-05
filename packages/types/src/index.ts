@@ -132,8 +132,9 @@ export interface DynamicFieldDefinition {
   key: string;
   label: string;
   section?: string;
-  inputType?: 'text' | 'date' | 'textarea';
+  inputType?: 'text' | 'date' | 'textarea' | 'select';
   placeholder?: string;
+  options?: string[];
   defaultValue?: string;
   readOnly?: boolean;
   exportPrefix?: string;
@@ -170,6 +171,8 @@ export interface MeasurementTableDefinition {
   minRows?: number;
   maxRows?: number;
   fixedRows?: boolean;
+  rowGroupSize?: number;
+  headerFieldKeys?: string[];
   preserveTemplateRows?: boolean;
   columns: MeasurementTableColumnDefinition[];
 }
@@ -217,6 +220,7 @@ export interface InstrumentFormDetailItem {
     sections: Array<{ id: string; label: string }>;
     instrumentNameDefault?: string;
     fieldLabels?: Partial<Record<FormFieldLabelKey, string>>;
+    cellValueFormats?: Record<string, { prefix?: string; suffix?: string }>;
     additionalFields: DynamicFieldDefinition[];
     measurementTables: MeasurementTableDefinition[];
   };
@@ -233,6 +237,11 @@ export interface InstrumentFormDetailItem {
       templateRowCount: number;
       preserveTemplateRows?: boolean;
       columns: Record<string, string>;
+    }>;
+    conditionalCells?: Array<{
+      dataPath: string;
+      target: string;
+      valueMap: Record<string, string>;
     }>;
   };
   isActive: boolean;
