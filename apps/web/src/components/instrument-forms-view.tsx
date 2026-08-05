@@ -205,7 +205,7 @@ export function InstrumentFormsView() {
                 <CardHeader className="space-y-2.5 p-5 pb-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className="inline-block rounded-md bg-[#EEF5FA] px-2.5 py-1 text-xs font-bold text-[#1F5F8B]">
-                      {form.code}
+                      {form.code}{form.revision !== 'DRAFT-1' ? ` · Rev. ${form.revision}` : ''}
                     </span>
                     {form.needsTemplateReview ? (
                       <Badge variant="warning">Tinjau Template</Badge>

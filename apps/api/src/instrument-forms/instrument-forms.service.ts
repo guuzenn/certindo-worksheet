@@ -19,7 +19,7 @@ export class InstrumentFormsService {
             }
           : {}),
       },
-      orderBy: { code: 'asc' },
+      orderBy: [{ code: 'asc' }, { revision: 'desc' }],
       select: {
         id: true,
         code: true,

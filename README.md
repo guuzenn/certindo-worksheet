@@ -1,32 +1,33 @@
 # Certindo Worksheet
 
-Sistem lembar kerja kalibrasi PT Certindonesia untuk mengelola data klien, mengisi formulir instrumen, menjalankan proses review dan approval, serta menghasilkan workbook Excel dari template resmi.
+Aplikasi internal PT Certindonesia untuk mengisi lembar kerja kalibrasi, menjalankan review dan approval, serta menghasilkan workbook Excel dari template resmi.
 
-## Fitur utama
+## Kemampuan utama
 
-- Katalog 89+ template instrumen dengan schema form dan mapping sel Excel dinamis.
-- Pembuatan dan revisi lembar kerja kalibrasi tanpa mengubah style workbook sumber.
-- Workflow berbasis role dari `DRAFT` sampai `COMPLETED`, termasuk catatan permintaan perbaikan.
-- Manajemen perusahaan klien dan riwayat kalibrasinya.
-- Manajemen pengguna dengan role `ADMIN`, `TECHNICIAN`, `REVIEWER`, dan `APPROVER`.
-- Pengaturan profil dan perubahan kata sandi.
-- Penyimpanan template dan hasil ekspor melalui filesystem lokal atau private Vercel Blob.
-- Dashboard ringkasan status kalibrasi dan health check untuk deployment.
+- Katalog 89+ formulir instrumen dari workbook `0X-94` dan `095-163`.
+- Form identitas dan tabel pengukuran yang dibentuk secara dinamis dari metadata template.
+- Ekspor OOXML tanpa mengubah format dan style workbook sumber.
+- Workflow kalibrasi berbasis role, lengkap dengan catatan permintaan perbaikan.
+- Manajemen perusahaan, pengguna, profil, dan kata sandi.
+- Penyimpanan lokal untuk development atau private Vercel Blob untuk staging/production.
+- Dashboard operasional dan endpoint health check untuk deployment.
 
-## Teknologi
+Satu kode formulir dapat memiliki lebih dari satu revisi. Contohnya, Timbangan menggunakan kode resmi `CCI-KAL-FOM-028` dengan revisi `04` dan `05`; masing-masing tetap memiliki sheet dan mapping sel sendiri.
 
-- Next.js 16 dan React 19 untuk aplikasi web.
-- NestJS 11 untuk REST API.
-- PostgreSQL, Prisma ORM, dan JSONB untuk data formulir dinamis.
-- TanStack Query, React Hook Form, dan Zod.
-- JSZip untuk manipulasi OOXML workbook.
-- Turborepo dan pnpm workspace.
+## Tech stack
 
-## Struktur proyek
+- Next.js 16, React 19, Tailwind CSS 4
+- NestJS 11 dan REST API
+- PostgreSQL dan Prisma ORM
+- TanStack Query, React Hook Form, dan Zod
+- JSZip untuk manipulasi OOXML
+- Turborepo dan pnpm workspace
+
+## Struktur repository
 
 ```text
 apps/
-  api/          NestJS REST API dan engine ekspor OOXML
+  api/          NestJS API, aturan domain, storage, dan engine OOXML
   web/          Next.js App Router
 packages/
   config/       konfigurasi bersama
@@ -35,37 +36,46 @@ packages/
   ui/           komponen UI bersama
   eslint-config/
   tsconfig/
-prisma/         schema, migrasi, katalog instrumen, dan seed
+prisma/
+  migrations/   migrasi database
+  schema.prisma schema Prisma
+  seed.ts       seed admin dan katalog instrumen
+  instrument-forms.ts metadata form dan mapping workbook
 storage/
-  templates/    workbook sumber untuk mode local
-  generated/    hasil ekspor untuk mode local
+  templates/    workbook sumber untuk driver local
+  generated/    hasil ekspor untuk driver local
 ```
 
-API menjadi pemilik aturan domain dan akses database. Aplikasi web mengaksesnya melalui REST menggunakan bearer token.
+API menjadi pemilik aturan bisnis dan akses database. Web mengakses API menggunakan bearer token.
 
-## Prasyarat
+## Persyaratan
 
-- Node.js 20.9 atau lebih baru.
-- pnpm 11.
-- Database PostgreSQL.
-- Dua workbook template sumber jika menggunakan penyimpanan lokal.
+- Node.js 20.9 atau lebih baru
+- pnpm 11
+- PostgreSQL
+- Workbook template sumber untuk penggunaan driver `local`
 
 ## Menjalankan secara lokal
 
-1. Salin `.env.example` menjadi `.env`.
-2. Isi `DATABASE_URL`, `JWT_SECRET`, dan kredensial seed.
-3. Pasang dependensi dan siapkan database:
+Salin environment example dan isi nilai yang diperlukan:
+
+```bash
+cp .env.example .env
+```
+
+Pada PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Kemudian siapkan aplikasi dan database:
 
 ```bash
 pnpm install
 pnpm db:generate
 pnpm db:migrate
 pnpm db:seed
-```
-
-4. Jalankan seluruh aplikasi:
-
-```bash
 pnpm dev
 ```
 
@@ -75,19 +85,31 @@ Layanan lokal:
 - API: `http://localhost:4000/api`
 - Health check: `http://localhost:4000/api/health`
 
-Kredensial admin awal mengikuti `SEED_ADMIN_EMAIL` dan `SEED_ADMIN_PASSWORD`. Jangan gunakan password contoh pada environment bersama.
+Kredensial admin awal mengikuti `SEED_ADMIN_EMAIL` dan `SEED_ADMIN_PASSWORD`. Ganti password contoh sebelum memakai environment bersama.
 
 ## Workflow kalibrasi
 
-| Transisi | Role yang diizinkan | Keterangan |
+| Transisi | Role | Keterangan |
 | --- | --- | --- |
-| `DRAFT` → `UNDER_REVIEW` | `TECHNICIAN`, `ADMIN` | Mengajukan lembar kerja untuk diperiksa. |
-| `UNDER_REVIEW` → `DRAFT` | `REVIEWER`, `APPROVER`, `ADMIN` | Meminta perbaikan; catatan wajib diisi. |
-| `UNDER_REVIEW` → `CONFIRMED` | `REVIEWER`, `APPROVER`, `ADMIN` | Menyetujui hasil pemeriksaan. |
-| `UNDER_REVIEW` → `COMPLETED` | `APPROVER`, `ADMIN` | Menyetujui dan langsung menyelesaikan dokumen. |
-| `CONFIRMED` → `COMPLETED` | `APPROVER`, `ADMIN` | Menerbitkan hasil final. |
+| `DRAFT` -> `UNDER_REVIEW` | `TECHNICIAN`, `ADMIN` | Mengajukan lembar kerja untuk diperiksa. |
+| `UNDER_REVIEW` -> `DRAFT` | `REVIEWER`, `APPROVER`, `ADMIN` | Mengembalikan lembar kerja; catatan perbaikan wajib diisi. |
+| `UNDER_REVIEW` -> `CONFIRMED` | `REVIEWER`, `APPROVER`, `ADMIN` | Menyetujui hasil pemeriksaan. |
+| `UNDER_REVIEW` -> `COMPLETED` | `APPROVER`, `ADMIN` | Menyetujui sekaligus menyelesaikan dokumen. |
+| `CONFIRMED` -> `COMPLETED` | `APPROVER`, `ADMIN` | Menerbitkan hasil final. |
 
-Form hanya dapat diubah ketika berstatus `DRAFT`. Perubahan status juga divalidasi kembali di API, sehingga pembatasan tidak hanya bergantung pada UI.
+Form hanya dapat diubah ketika berstatus `DRAFT`. API memvalidasi role dan transisi status secara independen dari UI.
+
+## Template dan revision
+
+Metadata template berada di `prisma/instrument-forms.ts`. Setiap entri menentukan:
+
+- kode dan revision formulir;
+- workbook dan nama sheet sumber;
+- field identitas yang ditampilkan;
+- tabel pengukuran dinamis;
+- mapping data ke sel Excel.
+
+Kombinasi `code` dan `revision` harus unik. Jika posisi sel berubah antar-revision, gunakan mapping identitas dan tabel yang sesuai untuk revision tersebut. Setelah metadata berubah, jalankan `pnpm db:seed` untuk memperbarui katalog pada database.
 
 ## Environment variables
 
@@ -96,18 +118,18 @@ Form hanya dapat diubah ketika berstatus `DRAFT`. Perubahan status juga divalida
 | `DATABASE_URL` | Connection string PostgreSQL. |
 | `JWT_SECRET` | Rahasia JWT minimal 32 karakter. |
 | `JWT_EXPIRES_IN` | Masa berlaku token; default `8h`. |
-| `API_PORT` | Port API lokal; default `4000`. |
-| `CORS_ORIGINS` | Daftar origin web yang dipisahkan koma. |
+| `API_PORT` | Port API; default `4000`. |
+| `CORS_ORIGINS` | Origin web yang diizinkan, dipisahkan koma. |
 | `NEXT_PUBLIC_API_URL` | Base URL API yang dapat diakses browser. |
 | `STORAGE_DRIVER` | `local` atau `blob`. |
-| `STORAGE_LOCAL_ROOT` | Root penyimpanan saat memakai driver `local`. |
-| `BLOB_READ_WRITE_TOKEN` | Token private Vercel Blob untuk driver `blob`. |
-| `TEMPLATE_EARLY_URL` | URL workbook template 0X–94 di Blob. |
-| `TEMPLATE_CURRENT_URL` | URL workbook template 095–163 di Blob. |
-| `SEED_ADMIN_EMAIL` | Email admin yang dibuat oleh seed. |
-| `SEED_ADMIN_PASSWORD` | Password awal admin yang dibuat oleh seed. |
+| `STORAGE_LOCAL_ROOT` | Root penyimpanan untuk driver `local`. |
+| `BLOB_READ_WRITE_TOKEN` | Token private Vercel Blob. |
+| `TEMPLATE_EARLY_URL` | URL workbook template `0X-94` di Blob. |
+| `TEMPLATE_CURRENT_URL` | URL workbook template `095-163` di Blob. |
+| `SEED_ADMIN_EMAIL` | Email admin yang dibuat seed. |
+| `SEED_ADMIN_PASSWORD` | Password awal admin yang dibuat seed. |
 
-Lihat `.env.example` untuk contoh lengkap tanpa kredensial produksi.
+Gunakan `.env.example` sebagai referensi. Jangan commit `.env`, token Blob, connection string, atau kredensial pengguna.
 
 ## Endpoint API
 
@@ -120,23 +142,47 @@ Semua endpoint selain login dan health check membutuhkan bearer token.
 - Master data: `/api/companies`, `/api/users`, `/api/instrument-forms`
 - Health check: `/api/health`
 
-Operasi create, update, delete, dan approval dibatasi lagi berdasarkan role.
+Operasi create, update, delete, review, dan approval dibatasi berdasarkan role.
 
-## Perintah pengembangan
+## Perintah penting
 
 ```bash
-pnpm typecheck     # validasi TypeScript seluruh workspace
-pnpm test          # unit dan integration tests
-pnpm build         # production build web, API, dan packages
-pnpm lint          # ESLint seluruh workspace
-pnpm db:generate   # generate Prisma Client
-pnpm db:migrate    # membuat/menerapkan migrasi development
-pnpm db:migrate:deploy # menerapkan migrasi yang sudah ada
-pnpm db:seed       # mengisi admin dan katalog template instrumen
+pnpm dev                  # menjalankan web dan API
+pnpm typecheck            # memeriksa TypeScript seluruh workspace
+pnpm test                 # menjalankan seluruh test
+pnpm build                # production build
+pnpm lint                 # ESLint seluruh workspace
+pnpm db:generate          # generate Prisma Client
+pnpm db:migrate           # membuat/menerapkan migrasi development
+pnpm db:migrate:deploy    # menerapkan migrasi yang sudah tersedia
+pnpm db:seed              # memperbarui admin dan katalog template
 ```
 
-Gunakan database branch terpisah untuk development, staging, dan production. Setelah mengambil perubahan schema terbaru, jalankan `pnpm db:migrate:deploy` pada environment tujuan sebelum memulai API.
+## Deployment staging
 
-## Deployment
+Arsitektur staging yang digunakan:
 
-Arsitektur deployment yang didukung adalah Next.js di Vercel, API NestJS di Railway, PostgreSQL di Neon, dan private Vercel Blob untuk template serta hasil ekspor. Instruksi lengkap tersedia di [DEPLOYMENT.md](./DEPLOYMENT.md).
+- Web Next.js: Vercel
+- API NestJS: Railway
+- Database PostgreSQL: branch staging Neon
+- Template dan hasil Excel: private Vercel Blob
+
+Urutan deployment:
+
+1. Buat atau pilih branch staging di Neon dan simpan connection string sebagai `DATABASE_URL`.
+2. Buat private Blob store di Vercel dan simpan `BLOB_READ_WRITE_TOKEN`.
+3. Upload workbook template dengan `pnpm --filter @certindo/api storage:upload-templates`.
+4. Simpan URL hasil upload sebagai `TEMPLATE_EARLY_URL` dan `TEMPLATE_CURRENT_URL`.
+5. Deploy API ke Railway. Konfigurasi build dan health check dibaca dari `railway.json`.
+6. Isi environment API: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGINS`, storage, dan URL template.
+7. Terapkan database staging:
+
+```bash
+pnpm db:migrate:deploy
+pnpm db:seed
+```
+
+8. Deploy `apps/web` ke Vercel dan arahkan `NEXT_PUBLIC_API_URL` ke URL Railway dengan suffix `/api`.
+9. Verifikasi `/api/health`, login, katalog template, workflow status, serta generate/download workbook.
+
+Gunakan branch database dan kredensial yang berbeda untuk development, staging, dan production.

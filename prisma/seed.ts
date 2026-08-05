@@ -32,7 +32,19 @@ async function main(): Promise<void> {
     data: { code: 'CCI-KAL-FOM-152' },
   });
 
+  // Preserve existing record IDs and calibration relations while replacing the temporary
+  // Timbangan variant code with the official form code and workbook revisions.
+  await prisma.instrumentForm.updateMany({
+    where: { code: 'CCI-KAL-FOM-028', revision: 'DRAFT-1' },
+    data: { revision: '05' },
+  });
+  await prisma.instrumentForm.updateMany({
+    where: { code: 'CCI-KAL-FOM-028-B', revision: 'DRAFT-1' },
+    data: { code: 'CCI-KAL-FOM-028', revision: '04' },
+  });
+
   for (const form of instrumentForms) {
+    const revision = form.revision ?? 'DRAFT-1';
     const workbook = form.workbook ?? currentWorkbookPath;
     const templateFilePath = process.env.STORAGE_DRIVER === 'blob'
       ? workbook === earlyWorkbookPath
@@ -44,7 +56,7 @@ async function main(): Promise<void> {
       ? 'Template terhubung dan dapat digunakan untuk draft. Metadata sumber perlu ditinjau sebelum ekspor final.'
       : 'Template terhubung dari katalog workbook lembar kerja Certindo.';
     await prisma.instrumentForm.upsert({
-      where: { code_revision: { code: form.code, revision: 'DRAFT-1' } },
+      where: { code_revision: { code: form.code, revision } },
       update: {
         name: form.name,
         description,
@@ -72,7 +84,7 @@ async function main(): Promise<void> {
       create: {
         code: form.code,
         name: form.name,
-        revision: 'DRAFT-1',
+        revision,
         description,
         templateFilePath,
         schemaJson: {

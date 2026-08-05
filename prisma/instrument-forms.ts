@@ -26,9 +26,11 @@ export type InstrumentFieldKey = (typeof instrumentFieldOrder)[number];
 
 export interface InstrumentFormSeed {
   code: string;
+  revision?: string;
   name: string;
   sheet: string;
   workbook?: string;
+  identityMappingKey?: string;
   omitFields?: InstrumentFieldKey[];
   cellMappings?: Record<string, string[]>;
   needsTemplateReview?: boolean;
@@ -51,7 +53,7 @@ export interface WorksheetTableMapping {
 const generatedIdentityMappings = generatedIdentityMappingsJson as Record<string, Record<string, string[]>>;
 
 export function getInstrumentCellMappings(form: InstrumentFormSeed): Record<string, string[]> {
-  return { ...(generatedIdentityMappings[form.code] ?? {}), ...(form.cellMappings ?? {}) };
+  return { ...(generatedIdentityMappings[form.identityMappingKey ?? form.code] ?? {}), ...(form.cellMappings ?? {}) };
 }
 
 export function getWorksheetTableMappings(form: InstrumentFormSeed): WorksheetTableMapping[] {
@@ -267,7 +269,7 @@ export const instrumentForms: InstrumentFormSeed[] = [
     },
   },
   {
-    code: 'CCI-KAL-FOM-028', name: 'Timbangan', sheet: 'Timbangan 05', workbook: earlyWorkbookPath,
+    code: 'CCI-KAL-FOM-028', revision: '05', name: 'Timbangan', sheet: 'Timbangan 05', workbook: earlyWorkbookPath,
     measurementTables: [
       {
         id: 'eccentricity', title: 'A. Pengujian Pembebanan Tidak Terpusat (Eksentrisitas)', rowCount: 1,
@@ -288,7 +290,8 @@ export const instrumentForms: InstrumentFormSeed[] = [
     },
   },
   {
-    code: 'CCI-KAL-FOM-028-B', name: 'Timbangan (Varian 2)', sheet: 'TImbangan 04', workbook: earlyWorkbookPath, needsTemplateReview: true,
+    code: 'CCI-KAL-FOM-028', revision: '04', name: 'Timbangan', sheet: 'TImbangan 04', workbook: earlyWorkbookPath,
+    identityMappingKey: 'CCI-KAL-FOM-028-B',
     measurementTables: [
       {
         id: 'eccentricity', title: 'A. Pengujian Pembebanan Tidak Terpusat (Eksentrisitas)', rowCount: 1,
@@ -565,7 +568,6 @@ export const instrumentForms: InstrumentFormSeed[] = [
     code: 'CCI-KAL-FOM-152',
     name: 'Torque Gauge',
     sheet: 'Torque Gauge',
-    needsTemplateReview: true,
     measurementTables: [
       { id: 'clockwise', title: 'Clockwise', rowCount: 10, columns: [
         { key: 'indication', label: 'Penunjukan Alat' },

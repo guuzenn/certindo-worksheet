@@ -33,9 +33,11 @@ function InstrumentFormPicker({
   const sortedOptions = useMemo(() => sortInstrumentForms(options), [options]);
   const normalizedQuery = query.trim().toLocaleLowerCase('id');
   const filteredOptions = normalizedQuery
-    ? sortedOptions.filter((option) => `${option.code} ${option.name}`.toLocaleLowerCase('id').includes(normalizedQuery))
+    ? sortedOptions.filter((option) => `${option.code} ${option.revision} ${option.name}`.toLocaleLowerCase('id').includes(normalizedQuery))
     : sortedOptions;
-  const selectedLabel = selected ? `${selected.code} · ${selected.name}` : '';
+  const selectedLabel = selected
+    ? `${selected.code}${selected.revision !== 'DRAFT-1' ? ` Rev. ${selected.revision}` : ''} · ${selected.name}`
+    : '';
 
   return <div className="relative" onBlur={(event) => {
     if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
@@ -70,7 +72,7 @@ function InstrumentFormPicker({
         className={`flex w-full items-start gap-3 px-3.5 py-2.5 text-left text-sm hover:bg-[#EEF5FA] ${option.id === value ? 'bg-[#EEF5FA] text-[#1F5F8B]' : 'text-[#2D3A45]'}`}
         onClick={() => { onSelect(option); setIsOpen(false); }}
       >
-        <span className="min-w-32 font-semibold">{option.code}</span>
+        <span className="min-w-32 font-semibold">{option.code}{option.revision !== 'DRAFT-1' && <span className="mt-0.5 block text-xs font-normal text-slate-400">Rev. {option.revision}</span>}</span>
         <span>{option.name}</span>
       </button>)}
       {!filteredOptions.length && <p className="px-3.5 py-4 text-sm text-slate-400">Template tidak ditemukan.</p>}

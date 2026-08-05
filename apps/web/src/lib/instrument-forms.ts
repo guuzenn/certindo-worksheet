@@ -12,6 +12,7 @@ export function sortInstrumentForms(options: InstrumentFormOption[]): Instrument
     const numberDifference = instrumentFormNumber(left.code) - instrumentFormNumber(right.code);
     return numberDifference
       || left.code.localeCompare(right.code, 'id', { numeric: true })
+      || right.revision.localeCompare(left.revision, 'id', { numeric: true })
       || left.name.localeCompare(right.name, 'id');
   });
 }
