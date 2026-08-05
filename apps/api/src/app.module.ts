@@ -11,6 +11,8 @@ import { RequestLoggerMiddleware } from './common/request-logger.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 
+import { InstrumentFormsModule } from './instrument-forms/instrument-forms.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,6 +26,7 @@ import { UsersModule } from './users/users.module';
     CalibrationsModule,
     DashboardModule,
     HealthModule,
+    InstrumentFormsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }, Logger],
 })

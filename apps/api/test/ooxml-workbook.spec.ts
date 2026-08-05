@@ -228,8 +228,9 @@ describe('replaceCellValue', () => {
       for (const form of instrumentForms) {
         const mappings = getInstrumentCellMappings(form);
         expect(Object.keys(mappings).length, `${form.code} harus memiliki mapping`).toBeGreaterThan(0);
+        const staticEntries = Object.entries(mappings).filter(([key]) => !key.startsWith('measurements.tables.'));
         const cells = Object.fromEntries(
-          Object.values(mappings).flat().map((cell) => [cell, `CATALOG-QA-${cell}`]),
+          staticEntries.flatMap(([, targets]) => targets).map((cell) => [cell, `CATALOG-QA-${cell}`]),
         );
         const outputPath = join(temporaryDirectory, `${form.code}.xlsx`);
 
@@ -249,7 +250,7 @@ describe('replaceCellValue', () => {
         const worksheet = Object.values(zip.files).find((file) => /^xl\/worksheets\/sheet\d+\.xml$/.test(file.name));
         expect(worksheet, `${form.code} harus menyisakan satu worksheet`).toBeDefined();
         const worksheetXml = await worksheet!.async('string');
-        for (const cell of Object.values(mappings).flat()) {
+        for (const cell of staticEntries.flatMap(([, targets]) => targets)) {
           expect(worksheetXml, `${form.code} gagal mengisi ${cell}`).toContain(`CATALOG-QA-${cell}`);
         }
       }

@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useId, useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { createCalibrationSchema, type CreateCalibrationInput } from '@certindo/validation';
@@ -167,6 +167,9 @@ const defaults: CreateCalibrationInput = {
 
 export function CalibrationForm({ recordId }: { recordId?: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTemplateId = searchParams.get('templateId');
+
   const options = useQuery({ queryKey: ['calibration-options'], queryFn: () => apiRequest<CalibrationOptions>('/calibrations/options') });
   const record = useQuery({ queryKey: ['calibration', recordId], queryFn: () => apiRequest<CalibrationRecordDetail>(`/calibrations/${recordId}`), enabled: Boolean(recordId) });
   const form = useForm<CreateCalibrationInput>({ resolver: zodResolver(createCalibrationSchema), defaultValues: defaults });
@@ -194,6 +197,16 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
       },
     });
   }, [form, options.data, record.data]);
+
+  useEffect(() => {
+    if (!recordId && initialTemplateId && options.data?.instrumentForms) {
+      const match = options.data.instrumentForms.find((item) => item.id === initialTemplateId);
+      if (match && form.getValues('instrumentFormId') !== match.id) {
+        form.setValue('instrumentFormId', match.id, { shouldValidate: true });
+        applyInstrumentTemplate(match);
+      }
+    }
+  }, [initialTemplateId, options.data, recordId]);
 
   const save = useMutation({
     mutationFn: (input: CreateCalibrationInput) => recordId

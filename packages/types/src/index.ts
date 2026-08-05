@@ -141,3 +141,51 @@ export interface MeasurementTableDefinition {
   rowCount: number;
   columns: MeasurementTableColumnDefinition[];
 }
+
+export interface InstrumentFormSummaryItem {
+  id: string;
+  code: string;
+  name: string;
+  revision: string;
+  description: string | null;
+  sheet: string;
+  workbook: string;
+  needsTemplateReview: boolean;
+  fieldsCount: number;
+  tablesCount: number;
+  schemaJson: unknown;
+  updatedAt: string;
+}
+
+export interface InstrumentFormDetailItem {
+  id: string;
+  code: string;
+  name: string;
+  revision: string;
+  description: string | null;
+  templateFilePath: string;
+  schemaJson: {
+    version: number;
+    fields: InstrumentFieldKey[];
+    sections: Array<{ id: string; label: string }>;
+    additionalFields: DynamicFieldDefinition[];
+    measurementTables: MeasurementTableDefinition[];
+  };
+  mappingJson: {
+    version: number;
+    workbook: string;
+    sheet: string;
+    needsTemplateReview: boolean;
+    cells: Record<string, string[]>;
+    tables: Array<{
+      id: string;
+      firstRow: number;
+      templateRowCount: number;
+      columns: Record<string, string>;
+    }>;
+  };
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
