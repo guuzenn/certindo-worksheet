@@ -120,6 +120,8 @@ export interface CalibrationOptions {
     name: string;
     revision: string;
     mappingVerified: boolean;
+    instrumentNameDefault: string;
+    fieldLabels: Partial<Record<FormFieldLabelKey, string>>;
     fields: InstrumentFieldKey[];
     additionalFields: DynamicFieldDefinition[];
     measurementTables: MeasurementTableDefinition[];
@@ -132,7 +134,13 @@ export interface DynamicFieldDefinition {
   section?: string;
   inputType?: 'text' | 'date' | 'textarea';
   placeholder?: string;
+  defaultValue?: string;
+  readOnly?: boolean;
+  exportPrefix?: string;
+  exportSuffix?: string;
 }
+
+export type FormFieldLabelKey = InstrumentFieldKey | 'calibrationDate' | 'company';
 
 export interface MeasurementTableLeafColumnDefinition {
   key: string;
@@ -207,6 +215,8 @@ export interface InstrumentFormDetailItem {
     version: number;
     fields: InstrumentFieldKey[];
     sections: Array<{ id: string; label: string }>;
+    instrumentNameDefault?: string;
+    fieldLabels?: Partial<Record<FormFieldLabelKey, string>>;
     additionalFields: DynamicFieldDefinition[];
     measurementTables: MeasurementTableDefinition[];
   };

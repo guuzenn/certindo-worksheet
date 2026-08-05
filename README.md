@@ -115,7 +115,9 @@ Kombinasi `code` dan `revision` harus unik. Jika posisi sel berubah antar-revisi
 
 Tabel pengukuran schema V2 dapat memakai header bertingkat melalui `children`, sehingga susunan web mengikuti grup kolom pada workbook (misalnya Parameter, UUT 1–5, dan STD 1–5). `layout: 'record-grid'` menyajikan tabel yang lebar sebagai kartu input ringkas tanpa mengubah mapping Excel. `initialRowCount` mengatur jumlah baris awal di web, sedangkan `templateRowCount` mengatur area baris sumber. Gunakan `fixedRows`, `minRows`, dan `maxRows` untuk batas input, serta `preserveTemplateRows` jika area kosong resmi pada workbook harus dipertahankan.
 
-Field pendukung yang secara visual membentuk tabel tersendiri pada workbook dapat diberi `section`, misalnya `Standar yang Digunakan`. Section ditampilkan sebagai kartu terpisah di web, tetapi tetap diekspor ke alamat sel asli. Data tanda tangan dan approval tidak dimodelkan sebagai input teknisi.
+Field pendukung yang secara visual membentuk tabel tersendiri pada workbook dapat diberi `section`, misalnya `Data Standar`. Section ditampilkan sebagai kartu terpisah di web, tetapi tetap diekspor ke alamat sel asli. Data tanda tangan dan approval tidak dimodelkan sebagai input teknisi.
+
+Label field dasar dapat disesuaikan per template melalui `fieldLabels`, sedangkan `instrumentNameDefault` mengatur nilai awal nama alat. Field tambahan mendukung `defaultValue` untuk nilai bawaan workbook dan `exportPrefix`/`exportSuffix` untuk format seperti satuan di dalam tanda kurung. Setiap field yang dapat diisi pada workbook wajib memiliki input web atau sumber data aplikasi yang eksplisit serta mapping sel yang diuji.
 
 Ekspor Excel hanya diizinkan jika metadata form memiliki `mappingVerified: true`. Template yang belum diverifikasi tetap tersedia untuk penyimpanan draft, tetapi UI menampilkan peringatan dan API menolak ekspor. Tandai mapping sebagai terverifikasi hanya setelah header, seluruh leaf column, jumlah baris, dan alamat selnya dicocokkan dengan workbook sumber serta dilindungi test ekspor.
 

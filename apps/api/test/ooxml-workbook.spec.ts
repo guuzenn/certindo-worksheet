@@ -121,7 +121,12 @@ describe('replaceCellValue', () => {
     const general = instrumentForms.find((form) => form.code === 'CCI-KAL-FOM-0XX');
     expect(general?.cellMappings).toBeDefined();
     const cells = Object.fromEntries(
-      ['A18', 'C18', 'D18', 'E18', 'F18', 'G18', 'H18', 'I18', 'J18', 'K18', 'L18', 'C35', 'C36', 'C37', 'C38']
+      [
+        'C7', 'H7', 'C8', 'H8', 'C9', 'H9', 'C10', 'H10', 'C11', 'H11', 'C12',
+        'C13', 'D13', 'H13', 'J13', 'C14', 'D14', 'H14', 'J14',
+        'A18', 'C18', 'D18', 'E18', 'F18', 'G18', 'H18', 'I18', 'J18', 'K18', 'L18',
+        'C34', 'C35', 'C36', 'C37', 'C38',
+      ]
         .map((cell) => [cell, `GENERAL-QA-${cell}`]),
     );
     const temporaryDirectory = await mkdtemp(join(tmpdir(), 'certindo-general-'));
@@ -139,7 +144,7 @@ describe('replaceCellValue', () => {
       await expectSingleWorksheet(zip, 'Lembar Kerja Umum');
       const worksheet = Object.values(zip.files).find((file) => /^xl\/worksheets\/sheet\d+\.xml$/.test(file.name));
       const worksheetXml = await worksheet!.async('string');
-      for (const cell of ['A18', 'C18', 'G18', 'H18', 'L18', 'C35', 'C36', 'C37', 'C38']) {
+      for (const cell of ['C7', 'H7', 'C8', 'H8', 'H9', 'H10', 'H11', 'H13', 'J13', 'H14', 'J14', 'A18', 'C18', 'G18', 'H18', 'L18', 'C34', 'C35', 'C36', 'C37', 'C38']) {
         expect(worksheetXml).toContain(`GENERAL-QA-${cell}`);
       }
       expect(worksheetXml).toContain('<row r="31"');

@@ -32,9 +32,21 @@ export interface InstrumentFormSeed {
   workbook?: string;
   identityMappingKey?: string;
   omitFields?: InstrumentFieldKey[];
+  instrumentNameDefault?: string;
+  fieldLabels?: Partial<Record<InstrumentFieldKey | 'calibrationDate' | 'company', string>>;
   cellMappings?: Record<string, string[]>;
   mappingVerified?: boolean;
-  additionalFields?: Array<{ key: string; label: string; section?: string; inputType?: 'text' | 'date' | 'textarea'; placeholder?: string }>;
+  additionalFields?: Array<{
+    key: string;
+    label: string;
+    section?: string;
+    inputType?: 'text' | 'date' | 'textarea';
+    placeholder?: string;
+    defaultValue?: string;
+    readOnly?: boolean;
+    exportPrefix?: string;
+    exportSuffix?: string;
+  }>;
   measurementTables?: MeasurementTableSeed[];
 }
 
@@ -294,11 +306,34 @@ export const instrumentForms: InstrumentFormSeed[] = [
   {
     code: 'CCI-KAL-FOM-0XX', revision: '02', name: 'Lembar Kerja Umum', sheet: 'Lembar Kerja Umum', workbook: earlyWorkbookPath,
     mappingVerified: true,
+    instrumentNameDefault: '',
+    fieldLabels: {
+      calibrationDate: 'Tanggal Uji',
+      company: 'Nama Pemilik/Perusahaan',
+      certificateNumber: 'No. Sertifikat',
+      name: 'Nama Alat/Bahan',
+      manufacturer: 'Merk',
+      model: 'Type / Model / Kode',
+      serialNumber: 'No. Seri / No. Lot / Batch',
+      identityNumber: 'Identitas',
+      capacity: 'Kapasitas',
+      resolution: 'Resolusi',
+      calibrationLocation: 'Lokasi Uji',
+      ambientTemperatureStart: 'Suhu Ruangan Awal',
+      ambientTemperatureEnd: 'Suhu Ruangan Akhir',
+      ambientHumidityStart: 'Kelembapan Ruangan Awal',
+      ambientHumidityEnd: 'Kelembapan Ruangan Akhir',
+    },
     additionalFields: [
-      { key: 'standardManufacturer', label: 'Merk', section: 'Standar yang Digunakan' },
-      { key: 'standardSerialNumber', label: 'No. Seri / No. Lot', section: 'Standar yang Digunakan' },
-      { key: 'standardTraceability', label: 'Tertelusur ke SI', section: 'Standar yang Digunakan' },
-      { key: 'standardUncertainty', label: 'Ketidakpastian', section: 'Standar yang Digunakan' },
+      { key: 'testMethod', label: 'Metode Uji', defaultValue: 'CCI-KAL-WI-037' },
+      { key: 'additionalInformation', label: 'Keterangan Tambahan' },
+      { key: 'capacityUnit', label: 'Satuan Kapasitas', placeholder: 'Contoh: kg', exportPrefix: '(', exportSuffix: ')' },
+      { key: 'resolutionUnit', label: 'Satuan Resolusi', placeholder: 'Contoh: g', exportPrefix: '(', exportSuffix: ')' },
+      { key: 'standardName', label: 'Standar yang digunakan', section: 'Data Standar' },
+      { key: 'standardManufacturer', label: 'Merk', section: 'Data Standar' },
+      { key: 'standardSerialNumber', label: 'No. Seri / No. Lot', section: 'Data Standar' },
+      { key: 'standardTraceability', label: 'Tertelusur ke SI', section: 'Data Standar' },
+      { key: 'standardUncertainty', label: 'Ketidakpastian', section: 'Data Standar' },
     ],
     measurementTables: [{
       id: 'measurements',
@@ -324,6 +359,25 @@ export const instrumentForms: InstrumentFormSeed[] = [
       ],
     }],
     cellMappings: {
+      calibrationDate: ['H7'],
+      calibrationLocation: ['H8'],
+      'instrument.name': ['C8'],
+      'instrument.manufacturer': ['C9'],
+      'instrument.model': ['C10'],
+      'instrument.serialNumber': ['C11'],
+      'instrument.identityNumber': ['C12'],
+      'instrument.capacity': ['C13'],
+      'instrument.resolution': ['C14'],
+      'environment.temperatureStart': ['H13'],
+      'environment.temperatureEnd': ['J13'],
+      'environment.humidityStart': ['H14'],
+      'environment.humidityEnd': ['J14'],
+      'company.name': ['H10'],
+      'additionalFields.testMethod': ['H9'],
+      'additionalFields.additionalInformation': ['H11'],
+      'additionalFields.capacityUnit': ['D13'],
+      'additionalFields.resolutionUnit': ['D14'],
+      'additionalFields.standardName': ['C34'],
       'additionalFields.standardManufacturer': ['C35'],
       'additionalFields.standardSerialNumber': ['C36'],
       'additionalFields.standardTraceability': ['C37'],

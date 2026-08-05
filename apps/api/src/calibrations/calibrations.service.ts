@@ -5,6 +5,7 @@ import type { CalibrationStatusTransitionInput, CreateCalibrationInput, UpdateCa
 import {
   instrumentFieldKeys,
   type DynamicFieldDefinition,
+  type FormFieldLabelKey,
   type InstrumentFieldKey,
   type MeasurementTableColumnDefinition,
   type MeasurementTableDefinition,
@@ -74,7 +75,25 @@ export class CalibrationsService {
         const measurementTables = 'measurementTables' in schema && Array.isArray(schema.measurementTables)
           ? schema.measurementTables.filter(isMeasurementTableDefinition)
           : [];
-        return { ...form, mappingVerified: mapping.mappingVerified === true, fields, additionalFields, measurementTables };
+        const rawFieldLabels = asObject(schema.fieldLabels);
+        const fieldLabels = Object.fromEntries(Object.entries(rawFieldLabels).filter(
+          (entry): entry is [FormFieldLabelKey, string] => (
+            (entry[0] === 'calibrationDate' || entry[0] === 'company' || instrumentFieldKeys.includes(entry[0] as InstrumentFieldKey))
+            && typeof entry[1] === 'string'
+          ),
+        ));
+        const instrumentNameDefault = typeof schema.instrumentNameDefault === 'string'
+          ? schema.instrumentNameDefault
+          : form.name;
+        return {
+          ...form,
+          mappingVerified: mapping.mappingVerified === true,
+          instrumentNameDefault,
+          fieldLabels,
+          fields,
+          additionalFields,
+          measurementTables,
+        };
       }),
     };
   }
@@ -173,6 +192,11 @@ export class CalibrationsService {
     }
     const sheet = typeof mapping.sheet === 'string' ? mapping.sheet : null;
     const rawCells = asObject(mapping.cells);
+    const formSchema = asObject(record.instrumentForm.schemaJson);
+    const additionalFieldDefinitions = Array.isArray(formSchema.additionalFields)
+      ? formSchema.additionalFields.filter(isDynamicFieldDefinition)
+      : [];
+    const additionalFieldDefinitionsByKey = new Map(additionalFieldDefinitions.map((field) => [field.key, field]));
     const worksheetTables = parseWorksheetTableMappings(mapping.tables);
     if (!sheet || !Object.keys(rawCells).length) {
       throw new BadRequestException('Mapping Excel untuk template ini belum tersedia');
@@ -217,11 +241,15 @@ export class CalibrationsService {
       const rawValue = readPath(values, dataPath);
       const cellValue = toCellValue(rawValue);
       if (!cellValue) continue;
-      const value = dataPath.startsWith('environment.temperature')
+      let value = dataPath.startsWith('environment.temperature')
         ? `${cellValue} °C`
         : dataPath.startsWith('environment.humidity')
           ? `${cellValue} %RH`
           : cellValue;
+      if (dataPath.startsWith('additionalFields.')) {
+        const definition = additionalFieldDefinitionsByKey.get(dataPath.slice('additionalFields.'.length));
+        value = formatDynamicFieldValue(value, definition);
+      }
       for (const target of rawTargets) {
         if (typeof target === 'string') {
           cellsToWrite[shiftCellReference(target, cellShiftLayouts)] = value;
@@ -322,6 +350,13 @@ export function worksheetTableRenderedRowCount(
   dataRowCount: number,
 ): number {
   return table.preserveTemplateRows ? table.templateRowCount : Math.max(1, dataRowCount);
+}
+
+export function formatDynamicFieldValue(
+  value: string,
+  definition?: Pick<DynamicFieldDefinition, 'exportPrefix' | 'exportSuffix'>,
+): string {
+  return `${definition?.exportPrefix ?? ''}${value}${definition?.exportSuffix ?? ''}`;
 }
 
 function legacyWorksheetRows(measurements: Record<string, unknown>, tableId: string): unknown[] {

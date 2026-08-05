@@ -5,6 +5,7 @@ import {
   isMeasurementTableLeafColumn,
   type CalibrationOptions,
   type CalibrationRecordDetail,
+  type FormFieldLabelKey,
   type MeasurementTableDefinition,
   type MeasurementTableLeafColumnDefinition,
 } from '@certindo/types';
@@ -194,7 +195,16 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
   const form = useForm<CreateCalibrationInput>({ resolver: zodResolver(createCalibrationSchema), defaultValues: defaults });
 
   useEffect(() => {
-    if (record.data) form.reset({
+    if (record.data) {
+      const recordTemplate = options.data?.instrumentForms.find((item) => item.id === record.data.instrumentForm.id);
+      const savedAdditionalFields = record.data.formDataJson.additionalFields ?? {};
+      const normalizedAdditionalFields = recordTemplate
+        ? Object.fromEntries(recordTemplate.additionalFields.map((field) => [
+          field.key,
+          savedAdditionalFields[field.key] ?? field.defaultValue ?? '',
+        ]))
+        : savedAdditionalFields;
+      form.reset({
       companyId: record.data.company.id,
       instrumentFormId: record.data.instrumentForm.id,
       certificateNumber: record.data.certificateNumber?.startsWith(certificatePrefix) ? record.data.certificateNumber : `${certificatePrefix}${record.data.certificateNumber ?? ''}`,
@@ -212,9 +222,10 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
             legacyMeasurementTables(record.data.formDataJson.measurements),
           ),
         },
-        additionalFields: record.data.formDataJson.additionalFields ?? {},
+        additionalFields: normalizedAdditionalFields,
       },
-    });
+      });
+    }
   }, [form, options.data, record.data]);
 
   useEffect(() => {
@@ -251,8 +262,12 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
   const watchedMeasurementTables = useWatch({ control: form.control, name: 'formData.measurements.tables' }) ?? {};
   const isReadOnly = Boolean(recordId && record.data?.status !== 'DRAFT');
 
+  function fieldLabel(key: FormFieldLabelKey, fallback: string): string {
+    return selectedTemplate?.fieldLabels[key] ?? fallback;
+  }
+
   function applyInstrumentTemplate(selected: InstrumentFormOption): void {
-    form.setValue('formData.instrument.name', selected.name, { shouldValidate: true, shouldDirty: true });
+    form.setValue('formData.instrument.name', selected.instrumentNameDefault, { shouldValidate: true, shouldDirty: true });
     if (!selected.fields.includes('identityNumber')) form.setValue('formData.instrument.identityNumber', '');
     if (!selected.fields.includes('capacity')) form.setValue('formData.instrument.capacity', '');
     if (!selected.fields.includes('capacityMin')) form.setValue('formData.instrument.capacityMin', '');
@@ -265,7 +280,7 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
     if (!selected.fields.includes('ambientHumidityStart')) form.setValue('formData.environment.humidityStart', '');
     if (!selected.fields.includes('ambientHumidityMiddle')) form.setValue('formData.environment.humidityMiddle', '');
     if (!selected.fields.includes('ambientHumidityEnd')) form.setValue('formData.environment.humidityEnd', '');
-    form.setValue('formData.additionalFields', Object.fromEntries(selected.additionalFields.map((field) => [field.key, ''])));
+    form.setValue('formData.additionalFields', Object.fromEntries(selected.additionalFields.map((field) => [field.key, field.defaultValue ?? ''])));
     form.setValue('formData.measurements.tables', normalizeMeasurementTables(selected.measurementTables, undefined));
   }
 
@@ -316,25 +331,25 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
       {isReadOnly && record.data && <div className="rounded-[10px] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"><span className="font-semibold">Form hanya dapat dilihat.</span> {record.data.status === 'UNDER_REVIEW' ? 'Rekaman sedang dalam pemeriksaan.' : 'Rekaman yang telah dikonfirmasi atau diselesaikan tidak dapat diubah.'}{record.data.workflowNote && <span className="mt-1 block">Catatan workflow: {record.data.workflowNote}</span>}</div>}
       <fieldset className="space-y-6 disabled:opacity-75" disabled={isReadOnly}>
       <Card><CardHeader className="border-b"><CardTitle>Informasi Rekaman</CardTitle><p className="text-sm text-slate-400">Pilih perusahaan dan jenis formulir yang akan digunakan.</p></CardHeader><CardContent className="grid gap-5 pt-6 md:grid-cols-2">
-        <label className={inputClass}>Perusahaan<select className="h-11 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 text-sm font-normal outline-none focus:border-[#1F5F8B]" {...form.register('companyId')}><option value="">Pilih perusahaan</option>{options.data?.companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select>{errors.companyId && <span className="block text-xs font-normal text-[#D71920]">{errors.companyId.message}</span>}</label>
+        <label className={inputClass}>{fieldLabel('company', 'Perusahaan')}<select className="h-11 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 text-sm font-normal outline-none focus:border-[#1F5F8B]" {...form.register('companyId')}><option value="">Pilih perusahaan</option>{options.data?.companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select>{errors.companyId && <span className="block text-xs font-normal text-[#D71920]">{errors.companyId.message}</span>}</label>
         <label className={inputClass}>Template instrumen<Controller control={form.control} name="instrumentFormId" render={({ field }) => <InstrumentFormPicker disabled={Boolean(recordId)} options={options.data?.instrumentForms ?? []} value={field.value} onSelect={(selected) => { field.onChange(selected.id); applyInstrumentTemplate(selected); }} />} />{errors.instrumentFormId && <span className="block text-xs font-normal text-[#D71920]">{errors.instrumentFormId.message}</span>}</label>
-        <label className={inputClass}>Tanggal kalibrasi<Input type="date" {...form.register('formData.calibrationDate')} />{errors.formData?.calibrationDate && <span className="block text-xs font-normal text-[#D71920]">{errors.formData.calibrationDate.message}</span>}</label>
-        {visibleFields.has('calibrationLocation') && <label className={inputClass}>Lokasi Kalibrasi<Input placeholder="Lokasi pelaksanaan kalibrasi" {...form.register('formData.calibrationLocation')} /></label>}
+        <label className={inputClass}>{fieldLabel('calibrationDate', 'Tanggal kalibrasi')}<Input type="date" {...form.register('formData.calibrationDate')} />{errors.formData?.calibrationDate && <span className="block text-xs font-normal text-[#D71920]">{errors.formData.calibrationDate.message}</span>}</label>
+        {visibleFields.has('calibrationLocation') && <label className={inputClass}>{fieldLabel('calibrationLocation', 'Lokasi Kalibrasi')}<Input placeholder="Lokasi pelaksanaan kalibrasi" {...form.register('formData.calibrationLocation')} /></label>}
       </CardContent></Card>
       <Card><CardHeader className="border-b"><CardTitle>Identitas Alat</CardTitle><p className="text-sm text-slate-400">Field dasar ini disimpan netral dan nantinya dipetakan ke sheet Excel sesuai jenis alat.</p></CardHeader><CardContent className="grid gap-5 pt-6 md:grid-cols-2">
         {!selectedTemplate && <p className="text-sm font-normal text-slate-400 md:col-span-2">Pilih template instrumen untuk menampilkan field yang sesuai dengan lembar kerja.</p>}
-        {visibleFields.has('certificateNumber') && <label className={inputClass}>1. No. Sertifikat<Controller control={form.control} name="certificateNumber" render={({ field }) => <div className="flex h-11 overflow-hidden rounded-[10px] border border-[#DDE5EA] bg-white focus-within:border-[#1F5F8B]"><span className="flex items-center border-r border-[#DDE5EA] bg-[#F8FAFB] px-3.5 text-sm font-semibold text-[#526575]">{certificatePrefix}</span><input className="min-w-0 flex-1 px-3.5 text-sm font-normal outline-none" placeholder="Nomor sertifikat" value={field.value.startsWith(certificatePrefix) ? field.value.slice(certificatePrefix.length) : field.value} onBlur={field.onBlur} onChange={(event) => field.onChange(`${certificatePrefix}${event.target.value.replace(/^CTD\/CAL\//i, '')}`)} ref={field.ref} /></div>} />{errors.certificateNumber && <span className="block text-xs font-normal text-[#D71920]">{errors.certificateNumber.message}</span>}</label>}
-        {visibleFields.has('name') && <label className={inputClass}>2. Nama Alat<Input placeholder="Contoh: Digital Torque Gauge" {...form.register('formData.instrument.name')} />{errors.formData?.instrument?.name && <span className="block text-xs font-normal text-[#D71920]">{errors.formData.instrument.name.message}</span>}</label>}
-        {visibleFields.has('manufacturer') && <label className={inputClass}>3. Merk<Input {...form.register('formData.instrument.manufacturer')} /></label>}
-        {visibleFields.has('model') && <label className={inputClass}>4. Type/Model<Input {...form.register('formData.instrument.model')} /></label>}
-        {visibleFields.has('serialNumber') && <label className={inputClass}>5. No. Seri<Input placeholder="Nomor seri alat" {...form.register('formData.instrument.serialNumber')} />{errors.formData?.instrument?.serialNumber && <span className="block text-xs font-normal text-[#D71920]">{errors.formData.instrument.serialNumber.message}</span>}</label>}
-        {visibleFields.has('identityNumber') && <label className={inputClass}>6. No. Identitas<Input placeholder="Nomor identitas alat" {...form.register('formData.instrument.identityNumber')} /></label>}
-        {visibleFields.has('capacity') && <label className={inputClass}>7. Kapasitas<Input placeholder="Contoh: 10 N·m" {...form.register('formData.instrument.capacity')} /></label>}
+        {visibleFields.has('certificateNumber') && <label className={inputClass}>1. {fieldLabel('certificateNumber', 'No. Sertifikat')}<Controller control={form.control} name="certificateNumber" render={({ field }) => <div className="flex h-11 overflow-hidden rounded-[10px] border border-[#DDE5EA] bg-white focus-within:border-[#1F5F8B]"><span className="flex items-center border-r border-[#DDE5EA] bg-[#F8FAFB] px-3.5 text-sm font-semibold text-[#526575]">{certificatePrefix}</span><input className="min-w-0 flex-1 px-3.5 text-sm font-normal outline-none" placeholder="Nomor sertifikat" value={field.value.startsWith(certificatePrefix) ? field.value.slice(certificatePrefix.length) : field.value} onBlur={field.onBlur} onChange={(event) => field.onChange(`${certificatePrefix}${event.target.value.replace(/^CTD\/CAL\//i, '')}`)} ref={field.ref} /></div>} />{errors.certificateNumber && <span className="block text-xs font-normal text-[#D71920]">{errors.certificateNumber.message}</span>}</label>}
+        {visibleFields.has('name') && <label className={inputClass}>2. {fieldLabel('name', 'Nama Alat')}<Input placeholder="Nama alat atau bahan" {...form.register('formData.instrument.name')} />{errors.formData?.instrument?.name && <span className="block text-xs font-normal text-[#D71920]">{errors.formData.instrument.name.message}</span>}</label>}
+        {visibleFields.has('manufacturer') && <label className={inputClass}>3. {fieldLabel('manufacturer', 'Merk')}<Input {...form.register('formData.instrument.manufacturer')} /></label>}
+        {visibleFields.has('model') && <label className={inputClass}>4. {fieldLabel('model', 'Type/Model')}<Input {...form.register('formData.instrument.model')} /></label>}
+        {visibleFields.has('serialNumber') && <label className={inputClass}>5. {fieldLabel('serialNumber', 'No. Seri')}<Input placeholder="Nomor seri alat" {...form.register('formData.instrument.serialNumber')} />{errors.formData?.instrument?.serialNumber && <span className="block text-xs font-normal text-[#D71920]">{errors.formData.instrument.serialNumber.message}</span>}</label>}
+        {visibleFields.has('identityNumber') && <label className={inputClass}>6. {fieldLabel('identityNumber', 'No. Identitas')}<Input placeholder="Nomor identitas alat" {...form.register('formData.instrument.identityNumber')} /></label>}
+        {visibleFields.has('capacity') && <label className={inputClass}>7. {fieldLabel('capacity', 'Kapasitas')}<Input placeholder="Nilai kapasitas" {...form.register('formData.instrument.capacity')} /></label>}
         {visibleFields.has('capacityMin') && <label className={inputClass}>7a. Kapasitas Min.<Input {...form.register('formData.instrument.capacityMin')} /></label>}
         {visibleFields.has('capacityMax') && <label className={inputClass}>7b. Kapasitas Max.<Input {...form.register('formData.instrument.capacityMax')} /></label>}
-        {visibleFields.has('resolution') && <label className={inputClass}>8. Resolusi<Input placeholder="Contoh: 0,01 N·m" {...form.register('formData.instrument.resolution')} /></label>}
-        {inlineAdditionalFields.map((field) => <label key={field.key} className={`${inputClass} ${field.inputType === 'textarea' ? 'md:col-span-2' : ''}`}>{field.label}{field.inputType === 'textarea' ? <textarea className="min-h-28 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 py-3 text-sm font-normal outline-none focus:border-[#1F5F8B]" placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} /> : <Input type={field.inputType === 'date' ? 'date' : 'text'} placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} />}</label>)}
-        {(visibleFields.has('ambientTemperatureStart') || visibleFields.has('ambientTemperatureMiddle') || visibleFields.has('ambientTemperatureEnd') || visibleFields.has('ambientHumidityStart') || visibleFields.has('ambientHumidityMiddle') || visibleFields.has('ambientHumidityEnd')) && <div className="border-t border-[#E7EDF1] pt-5 md:col-span-2"><h3 className="text-sm font-semibold text-[#2D3A45]">Kondisi Ruangan</h3><div className="mt-4 grid gap-5 md:grid-cols-3">{visibleFields.has('ambientTemperatureStart') && <label className={inputClass}>Temperatur Awal (°C)<Input inputMode="decimal" {...form.register('formData.environment.temperatureStart')} /></label>}{visibleFields.has('ambientTemperatureMiddle') && <label className={inputClass}>Temperatur Tengah (°C)<Input inputMode="decimal" {...form.register('formData.environment.temperatureMiddle')} /></label>}{visibleFields.has('ambientTemperatureEnd') && <label className={inputClass}>Temperatur Akhir (°C)<Input inputMode="decimal" {...form.register('formData.environment.temperatureEnd')} /></label>}{visibleFields.has('ambientHumidityStart') && <label className={inputClass}>Kelembaban Awal (%RH)<Input inputMode="decimal" {...form.register('formData.environment.humidityStart')} /></label>}{visibleFields.has('ambientHumidityMiddle') && <label className={inputClass}>Kelembaban Tengah (%RH)<Input inputMode="decimal" {...form.register('formData.environment.humidityMiddle')} /></label>}{visibleFields.has('ambientHumidityEnd') && <label className={inputClass}>Kelembaban Akhir (%RH)<Input inputMode="decimal" {...form.register('formData.environment.humidityEnd')} /></label>}</div></div>}
+        {visibleFields.has('resolution') && <label className={inputClass}>8. {fieldLabel('resolution', 'Resolusi')}<Input placeholder="Nilai resolusi" {...form.register('formData.instrument.resolution')} /></label>}
+        {inlineAdditionalFields.map((field) => <label key={field.key} className={`${inputClass} ${field.inputType === 'textarea' ? 'md:col-span-2' : ''}`}>{field.label}{field.inputType === 'textarea' ? <textarea readOnly={field.readOnly} className="min-h-28 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 py-3 text-sm font-normal outline-none focus:border-[#1F5F8B] read-only:bg-slate-50" placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} /> : <Input readOnly={field.readOnly} type={field.inputType === 'date' ? 'date' : 'text'} placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} />}</label>)}
+        {(visibleFields.has('ambientTemperatureStart') || visibleFields.has('ambientTemperatureMiddle') || visibleFields.has('ambientTemperatureEnd') || visibleFields.has('ambientHumidityStart') || visibleFields.has('ambientHumidityMiddle') || visibleFields.has('ambientHumidityEnd')) && <div className="border-t border-[#E7EDF1] pt-5 md:col-span-2"><h3 className="text-sm font-semibold text-[#2D3A45]">Kondisi Lingkungan</h3><div className="mt-4 grid gap-5 md:grid-cols-2">{visibleFields.has('ambientTemperatureStart') && <label className={inputClass}>{fieldLabel('ambientTemperatureStart', 'Temperatur Awal')} (°C)<Input inputMode="decimal" {...form.register('formData.environment.temperatureStart')} /></label>}{visibleFields.has('ambientTemperatureMiddle') && <label className={inputClass}>{fieldLabel('ambientTemperatureMiddle', 'Temperatur Tengah')} (°C)<Input inputMode="decimal" {...form.register('formData.environment.temperatureMiddle')} /></label>}{visibleFields.has('ambientTemperatureEnd') && <label className={inputClass}>{fieldLabel('ambientTemperatureEnd', 'Temperatur Akhir')} (°C)<Input inputMode="decimal" {...form.register('formData.environment.temperatureEnd')} /></label>}{visibleFields.has('ambientHumidityStart') && <label className={inputClass}>{fieldLabel('ambientHumidityStart', 'Kelembapan Awal')} (%RH)<Input inputMode="decimal" {...form.register('formData.environment.humidityStart')} /></label>}{visibleFields.has('ambientHumidityMiddle') && <label className={inputClass}>{fieldLabel('ambientHumidityMiddle', 'Kelembapan Tengah')} (%RH)<Input inputMode="decimal" {...form.register('formData.environment.humidityMiddle')} /></label>}{visibleFields.has('ambientHumidityEnd') && <label className={inputClass}>{fieldLabel('ambientHumidityEnd', 'Kelembapan Akhir')} (%RH)<Input inputMode="decimal" {...form.register('formData.environment.humidityEnd')} /></label>}</div></div>}
         <label className={`${inputClass} md:col-span-2`}>Catatan<textarea className="min-h-28 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 py-3 text-sm font-normal outline-none focus:border-[#1F5F8B]" {...form.register('formData.notes')} /></label>
       </CardContent></Card>
       {selectedTemplate?.measurementTables.map((table) => {
@@ -364,7 +379,7 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
         </CardContent>
       </Card>;
       })}
-      {additionalFieldSections.map(([section, fields]) => <Card key={section}><CardHeader className="border-b"><CardTitle>{section}</CardTitle><p className="text-sm text-slate-400">Data pendukung ini dipetakan ke tabel yang sama pada workbook sumber.</p></CardHeader><CardContent className="grid gap-5 pt-6 md:grid-cols-2">{fields.map((field) => <label key={field.key} className={`${inputClass} ${field.inputType === 'textarea' ? 'md:col-span-2' : ''}`}>{field.label}{field.inputType === 'textarea' ? <textarea className="min-h-28 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 py-3 text-sm font-normal outline-none focus:border-[#1F5F8B]" placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} /> : <Input type={field.inputType === 'date' ? 'date' : 'text'} placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} />}</label>)}</CardContent></Card>)}
+      {additionalFieldSections.map(([section, fields]) => <Card key={section}><CardHeader className="border-b"><CardTitle>{section}</CardTitle><p className="text-sm text-slate-400">Semua kolom pada bagian ini dipetakan ke workbook sumber.</p></CardHeader><CardContent className="grid gap-5 pt-6 md:grid-cols-2">{fields.map((field) => <label key={field.key} className={`${inputClass} ${field.inputType === 'textarea' ? 'md:col-span-2' : ''}`}>{field.label}{field.inputType === 'textarea' ? <textarea readOnly={field.readOnly} className="min-h-28 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 py-3 text-sm font-normal outline-none focus:border-[#1F5F8B] read-only:bg-slate-50" placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} /> : <Input readOnly={field.readOnly} type={field.inputType === 'date' ? 'date' : 'text'} placeholder={field.placeholder} {...form.register(`formData.additionalFields.${field.key}`)} />}</label>)}</CardContent></Card>)}
       </fieldset>
     </form>
   );
