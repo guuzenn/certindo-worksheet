@@ -1,6 +1,10 @@
 'use client';
 
-import type { InstrumentFormDetailItem, InstrumentFormSummaryItem } from '@certindo/types';
+import {
+  getMeasurementTableLeafColumns,
+  type InstrumentFormDetailItem,
+  type InstrumentFormSummaryItem,
+} from '@certindo/types';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@certindo/ui';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -48,7 +52,7 @@ export function InstrumentFormsView() {
 
   const stats = useMemo(() => {
     const total = forms.length;
-    const reviewNeeded = forms.filter((f) => f.needsTemplateReview).length;
+    const reviewNeeded = forms.filter((form) => !form.mappingVerified).length;
     const ready = total - reviewNeeded;
     const earlyCount = forms.filter((f) => f.workbook.includes('0X-94')).length;
     const currentCount = forms.filter((f) => f.workbook.includes('095-163')).length;
@@ -113,11 +117,11 @@ export function InstrumentFormsView() {
         <Card>
           <CardContent className="flex items-start justify-between p-5">
             <div>
-              <p className="text-sm font-medium text-slate-500">Peninjauan Template</p>
+              <p className="text-sm font-medium text-slate-500">Mapping Belum Diverifikasi</p>
               <p className="mt-2 font-heading text-3xl font-extrabold text-[#183247]">
                 {catalogQuery.isLoading ? '—' : stats.reviewNeeded}
               </p>
-              <p className="mt-1 text-xs text-slate-400">Perlu tinjauan metadata</p>
+              <p className="mt-1 text-xs text-slate-400">Belum dicocokkan dengan workbook sumber</p>
             </div>
             <span className="grid size-10 place-items-center rounded-[10px] bg-amber-50 text-amber-700">
               <AlertTriangle className="size-5" />
@@ -207,8 +211,8 @@ export function InstrumentFormsView() {
                     <span className="inline-block rounded-md bg-[#EEF5FA] px-2.5 py-1 text-xs font-bold text-[#1F5F8B]">
                       {form.code}{form.revision !== 'DRAFT-1' ? ` · Rev. ${form.revision}` : ''}
                     </span>
-                    {form.needsTemplateReview ? (
-                      <Badge variant="warning">Tinjau Template</Badge>
+                    {!form.mappingVerified ? (
+                      <Badge variant="warning">Belum Diverifikasi</Badge>
                     ) : (
                       <Badge variant="success">Siap Ekspor</Badge>
                     )}
@@ -313,9 +317,9 @@ export function InstrumentFormsView() {
                     <span className="font-semibold text-slate-600">{selectedForm.revision}</span>
                   </div>
                   <div>
-                    <span className="block text-slate-400">Status Peninjauan</span>
-                    {selectedForm.mappingJson.needsTemplateReview ? (
-                      <span className="font-semibold text-amber-700">Perlu Peninjauan Metadata</span>
+                    <span className="block text-slate-400">Status Mapping</span>
+                    {!selectedForm.mappingJson.mappingVerified ? (
+                      <span className="font-semibold text-amber-700">Belum Diverifikasi ke Workbook</span>
                     ) : (
                       <span className="font-semibold text-emerald-700">Siap Ekspor Workbook</span>
                     )}
@@ -365,7 +369,7 @@ export function InstrumentFormsView() {
                         <span className="text-[11px] text-slate-400">ID: {table.id}</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5 pt-1">
-                        {table.columns.map((col) => (
+                        {getMeasurementTableLeafColumns(table.columns).map((col) => (
                           <span key={col.key} className="rounded bg-[#EEF5FA] px-2 py-0.5 text-[11px] font-semibold text-[#1F5F8B]">
                             {col.label}
                           </span>

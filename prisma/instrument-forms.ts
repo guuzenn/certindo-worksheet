@@ -33,14 +33,38 @@ export interface InstrumentFormSeed {
   identityMappingKey?: string;
   omitFields?: InstrumentFieldKey[];
   cellMappings?: Record<string, string[]>;
-  needsTemplateReview?: boolean;
+  mappingVerified?: boolean;
   additionalFields?: Array<{ key: string; label: string; inputType?: 'text' | 'date' | 'textarea'; placeholder?: string }>;
-  measurementTables?: Array<{
-    id: string;
-    title: string;
-    rowCount: number;
-    columns: Array<{ key: string; label: string; lockedValues?: string[] }>;
-  }>;
+  measurementTables?: MeasurementTableSeed[];
+}
+
+export interface MeasurementTableLeafColumnSeed {
+  key: string;
+  label: string;
+  lockedValues?: string[];
+  unit?: string;
+  inputType?: 'text' | 'number' | 'select';
+  options?: string[];
+}
+
+export interface MeasurementTableColumnGroupSeed {
+  label: string;
+  children: MeasurementTableColumnSeed[];
+}
+
+export type MeasurementTableColumnSeed = MeasurementTableLeafColumnSeed | MeasurementTableColumnGroupSeed;
+
+export interface MeasurementTableSeed {
+  id: string;
+  title: string;
+  description?: string;
+  rowCount: number;
+  initialRowCount?: number;
+  templateRowCount?: number;
+  minRows?: number;
+  maxRows?: number;
+  fixedRows?: boolean;
+  columns: MeasurementTableColumnSeed[];
 }
 
 export interface WorksheetTableMapping {
@@ -61,7 +85,7 @@ export function getWorksheetTableMappings(form: InstrumentFormSeed): WorksheetTa
   return (form.measurementTables ?? []).flatMap((table) => {
     const columns: Record<string, string> = {};
     let firstRow: number | null = null;
-    for (const column of table.columns) {
+    for (const column of getMeasurementTableLeafColumns(table.columns)) {
       const target = cells[`measurements.tables.${table.id}.0.${column.key}`]?.[0];
       const match = target?.match(/^([A-Z]+)(\d+)$/i);
       if (!match?.[1] || !match[2]) continue;
@@ -69,9 +93,15 @@ export function getWorksheetTableMappings(form: InstrumentFormSeed): WorksheetTa
       firstRow ??= Number(match[2]);
     }
     return firstRow && Object.keys(columns).length
-      ? [{ id: table.id, firstRow, templateRowCount: table.rowCount, columns }]
+      ? [{ id: table.id, firstRow, templateRowCount: table.templateRowCount ?? table.rowCount, columns }]
       : [];
   });
+}
+
+export function getMeasurementTableLeafColumns(columns: MeasurementTableColumnSeed[]): MeasurementTableLeafColumnSeed[] {
+  return columns.flatMap((column) => (
+    'key' in column ? [column] : getMeasurementTableLeafColumns(column.children)
+  ));
 }
 
 function createGenericTableMappings(
@@ -250,7 +280,39 @@ function createEarlyDimensionalInstrumentForm(
 }
 
 export const instrumentForms: InstrumentFormSeed[] = [
-  createStandardVsUutForm('CCI-KAL-FOM-0XX', 'Lembar Kerja Umum', 'Lembar Kerja Umum', 18, 5, earlyWorkbookPath),
+  {
+    code: 'CCI-KAL-FOM-0XX', revision: '02', name: 'Lembar Kerja Umum', sheet: 'Lembar Kerja Umum', workbook: earlyWorkbookPath,
+    mappingVerified: true,
+    measurementTables: [{
+      id: 'measurements',
+      title: 'Titik/Parameter Ukur/Uji',
+      description: 'Isi parameter pengujian, lima penunjukan alat/bahan UUT, dan lima penunjukan standar untuk setiap baris.',
+      rowCount: 14,
+      initialRowCount: 14,
+      templateRowCount: 14,
+      minRows: 14,
+      maxRows: 14,
+      fixedRows: true,
+      columns: [
+        { key: 'parameter', label: 'Titik/Parameter Ukur/Uji', inputType: 'text' },
+        {
+          label: 'Penunjukan Alat/Bahan UUT',
+          children: Array.from({ length: 5 }, (_, index) => ({ key: `uut${index + 1}`, label: String(index + 1), inputType: 'number' as const })),
+        },
+        {
+          label: 'Penunjukan Standar STD',
+          children: Array.from({ length: 5 }, (_, index) => ({ key: `standard${index + 1}`, label: String(index + 1), inputType: 'number' as const })),
+        },
+      ],
+    }],
+    cellMappings: {
+      ...createGenericTableMappings('measurements', 18, 14, {
+        parameter: 'A',
+        uut1: 'C', uut2: 'D', uut3: 'E', uut4: 'F', uut5: 'G',
+        standard1: 'H', standard2: 'I', standard3: 'J', standard4: 'K', standard5: 'L',
+      }),
+    },
+  },
   createPressureGaugeForm('CCI-KAL-FOM-010', 'Pressure Gauge', 'Pressure Gauge', earlyWorkbookPath),
   {
     code: 'CCI-KAL-FOM-027', name: 'Anak Timbangan', sheet: ' Anak Timbangan 04', workbook: earlyWorkbookPath,
@@ -568,12 +630,13 @@ export const instrumentForms: InstrumentFormSeed[] = [
     code: 'CCI-KAL-FOM-152',
     name: 'Torque Gauge',
     sheet: 'Torque Gauge',
+    mappingVerified: true,
     measurementTables: [
-      { id: 'clockwise', title: 'Clockwise', rowCount: 10, columns: [
+      { id: 'clockwise', title: 'Clockwise', rowCount: 10, initialRowCount: 10, templateRowCount: 10, minRows: 10, maxRows: 10, fixedRows: true, columns: [
         { key: 'indication', label: 'Penunjukan Alat' },
         ...Array.from({ length: 5 }, (_, index) => ({ key: `reading${index + 1}`, label: `Standar ${index + 1}` })),
       ] },
-      { id: 'counterClockwise', title: 'Counter Clockwise', rowCount: 11, columns: [
+      { id: 'counterClockwise', title: 'Counter Clockwise', rowCount: 11, initialRowCount: 11, templateRowCount: 11, minRows: 11, maxRows: 11, fixedRows: true, columns: [
         { key: 'indication', label: 'Penunjukan Alat' },
         ...Array.from({ length: 5 }, (_, index) => ({ key: `reading${index + 1}`, label: `Standar ${index + 1}` })),
       ] },
@@ -599,8 +662,10 @@ export const instrumentForms: InstrumentFormSeed[] = [
     code: 'CCI-KAL-FOM-153',
     name: 'Dissolved Oxygen Meter',
     sheet: 'DISSOLVED OXYGEN METER',
+    mappingVerified: true,
     measurementTables: [{
       id: 'dissolvedOxygen', title: 'Data Pengukuran Dissolved Oxygen Meter', rowCount: 4,
+      initialRowCount: 4, templateRowCount: 4, minRows: 4, maxRows: 4, fixedRows: true,
       columns: [
         { key: 'number', label: 'No.', lockedValues: ['1', '2', '3', '4'] },
         { key: 'standard', label: 'Standar DO' }, { key: 'resolution', label: 'Resolusi' },

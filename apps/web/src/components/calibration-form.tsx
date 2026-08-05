@@ -1,6 +1,11 @@
 'use client';
 
-import type { CalibrationOptions, CalibrationRecordDetail, MeasurementTableDefinition } from '@certindo/types';
+import {
+  getMeasurementTableLeafColumns,
+  type CalibrationOptions,
+  type CalibrationRecordDetail,
+  type MeasurementTableDefinition,
+} from '@certindo/types';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from '@certindo/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -12,6 +17,12 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { createCalibrationSchema, type CreateCalibrationInput } from '@certindo/validation';
 import { apiRequest } from '@/lib/api';
 import { sortInstrumentForms } from '@/lib/instrument-forms';
+import {
+  createMeasurementHeaderRows,
+  measurementTableInitialRowCount,
+  measurementTableMaximumRowCount,
+  measurementTableMinimumRowCount,
+} from '@/lib/measurement-tables';
 
 type InstrumentFormOption = CalibrationOptions['instrumentForms'][number];
 
@@ -108,13 +119,17 @@ const normalizeDissolvedOxygenRows = (
 const normalizeMeasurementTables = (
   definitions: MeasurementTableDefinition[],
   existing: Record<string, Array<Record<string, string>>> | undefined,
-) => Object.fromEntries(definitions.map((table) => [
-  table.id,
-  Array.from({ length: existing?.[table.id]?.length || 1 }, (_, rowIndex) => Object.fromEntries(table.columns.map((column) => [
-    column.key,
-    existing?.[table.id]?.[rowIndex]?.[column.key] ?? lockedColumnValue(column.lockedValues, rowIndex) ?? '',
-  ]))),
-]));
+) => Object.fromEntries(definitions.map((table) => {
+  const columns = getMeasurementTableLeafColumns(table.columns);
+  const rowCount = existing?.[table.id]?.length || measurementTableInitialRowCount(table);
+  return [
+    table.id,
+    Array.from({ length: rowCount }, (_, rowIndex) => Object.fromEntries(columns.map((column) => [
+      column.key,
+      existing?.[table.id]?.[rowIndex]?.[column.key] ?? lockedColumnValue(column.lockedValues, rowIndex) ?? '',
+    ]))),
+  ];
+}));
 
 function lockedColumnValue(values: string[] | undefined, rowIndex: number): string | undefined {
   if (!values?.length) return undefined;
@@ -244,8 +259,10 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
 
   function addMeasurementRow(table: MeasurementTableDefinition): void {
     const rows = form.getValues(`formData.measurements.tables.${table.id}`) ?? [];
+    const maximumRows = measurementTableMaximumRowCount(table);
+    if (maximumRows !== undefined && rows.length >= maximumRows) return;
     const rowIndex = rows.length;
-    const nextRow = Object.fromEntries(table.columns.map((column) => [
+    const nextRow = Object.fromEntries(getMeasurementTableLeafColumns(table.columns).map((column) => [
       column.key,
       lockedColumnValue(column.lockedValues, rowIndex) ?? '',
     ]));
@@ -254,7 +271,7 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
 
   function removeMeasurementRow(table: MeasurementTableDefinition, rowIndex: number): void {
     const rows = form.getValues(`formData.measurements.tables.${table.id}`) ?? [];
-    if (rows.length <= 1) return;
+    if (rows.length <= measurementTableMinimumRowCount(table)) return;
     form.setValue(
       `formData.measurements.tables.${table.id}`,
       rows.filter((_, index) => index !== rowIndex),
@@ -267,6 +284,7 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
       <div className="flex items-center justify-between gap-4"><Link href="/calibrations" className="inline-flex items-center gap-2 text-sm font-semibold text-[#1F5F8B] hover:underline"><ArrowLeft className="size-4" /> Kembali</Link>{!isReadOnly && <Button type="submit" disabled={save.isPending || options.isLoading || record.isLoading}><Save className="size-4" /> {save.isPending ? 'Menyimpan...' : 'Simpan Draft'}</Button>}</div>
       {(options.isError || record.isError) && <div className="rounded-[10px] bg-[#FDEBEC] p-4 text-sm text-[#B9151B]">Data pendukung gagal dimuat. Pastikan API dan database berjalan.</div>}
       {save.isError && <div className="rounded-[10px] bg-[#FDEBEC] p-4 text-sm text-[#B9151B]">{save.error instanceof Error ? save.error.message : 'Draft gagal disimpan.'}</div>}
+      {selectedTemplate && !selectedTemplate.mappingVerified && <div className="rounded-[10px] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"><span className="font-semibold">Mapping template belum diverifikasi terhadap workbook sumber.</span> Draft tetap dapat disimpan, tetapi ekspor Excel diblokir sampai struktur field, tabel, dan alamat sel selesai diverifikasi.</div>}
       {isReadOnly && record.data && <div className="rounded-[10px] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"><span className="font-semibold">Form hanya dapat dilihat.</span> {record.data.status === 'UNDER_REVIEW' ? 'Rekaman sedang dalam pemeriksaan.' : 'Rekaman yang telah dikonfirmasi atau diselesaikan tidak dapat diubah.'}{record.data.workflowNote && <span className="mt-1 block">Catatan workflow: {record.data.workflowNote}</span>}</div>}
       <fieldset className="space-y-6 disabled:opacity-75" disabled={isReadOnly}>
       <Card><CardHeader className="border-b"><CardTitle>Informasi Rekaman</CardTitle><p className="text-sm text-slate-400">Pilih perusahaan dan jenis formulir yang akan digunakan.</p></CardHeader><CardContent className="grid gap-5 pt-6 md:grid-cols-2">
@@ -293,21 +311,28 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
       </CardContent></Card>
       {selectedTemplate?.measurementTables.map((table) => {
         const rows = watchedMeasurementTables[table.id] ?? [];
+        const columns = getMeasurementTableLeafColumns(table.columns);
+        const headerRows = createMeasurementHeaderRows(table.columns);
+        const minimumRows = measurementTableMinimumRowCount(table);
+        const maximumRows = measurementTableMaximumRowCount(table);
+        const showRowActions = !table.fixedRows;
         return <Card key={table.id}>
-        <CardHeader className="flex-row items-center justify-between gap-4 border-b"><div><CardTitle>{table.title}</CardTitle><p className="mt-1 text-sm text-slate-400">Baris Excel akan mengikuti jumlah baris yang diisi di sini.</p></div><Button type="button" onClick={() => addMeasurementRow(table)}><Plus className="size-4" /> Tambah Baris</Button></CardHeader>
+        <CardHeader className="flex-row items-center justify-between gap-4 border-b"><div><CardTitle>{table.title}</CardTitle><p className="mt-1 text-sm text-slate-400">{table.description ?? (table.fixedRows ? `Tabel mengikuti ${rows.length} baris tetap pada workbook.` : 'Baris Excel akan mengikuti jumlah baris yang diisi di sini.')}</p></div>{showRowActions && <Button type="button" onClick={() => addMeasurementRow(table)} disabled={maximumRows !== undefined && rows.length >= maximumRows}><Plus className="size-4" /> Tambah Baris</Button>}</CardHeader>
         <CardContent className="pt-6">
           <div className="overflow-x-auto rounded-[10px] border border-[#DDE5EA]">
             <table className="w-full min-w-max border-collapse text-sm">
-              <thead className="bg-[#F8FAFB] text-[#526575]"><tr>{table.columns.map((column) => <th key={column.key} className="min-w-28 border-b border-r border-[#DDE5EA] px-3 py-3 text-left">{column.label}</th>)}<th className="w-20 border-b border-[#DDE5EA] px-3 py-3 text-center">Aksi</th></tr></thead>
-              <tbody>{rows.map((_, rowIndex) => <tr key={rowIndex}>{table.columns.map((column) => {
+              <thead className="bg-[#F8FAFB] text-[#526575]">{headerRows.map((headerRow, headerRowIndex) => <tr key={headerRowIndex}>{headerRow.map((cell) => <th key={cell.id} colSpan={cell.colSpan} rowSpan={cell.rowSpan} scope={cell.column ? 'col' : 'colgroup'} className="min-w-28 border-b border-r border-[#DDE5EA] px-3 py-3 text-center align-middle"><span className="font-semibold">{cell.label}</span>{cell.column?.unit && <span className="mt-0.5 block text-[11px] font-normal text-slate-400">({cell.column.unit})</span>}</th>)}{headerRowIndex === 0 && showRowActions && <th rowSpan={headerRows.length} className="w-20 border-b border-[#DDE5EA] px-3 py-3 text-center align-middle">Aksi</th>}</tr>)}</thead>
+              <tbody>{rows.map((_, rowIndex) => <tr key={rowIndex}>{columns.map((column) => {
                 const lockedValue = lockedColumnValue(column.lockedValues, rowIndex);
                 const fieldName = `formData.measurements.tables.${table.id}.${rowIndex}.${column.key}` as const;
                 return <td key={column.key} className="border-b border-r border-[#DDE5EA] p-2 last:border-r-0">
                   {lockedValue !== undefined
                     ? <><span className="block min-h-10 px-2 py-2.5 text-center text-slate-600">{lockedValue}</span><input type="hidden" value={lockedValue} {...form.register(fieldName)} /></>
-                    : <Input inputMode="decimal" aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)} />}
+                    : column.inputType === 'select'
+                      ? <select className="h-10 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3 text-sm outline-none focus:border-[#1F5F8B]" aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)}><option value="">Pilih</option>{column.options?.map((option) => <option key={option} value={option}>{option}</option>)}</select>
+                      : <Input inputMode={column.inputType === 'number' ? 'decimal' : 'text'} aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)} />}
                 </td>;
-              })}<td className="border-b border-[#DDE5EA] p-2 text-center"><button type="button" aria-label={`Hapus baris ${rowIndex + 1}`} disabled={rows.length <= 1} className="inline-flex size-9 items-center justify-center rounded-lg text-[#D71920] hover:bg-[#FDEBEC] disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent" onClick={() => removeMeasurementRow(table, rowIndex)}><Trash2 className="size-4" /></button></td></tr>)}</tbody>
+              })}{showRowActions && <td className="border-b border-[#DDE5EA] p-2 text-center"><button type="button" aria-label={`Hapus baris ${rowIndex + 1}`} disabled={rows.length <= minimumRows} className="inline-flex size-9 items-center justify-center rounded-lg text-[#D71920] hover:bg-[#FDEBEC] disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent" onClick={() => removeMeasurementRow(table, rowIndex)}><Trash2 className="size-4" /></button></td>}</tr>)}</tbody>
             </table>
           </div>
         </CardContent>

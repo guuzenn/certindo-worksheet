@@ -119,6 +119,7 @@ export interface CalibrationOptions {
     code: string;
     name: string;
     revision: string;
+    mappingVerified: boolean;
     fields: InstrumentFieldKey[];
     additionalFields: DynamicFieldDefinition[];
     measurementTables: MeasurementTableDefinition[];
@@ -132,17 +133,48 @@ export interface DynamicFieldDefinition {
   placeholder?: string;
 }
 
-export interface MeasurementTableColumnDefinition {
+export interface MeasurementTableLeafColumnDefinition {
   key: string;
   label: string;
   lockedValues?: string[];
+  unit?: string;
+  inputType?: 'text' | 'number' | 'select';
+  options?: string[];
 }
+
+export interface MeasurementTableColumnGroupDefinition {
+  label: string;
+  children: MeasurementTableColumnDefinition[];
+}
+
+export type MeasurementTableColumnDefinition = MeasurementTableLeafColumnDefinition | MeasurementTableColumnGroupDefinition;
 
 export interface MeasurementTableDefinition {
   id: string;
   title: string;
+  description?: string;
+  /** @deprecated Use initialRowCount and templateRowCount for V2 definitions. */
   rowCount: number;
+  initialRowCount?: number;
+  templateRowCount?: number;
+  minRows?: number;
+  maxRows?: number;
+  fixedRows?: boolean;
   columns: MeasurementTableColumnDefinition[];
+}
+
+export function isMeasurementTableLeafColumn(
+  column: MeasurementTableColumnDefinition,
+): column is MeasurementTableLeafColumnDefinition {
+  return 'key' in column;
+}
+
+export function getMeasurementTableLeafColumns(
+  columns: MeasurementTableColumnDefinition[],
+): MeasurementTableLeafColumnDefinition[] {
+  return columns.flatMap((column) => (
+    isMeasurementTableLeafColumn(column) ? [column] : getMeasurementTableLeafColumns(column.children)
+  ));
 }
 
 export interface InstrumentFormSummaryItem {
@@ -154,6 +186,7 @@ export interface InstrumentFormSummaryItem {
   sheet: string;
   workbook: string;
   needsTemplateReview: boolean;
+  mappingVerified: boolean;
   fieldsCount: number;
   tablesCount: number;
   schemaJson: unknown;
@@ -179,6 +212,7 @@ export interface InstrumentFormDetailItem {
     workbook: string;
     sheet: string;
     needsTemplateReview: boolean;
+    mappingVerified: boolean;
     cells: Record<string, string[]>;
     tables: Array<{
       id: string;
@@ -232,5 +266,4 @@ export interface UserItem {
   createdAt: string;
   updatedAt: string;
 }
-
 

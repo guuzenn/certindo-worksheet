@@ -117,6 +117,34 @@ describe('replaceCellValue', () => {
     }
   });
 
+  it('mengisi parameter, UUT 1-5, dan standar 1-5 pada Lembar Kerja Umum', async () => {
+    const general = instrumentForms.find((form) => form.code === 'CCI-KAL-FOM-0XX');
+    expect(general?.cellMappings).toBeDefined();
+    const cells = Object.fromEntries(
+      Object.values(general?.cellMappings ?? {}).flat().map((cell) => [cell, `GENERAL-QA-${cell}`]),
+    );
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), 'certindo-general-'));
+    const outputPath = join(temporaryDirectory, 'lembar-kerja-umum.xlsx');
+
+    try {
+      await new OoxmlWorkbookService().fillTemplate(
+        resolve(process.cwd(), '..', '..', general?.workbook ?? currentWorkbookPath),
+        outputPath,
+        general?.sheet ?? '',
+        cells,
+      );
+      const zip = await JSZip.loadAsync(await readFile(outputPath));
+      await expectSingleWorksheet(zip, 'Lembar Kerja Umum');
+      const worksheet = Object.values(zip.files).find((file) => /^xl\/worksheets\/sheet\d+\.xml$/.test(file.name));
+      const worksheetXml = await worksheet!.async('string');
+      for (const cell of ['A18', 'C18', 'G18', 'H18', 'L18', 'A31', 'L31']) {
+        expect(worksheetXml).toContain(`GENERAL-QA-${cell}`);
+      }
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+
   it('mengisi seluruh mapping Dissolved Oxygen Meter pada salinan workbook', async () => {
     const dissolvedOxygen = instrumentForms.find((form) => form.code === 'CCI-KAL-FOM-153');
     expect(dissolvedOxygen?.cellMappings).toBeDefined();

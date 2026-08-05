@@ -46,6 +46,10 @@ async function main(): Promise<void> {
     where: { code: { in: ['CCI-KAL-FOM-057', 'CCI-KAL-FOM-057-B'] }, revision: 'DRAFT-1' },
     data: { revision: '03' },
   });
+  await prisma.instrumentForm.updateMany({
+    where: { code: 'CCI-KAL-FOM-0XX', revision: 'DRAFT-1' },
+    data: { revision: '02' },
+  });
 
   for (const form of instrumentForms) {
     const revision = form.revision ?? 'DRAFT-1';
@@ -56,9 +60,15 @@ async function main(): Promise<void> {
         : process.env.TEMPLATE_CURRENT_URL ?? workbook
       : workbook;
     const fields = getInstrumentFields(form);
-    const description = form.needsTemplateReview
-      ? 'Template terhubung dan dapat digunakan untuk draft. Metadata sumber perlu ditinjau sebelum ekspor final.'
-      : 'Template terhubung dari katalog workbook lembar kerja Certindo.';
+    const mappingVerified = form.mappingVerified === true;
+    const schemaVersion = form.measurementTables?.some((table) => (
+      table.initialRowCount !== undefined
+      || table.templateRowCount !== undefined
+      || table.columns.some((column) => 'children' in column)
+    )) ? 2 : 1;
+    const description = mappingVerified
+      ? 'Struktur form dan mapping Excel telah diverifikasi terhadap workbook sumber.'
+      : 'Template tersedia untuk pemetaan. Struktur tabel dan target sel perlu diverifikasi sebelum ekspor.';
     await prisma.instrumentForm.upsert({
       where: { code_revision: { code: form.code, revision } },
       update: {
@@ -67,15 +77,16 @@ async function main(): Promise<void> {
         isActive: true,
         templateFilePath,
         mappingJson: {
-          version: 1,
+          version: schemaVersion,
           workbook,
           sheet: form.sheet,
-          needsTemplateReview: form.needsTemplateReview ?? false,
+          needsTemplateReview: !mappingVerified,
+          mappingVerified,
           cells: getInstrumentCellMappings(form),
           tables: getWorksheetTableMappings(form),
         },
         schemaJson: {
-          version: 1,
+          version: schemaVersion,
           fields,
           sections: [
             { id: 'instrument', label: 'Identitas Alat' },
@@ -92,7 +103,7 @@ async function main(): Promise<void> {
         description,
         templateFilePath,
         schemaJson: {
-          version: 1,
+          version: schemaVersion,
           fields,
           sections: [
             { id: 'instrument', label: 'Identitas Alat' },
@@ -102,10 +113,11 @@ async function main(): Promise<void> {
           measurementTables: form.measurementTables ?? [],
         },
         mappingJson: {
-          version: 1,
+          version: schemaVersion,
           workbook,
           sheet: form.sheet,
-          needsTemplateReview: form.needsTemplateReview ?? false,
+          needsTemplateReview: !mappingVerified,
+          mappingVerified,
           cells: getInstrumentCellMappings(form),
           tables: getWorksheetTableMappings(form),
         },

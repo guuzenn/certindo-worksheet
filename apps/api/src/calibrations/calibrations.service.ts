@@ -6,6 +6,7 @@ import {
   instrumentFieldKeys,
   type DynamicFieldDefinition,
   type InstrumentFieldKey,
+  type MeasurementTableColumnDefinition,
   type MeasurementTableDefinition,
 } from '@certindo/types';
 import { randomUUID } from 'node:crypto';
@@ -55,13 +56,14 @@ export class CalibrationsService {
       this.prisma.instrumentForm.findMany({
         where: { isActive: true },
         orderBy: { name: 'asc' },
-        select: { id: true, code: true, name: true, revision: true, schemaJson: true },
+        select: { id: true, code: true, name: true, revision: true, schemaJson: true, mappingJson: true },
       }),
     ]);
     return {
       companies,
-      instrumentForms: instrumentForms.map(({ schemaJson, ...form }) => {
+      instrumentForms: instrumentForms.map(({ schemaJson, mappingJson, ...form }) => {
         const schema = schemaJson && typeof schemaJson === 'object' && !Array.isArray(schemaJson) ? schemaJson : {};
+        const mapping = mappingJson && typeof mappingJson === 'object' && !Array.isArray(mappingJson) ? mappingJson : {};
         const rawFields = 'fields' in schema && Array.isArray(schema.fields) ? schema.fields : [];
         const fields = rawFields.filter((field): field is InstrumentFieldKey =>
           instrumentFieldKeys.includes(field as InstrumentFieldKey),
@@ -72,7 +74,7 @@ export class CalibrationsService {
         const measurementTables = 'measurementTables' in schema && Array.isArray(schema.measurementTables)
           ? schema.measurementTables.filter(isMeasurementTableDefinition)
           : [];
-        return { ...form, fields, additionalFields, measurementTables };
+        return { ...form, mappingVerified: mapping.mappingVerified === true, fields, additionalFields, measurementTables };
       }),
     };
   }
@@ -166,6 +168,9 @@ export class CalibrationsService {
     if (!record) throw new NotFoundException('Rekaman kalibrasi tidak ditemukan');
 
     const mapping = asObject(record.instrumentForm.mappingJson);
+    if (mapping.mappingVerified !== true) {
+      throw new BadRequestException('Mapping template ini belum diverifikasi terhadap workbook sumber dan belum dapat diekspor');
+    }
     const sheet = typeof mapping.sheet === 'string' ? mapping.sheet : null;
     const rawCells = asObject(mapping.cells);
     const worksheetTables = parseWorksheetTableMappings(mapping.tables);
@@ -369,7 +374,17 @@ function isMeasurementTableDefinition(value: unknown): value is MeasurementTable
   return typeof item.id === 'string'
     && typeof item.title === 'string'
     && typeof item.rowCount === 'number'
-    && Array.isArray(item.columns);
+    && Array.isArray(item.columns)
+    && item.columns.every(isMeasurementTableColumnDefinition);
+}
+
+function isMeasurementTableColumnDefinition(value: unknown): value is MeasurementTableColumnDefinition {
+  const item = asObject(value);
+  if (typeof item.label !== 'string') return false;
+  if (typeof item.key === 'string') return true;
+  return Array.isArray(item.children)
+    && item.children.length > 0
+    && item.children.every(isMeasurementTableColumnDefinition);
 }
 
 function asObject(value: unknown): Record<string, unknown> {
