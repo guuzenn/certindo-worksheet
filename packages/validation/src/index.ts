@@ -86,8 +86,27 @@ export const companySchema = z.object({
   email: z.string().trim().email('Email tidak valid').or(z.literal('')).optional(),
 });
 
+export const userRoleSchema = z.enum(['ADMIN', 'TECHNICIAN', 'REVIEWER', 'APPROVER']);
+
+export const createUserSchema = z.object({
+  name: z.string().trim().min(2, 'Nama pengguna minimal 2 karakter'),
+  email: z.string().trim().toLowerCase().email('Email tidak valid'),
+  password: z.string().min(8, 'Kata sandi minimal 8 karakter'),
+  role: userRoleSchema,
+});
+
+export const updateUserSchema = z.object({
+  name: z.string().trim().min(2, 'Nama pengguna minimal 2 karakter'),
+  email: z.string().trim().toLowerCase().email('Email tidak valid'),
+  role: userRoleSchema,
+  password: z.string().trim().optional(),
+});
+
 export type CalibrationFormDataInput = z.infer<typeof calibrationFormDataSchema>;
 export type CreateCalibrationInput = z.infer<typeof createCalibrationSchema>;
 export type UpdateCalibrationInput = z.infer<typeof updateCalibrationSchema>;
 export type CreateCompanyInput = z.infer<typeof companySchema>;
+export type CreateUserInput = z.infer<typeof createUserSchema>;
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+
 

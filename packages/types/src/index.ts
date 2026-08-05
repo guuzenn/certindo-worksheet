@@ -220,4 +220,15 @@ export interface CompanyDetailItem extends CompanyItem {
   }>;
 }
 
+export interface UserItem {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  createdRecordsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+
 
