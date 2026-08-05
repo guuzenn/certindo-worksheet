@@ -1,7 +1,14 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import type { AuthUser } from '@certindo/types';
-import { loginSchema, type LoginInput } from '@certindo/validation';
+import {
+  changePasswordSchema,
+  loginSchema,
+  updateProfileSchema,
+  type ChangePasswordInput,
+  type LoginInput,
+  type UpdateProfileInput,
+} from '@certindo/validation';
 import type { Request } from 'express';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { AuthService } from './auth.service';
@@ -21,7 +28,25 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  me(@Req() request: AuthenticatedRequest): AuthUser {
-    return request.user;
+  me(@Req() request: AuthenticatedRequest) {
+    return this.auth.getProfile(request.user.id);
+  }
+
+  @Patch('profile')
+  @UseGuards(JwtAuthGuard)
+  updateProfile(
+    @Req() request: AuthenticatedRequest,
+    @Body(new ZodValidationPipe(updateProfileSchema)) body: UpdateProfileInput,
+  ) {
+    return this.auth.updateProfile(request.user.id, body);
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  changePassword(
+    @Req() request: AuthenticatedRequest,
+    @Body(new ZodValidationPipe(changePasswordSchema)) body: ChangePasswordInput,
+  ) {
+    return this.auth.changePassword(request.user.id, body);
   }
 }

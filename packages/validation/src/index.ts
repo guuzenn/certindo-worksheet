@@ -102,11 +102,29 @@ export const updateUserSchema = z.object({
   password: z.string().trim().optional(),
 });
 
+export const updateProfileSchema = z.object({
+  name: z.string().trim().min(2, 'Nama pengguna minimal 2 karakter'),
+});
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Kata sandi saat ini wajib diisi'),
+    newPassword: z.string().min(8, 'Kata sandi baru minimal 8 karakter'),
+    confirmPassword: z.string().min(8, 'Konfirmasi kata sandi minimal 8 karakter'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Konfirmasi kata sandi tidak cocok dengan kata sandi baru',
+    path: ['confirmPassword'],
+  });
+
 export type CalibrationFormDataInput = z.infer<typeof calibrationFormDataSchema>;
 export type CreateCalibrationInput = z.infer<typeof createCalibrationSchema>;
 export type UpdateCalibrationInput = z.infer<typeof updateCalibrationSchema>;
 export type CreateCompanyInput = z.infer<typeof companySchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
 
 
