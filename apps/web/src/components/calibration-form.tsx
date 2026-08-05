@@ -222,7 +222,7 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
   const watchedMeasurementTables = useWatch({ control: form.control, name: 'formData.measurements.tables' }) ?? {};
 
   function applyInstrumentTemplate(selected: InstrumentFormOption): void {
-    if (!form.getValues('formData.instrument.name')) form.setValue('formData.instrument.name', selected.name, { shouldValidate: true });
+    form.setValue('formData.instrument.name', selected.name, { shouldValidate: true, shouldDirty: true });
     if (!selected.fields.includes('identityNumber')) form.setValue('formData.instrument.identityNumber', '');
     if (!selected.fields.includes('capacity')) form.setValue('formData.instrument.capacity', '');
     if (!selected.fields.includes('capacityMin')) form.setValue('formData.instrument.capacityMin', '');
