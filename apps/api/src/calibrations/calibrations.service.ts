@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { CalibrationStatus, Prisma } from '@prisma/client';
-import type { CreateCalibrationInput, UpdateCalibrationInput } from '@certindo/validation';
+import type { AuthUser, UserRole } from '@certindo/types';
+import type { CalibrationStatusTransitionInput, CreateCalibrationInput, UpdateCalibrationInput } from '@certindo/validation';
 import {
   instrumentFieldKeys,
   type DynamicFieldDefinition,
@@ -16,6 +17,8 @@ const recordInclude = {
   company: { select: { id: true, name: true } },
   instrumentForm: { select: { id: true, code: true, name: true, revision: true } },
   createdBy: { select: { id: true, name: true } },
+  reviewedBy: { select: { id: true, name: true } },
+  approvedBy: { select: { id: true, name: true } },
 } satisfies Prisma.CalibrationRecordInclude;
 
 @Injectable()
@@ -142,6 +145,19 @@ export class CalibrationsService {
     return { id };
   }
 
+  async transitionStatus(id: string, input: CalibrationStatusTransitionInput, user: AuthUser) {
+    const current = await this.findOne(id);
+    const data = calibrationTransitionData(current.status, input.status, input.note, user);
+    const result = await this.prisma.calibrationRecord.updateMany({
+      where: { id, status: current.status },
+      data,
+    });
+    if (result.count !== 1) {
+      throw new ConflictException('Status rekaman telah berubah. Muat ulang data dan coba lagi');
+    }
+    return this.findOne(id);
+  }
+
   async generateWorkbook(id: string) {
     const record = await this.prisma.calibrationRecord.findUnique({
       where: { id },
@@ -236,6 +252,44 @@ export class CalibrationsService {
       fileName: `${record.recordNumber}-${record.instrumentForm.code}.xlsx`,
     };
   }
+}
+
+type CalibrationTransitionData = Prisma.CalibrationRecordUncheckedUpdateManyInput;
+
+export function calibrationTransitionData(
+  currentStatus: CalibrationStatus,
+  targetStatus: CalibrationStatusTransitionInput['status'],
+  note: string | undefined,
+  user: Pick<AuthUser, 'id' | 'role'>,
+): CalibrationTransitionData {
+  const transition = `${currentStatus}->${targetStatus}`;
+  const allowedRoles: Partial<Record<string, UserRole[]>> = {
+    'DRAFT->UNDER_REVIEW': ['ADMIN', 'TECHNICIAN'],
+    'UNDER_REVIEW->DRAFT': ['ADMIN', 'REVIEWER', 'APPROVER'],
+    'UNDER_REVIEW->CONFIRMED': ['ADMIN', 'REVIEWER', 'APPROVER'],
+    'UNDER_REVIEW->COMPLETED': ['ADMIN', 'APPROVER'],
+    'CONFIRMED->COMPLETED': ['ADMIN', 'APPROVER'],
+  };
+  const roles = allowedRoles[transition];
+  if (!roles) throw new BadRequestException(`Transisi status ${currentStatus} ke ${targetStatus} tidak diizinkan`);
+  if (!roles.includes(user.role)) throw new ForbiddenException('Peran Anda tidak diizinkan melakukan transisi status ini');
+
+  if (targetStatus === 'DRAFT') {
+    const revisionNote = note?.trim();
+    if (!revisionNote) throw new BadRequestException('Catatan perbaikan wajib diisi');
+    return { status: targetStatus, workflowNote: revisionNote, reviewedById: user.id, approvedById: null };
+  }
+  if (targetStatus === 'UNDER_REVIEW') {
+    return { status: targetStatus, workflowNote: null, reviewedById: null, approvedById: null };
+  }
+  return {
+    status: targetStatus,
+    workflowNote: note?.trim() || null,
+    reviewedById: user.id,
+    ...(targetStatus === 'COMPLETED' || user.role === 'APPROVER' || user.role === 'ADMIN'
+      ? { approvedById: user.id }
+      : {}),
+  };
 }
 
 interface WorksheetTableMapping {

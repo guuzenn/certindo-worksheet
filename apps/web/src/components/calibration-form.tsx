@@ -220,6 +220,7 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
   const selectedTemplate = options.data?.instrumentForms.find((item) => item.id === selectedInstrumentFormId);
   const visibleFields = new Set(selectedTemplate?.fields ?? []);
   const watchedMeasurementTables = useWatch({ control: form.control, name: 'formData.measurements.tables' }) ?? {};
+  const isReadOnly = Boolean(recordId && record.data?.status !== 'DRAFT');
 
   function applyInstrumentTemplate(selected: InstrumentFormOption): void {
     form.setValue('formData.instrument.name', selected.name, { shouldValidate: true, shouldDirty: true });
@@ -261,9 +262,11 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
 
   return (
     <form className="space-y-6" onSubmit={(event) => void form.handleSubmit((input) => save.mutate(input))(event)}>
-      <div className="flex items-center justify-between gap-4"><Link href="/calibrations" className="inline-flex items-center gap-2 text-sm font-semibold text-[#1F5F8B] hover:underline"><ArrowLeft className="size-4" /> Kembali</Link><Button type="submit" disabled={save.isPending || options.isLoading || record.isLoading}><Save className="size-4" /> {save.isPending ? 'Menyimpan...' : 'Simpan Draft'}</Button></div>
+      <div className="flex items-center justify-between gap-4"><Link href="/calibrations" className="inline-flex items-center gap-2 text-sm font-semibold text-[#1F5F8B] hover:underline"><ArrowLeft className="size-4" /> Kembali</Link>{!isReadOnly && <Button type="submit" disabled={save.isPending || options.isLoading || record.isLoading}><Save className="size-4" /> {save.isPending ? 'Menyimpan...' : 'Simpan Draft'}</Button>}</div>
       {(options.isError || record.isError) && <div className="rounded-[10px] bg-[#FDEBEC] p-4 text-sm text-[#B9151B]">Data pendukung gagal dimuat. Pastikan API dan database berjalan.</div>}
       {save.isError && <div className="rounded-[10px] bg-[#FDEBEC] p-4 text-sm text-[#B9151B]">{save.error instanceof Error ? save.error.message : 'Draft gagal disimpan.'}</div>}
+      {isReadOnly && record.data && <div className="rounded-[10px] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"><span className="font-semibold">Form hanya dapat dilihat.</span> {record.data.status === 'UNDER_REVIEW' ? 'Rekaman sedang dalam pemeriksaan.' : 'Rekaman yang telah dikonfirmasi atau diselesaikan tidak dapat diubah.'}{record.data.workflowNote && <span className="mt-1 block">Catatan workflow: {record.data.workflowNote}</span>}</div>}
+      <fieldset className="space-y-6 disabled:opacity-75" disabled={isReadOnly}>
       <Card><CardHeader className="border-b"><CardTitle>Informasi Rekaman</CardTitle><p className="text-sm text-slate-400">Pilih perusahaan dan jenis formulir yang akan digunakan.</p></CardHeader><CardContent className="grid gap-5 pt-6 md:grid-cols-2">
         <label className={inputClass}>Perusahaan<select className="h-11 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3.5 text-sm font-normal outline-none focus:border-[#1F5F8B]" {...form.register('companyId')}><option value="">Pilih perusahaan</option>{options.data?.companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select>{errors.companyId && <span className="block text-xs font-normal text-[#D71920]">{errors.companyId.message}</span>}</label>
         <label className={inputClass}>Template instrumen<Controller control={form.control} name="instrumentFormId" render={({ field }) => <InstrumentFormPicker disabled={Boolean(recordId)} options={options.data?.instrumentForms ?? []} value={field.value} onSelect={(selected) => { field.onChange(selected.id); applyInstrumentTemplate(selected); }} />} />{errors.instrumentFormId && <span className="block text-xs font-normal text-[#D71920]">{errors.instrumentFormId.message}</span>}</label>
@@ -308,6 +311,7 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
         </CardContent>
       </Card>;
       })}
+      </fieldset>
     </form>
   );
 }

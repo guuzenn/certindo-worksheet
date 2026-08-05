@@ -1,7 +1,14 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, StreamableFile, UseGuards } from '@nestjs/common';
 import type { AuthUser, CalibrationStatus } from '@certindo/types';
 import { calibrationStatuses } from '@certindo/types';
-import { createCalibrationSchema, type CreateCalibrationInput, updateCalibrationSchema, type UpdateCalibrationInput } from '@certindo/validation';
+import {
+  calibrationStatusTransitionSchema,
+  type CalibrationStatusTransitionInput,
+  createCalibrationSchema,
+  type CreateCalibrationInput,
+  updateCalibrationSchema,
+  type UpdateCalibrationInput,
+} from '@certindo/validation';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -58,6 +65,16 @@ export class CalibrationsController {
   @Roles('ADMIN', 'TECHNICIAN')
   update(@Param('id') id: string, @Body(new ZodValidationPipe(updateCalibrationSchema)) input: UpdateCalibrationInput, @Req() request: AuthenticatedRequest) {
     return this.calibrations.update(id, input, request.user.id);
+  }
+
+  @Patch(':id/status')
+  @Roles('ADMIN', 'TECHNICIAN', 'REVIEWER', 'APPROVER')
+  transitionStatus(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(calibrationStatusTransitionSchema)) input: CalibrationStatusTransitionInput,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.calibrations.transitionStatus(id, input, request.user);
   }
 
   @Delete(':id')

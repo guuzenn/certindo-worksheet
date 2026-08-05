@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createCalibrationSchema, loginSchema } from './index';
+import { calibrationStatusTransitionSchema, createCalibrationSchema, loginSchema } from './index';
 
 describe('loginSchema', () => {
   it('menormalkan email pengguna', () => {
@@ -10,6 +10,17 @@ describe('loginSchema', () => {
 
   it('menolak kata sandi pendek', () => {
     expect(loginSchema.safeParse({ email: 'admin@certindo.co.id', password: '123' }).success).toBe(false);
+  });
+});
+
+describe('calibrationStatusTransitionSchema', () => {
+  it('mewajibkan catatan saat meminta perbaikan', () => {
+    expect(calibrationStatusTransitionSchema.safeParse({ status: 'DRAFT' }).success).toBe(false);
+    expect(calibrationStatusTransitionSchema.safeParse({ status: 'DRAFT', note: 'Periksa kembali hasil ukur.' }).success).toBe(true);
+  });
+
+  it('menerima pengajuan review tanpa catatan', () => {
+    expect(calibrationStatusTransitionSchema.safeParse({ status: 'UNDER_REVIEW' }).success).toBe(true);
   });
 });
 

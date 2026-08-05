@@ -1,92 +1,142 @@
-# Certindo Calibration Worksheet
+# Certindo Worksheet
 
-Fondasi monorepo TypeScript untuk sistem lembar kerja kalibrasi PT Certindonesia. Implementasi saat ini mencakup workspace, database, autentikasi, design system, dashboard, CRUD draft kalibrasi, dan katalog template instrumen workbook 0X–94 serta 095–163. Adapter penulisan Excel dan formulir pengukuran dinamis masih dilanjutkan bertahap.
+Sistem lembar kerja kalibrasi PT Certindonesia untuk mengelola data klien, mengisi formulir instrumen, menjalankan proses review dan approval, serta menghasilkan workbook Excel dari template resmi.
 
-## Arsitektur
+## Fitur utama
+
+- Katalog 89+ template instrumen dengan schema form dan mapping sel Excel dinamis.
+- Pembuatan dan revisi lembar kerja kalibrasi tanpa mengubah style workbook sumber.
+- Workflow berbasis role dari `DRAFT` sampai `COMPLETED`, termasuk catatan permintaan perbaikan.
+- Manajemen perusahaan klien dan riwayat kalibrasinya.
+- Manajemen pengguna dengan role `ADMIN`, `TECHNICIAN`, `REVIEWER`, dan `APPROVER`.
+- Pengaturan profil dan perubahan kata sandi.
+- Penyimpanan template dan hasil ekspor melalui filesystem lokal atau private Vercel Blob.
+- Dashboard ringkasan status kalibrasi dan health check untuk deployment.
+
+## Teknologi
+
+- Next.js 16 dan React 19 untuk aplikasi web.
+- NestJS 11 untuk REST API.
+- PostgreSQL, Prisma ORM, dan JSONB untuk data formulir dinamis.
+- TanStack Query, React Hook Form, dan Zod.
+- JSZip untuk manipulasi OOXML workbook.
+- Turborepo dan pnpm workspace.
+
+## Struktur proyek
 
 ```text
 apps/
-  api/          NestJS REST API (runtime independen)
-  web/          Next.js App Router (deploy ke Vercel)
+  api/          NestJS REST API dan engine ekspor OOXML
+  web/          Next.js App Router
 packages/
-  config/       token desain dan konfigurasi bersama
+  config/       konfigurasi bersama
   types/        kontrak TypeScript lintas aplikasi
-  validation/   validasi Zod lintas aplikasi
-  ui/           komponen UI bergaya shadcn yang disesuaikan
+  validation/   schema validasi Zod
+  ui/           komponen UI bersama
   eslint-config/
   tsconfig/
-prisma/         schema, migrasi, dan seed
+prisma/         schema, migrasi, katalog instrumen, dan seed
 storage/
-  templates/    master template lokal (tidak masuk Git)
-  generated/    hasil generate lokal (tidak masuk Git)
+  templates/    workbook sumber untuk mode local
+  generated/    hasil ekspor untuk mode local
 ```
 
-Web dan API tidak digabungkan ke satu runtime. API menjadi pemilik aturan domain dan database; web berkomunikasi melalui REST. PostgreSQL JSONB disiapkan untuk schema formulir, mapping Excel, dan data kalibrasi agar penambahan instrumen tidak memerlukan tabel baru.
+API menjadi pemilik aturan domain dan akses database. Aplikasi web mengaksesnya melalui REST menggunakan bearer token.
 
 ## Prasyarat
 
-- Node.js 20.9 atau lebih baru
-- pnpm 11
-- Database PostgreSQL Neon
+- Node.js 20.9 atau lebih baru.
+- pnpm 11.
+- Database PostgreSQL.
+- Dua workbook template sumber jika menggunakan penyimpanan lokal.
 
 ## Menjalankan secara lokal
 
-1. Salin `.env.example` menjadi `.env` dan isi `DATABASE_URL` serta `JWT_SECRET`.
-2. Pasang dependensi: `pnpm install`.
-3. Generate Prisma Client: `pnpm db:generate`.
-4. Terapkan migrasi: `pnpm db:migrate`.
-5. Isi data awal: `pnpm db:seed`.
-6. Jalankan web dan API: `pnpm dev`.
-
-Web tersedia di `http://localhost:3000`, API di `http://localhost:4000/api`, dan health check di `http://localhost:4000/api/health`.
-
-Panduan staging Vercel, Render, Neon, dan private Blob tersedia di [DEPLOYMENT.md](./DEPLOYMENT.md).
-
-Data admin awal mengikuti `SEED_ADMIN_EMAIL` dan `SEED_ADMIN_PASSWORD`. Ganti password seed sebelum menggunakan environment bersama.
-
-## Environment
-
-- `DATABASE_URL`: connection string PostgreSQL Neon dengan SSL.
-- `JWT_SECRET`: rahasia acak minimal 32 karakter.
-- `JWT_EXPIRES_IN`: masa berlaku JWT, default `8h`.
-- `API_PORT`: port NestJS, default `4000`.
-- `CORS_ORIGINS`: daftar origin dipisahkan koma.
-- `NEXT_PUBLIC_API_URL`: base URL API yang dapat diakses browser.
-- `STORAGE_DRIVER`: `local` sekarang; `s3` akan tersedia melalui abstraksi storage pada fase Excel.
-- `STORAGE_LOCAL_ROOT`: root storage pengembangan lokal.
-
-## Perintah kualitas
+1. Salin `.env.example` menjadi `.env`.
+2. Isi `DATABASE_URL`, `JWT_SECRET`, dan kredensial seed.
+3. Pasang dependensi dan siapkan database:
 
 ```bash
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm build
+pnpm install
+pnpm db:generate
+pnpm db:migrate
+pnpm db:seed
 ```
 
-## Endpoint saat ini
+4. Jalankan seluruh aplikasi:
 
-- `POST /api/auth/login`
-- `GET /api/auth/me`
-- `GET /api/dashboard/summary`
-- `GET /api/calibrations`
-- `GET /api/calibrations/options`
-- `GET /api/calibrations/:id`
-- `POST /api/calibrations`
-- `PATCH /api/calibrations/:id`
-- `DELETE /api/calibrations/:id`
-- `POST /api/calibrations/:id/generate`
-- `GET /api/calibrations/:id/download`
-- `GET /api/health`
+```bash
+pnpm dev
+```
 
-Endpoint dashboard dan profil membutuhkan bearer token. Login dibatasi lima percobaan per menit per client.
+Layanan lokal:
 
-## Database dan riwayat
+- Web: `http://localhost:3000`
+- API: `http://localhost:4000/api`
+- Health check: `http://localhost:4000/api/health`
 
-Schema awal menyediakan `User`, `Company`, `InstrumentForm`, `CalibrationRecord`, dan `CalibrationRevision`, termasuk role `ADMIN`, `TECHNICIAN`, `REVIEWER`, `APPROVER` dan seluruh status workflow. Migrasi tidak memerlukan database lokal; gunakan branch Neon terpisah untuk pengembangan dan produksi.
+Kredensial admin awal mengikuti `SEED_ADMIN_EMAIL` dan `SEED_ADMIN_PASSWORD`. Jangan gunakan password contoh pada environment bersama.
 
-## Template instrumen
+## Workflow kalibrasi
 
-Seed katalog saat ini menghubungkan setiap instrumen aktif ke workbook lokal `storage/templates/Lembar Kerja 0X-94.xlsx` atau `storage/templates/Lembar Kerja 095-163.xlsx` dan nama sheet-nya melalui `mappingJson`. Sheet kosong tidak dimasukkan. Daftar field identitas mengikuti isi setiap sheet dan ditampilkan dalam urutan No. Sertifikat, Nama Alat, Merk, Type/Model, No. Seri, No. Identitas, Kapasitas, lalu Resolusi; field yang tidak ada pada template tidak ditampilkan. Nomor sertifikat selalu memakai prefix tetap `CTD/CAL/`. Template dengan kapasitas minimum/maksimum atau temperatur ruangan awal/tengah/akhir mendapatkan field terpisah sesuai lembar kerja. Template yang metadata sumbernya masih tidak konsisten ditandai `needsTemplateReview` agar tidak dianggap siap ekspor final.
+| Transisi | Role yang diizinkan | Keterangan |
+| --- | --- | --- |
+| `DRAFT` → `UNDER_REVIEW` | `TECHNICIAN`, `ADMIN` | Mengajukan lembar kerja untuk diperiksa. |
+| `UNDER_REVIEW` → `DRAFT` | `REVIEWER`, `APPROVER`, `ADMIN` | Meminta perbaikan; catatan wajib diisi. |
+| `UNDER_REVIEW` → `CONFIRMED` | `REVIEWER`, `APPROVER`, `ADMIN` | Menyetujui hasil pemeriksaan. |
+| `UNDER_REVIEW` → `COMPLETED` | `APPROVER`, `ADMIN` | Menyetujui dan langsung menyelesaikan dokumen. |
+| `CONFIRMED` → `COMPLETED` | `APPROVER`, `ADMIN` | Menerbitkan hasil final. |
 
-Mapping Torque Gauge sudah mencakup identitas, kondisi ruangan, 10 titik Clockwise, dan 11 titik Counter Clockwise dengan masing-masing lima pembacaan standar. Mapping Dissolved Oxygen Meter mencakup identitas, lokasi kalibrasi, temperatur dan kelembaban awal/akhir, serta empat baris Standar DO dengan pembacaan DO1–DO3. API menghasilkan workbook terisi yang hanya berisi sheet instrumen terpilih tanpa mengubah master multi-sheet, dan UI menyediakan tombol pembuatan sekaligus unduh Excel. Fase berikutnya adalah memperluas mapping dan tabel pengukuran ke jenis alat lain.
+Form hanya dapat diubah ketika berstatus `DRAFT`. Perubahan status juga divalidasi kembali di API, sehingga pembatasan tidak hanya bergantung pada UI.
+
+## Environment variables
+
+| Variable | Keterangan |
+| --- | --- |
+| `DATABASE_URL` | Connection string PostgreSQL. |
+| `JWT_SECRET` | Rahasia JWT minimal 32 karakter. |
+| `JWT_EXPIRES_IN` | Masa berlaku token; default `8h`. |
+| `API_PORT` | Port API lokal; default `4000`. |
+| `CORS_ORIGINS` | Daftar origin web yang dipisahkan koma. |
+| `NEXT_PUBLIC_API_URL` | Base URL API yang dapat diakses browser. |
+| `STORAGE_DRIVER` | `local` atau `blob`. |
+| `STORAGE_LOCAL_ROOT` | Root penyimpanan saat memakai driver `local`. |
+| `BLOB_READ_WRITE_TOKEN` | Token private Vercel Blob untuk driver `blob`. |
+| `TEMPLATE_EARLY_URL` | URL workbook template 0X–94 di Blob. |
+| `TEMPLATE_CURRENT_URL` | URL workbook template 095–163 di Blob. |
+| `SEED_ADMIN_EMAIL` | Email admin yang dibuat oleh seed. |
+| `SEED_ADMIN_PASSWORD` | Password awal admin yang dibuat oleh seed. |
+
+Lihat `.env.example` untuk contoh lengkap tanpa kredensial produksi.
+
+## Endpoint API
+
+Semua endpoint selain login dan health check membutuhkan bearer token.
+
+- Auth: `/api/auth/login`, `/api/auth/me`, `/api/auth/profile`, `/api/auth/change-password`
+- Dashboard: `/api/dashboard/summary`
+- Kalibrasi: `/api/calibrations`, `/api/calibrations/:id`, `/api/calibrations/:id/status`
+- Ekspor: `/api/calibrations/:id/generate`, `/api/calibrations/:id/download`
+- Master data: `/api/companies`, `/api/users`, `/api/instrument-forms`
+- Health check: `/api/health`
+
+Operasi create, update, delete, dan approval dibatasi lagi berdasarkan role.
+
+## Perintah pengembangan
+
+```bash
+pnpm typecheck     # validasi TypeScript seluruh workspace
+pnpm test          # unit dan integration tests
+pnpm build         # production build web, API, dan packages
+pnpm lint          # ESLint seluruh workspace
+pnpm db:generate   # generate Prisma Client
+pnpm db:migrate    # membuat/menerapkan migrasi development
+pnpm db:migrate:deploy # menerapkan migrasi yang sudah ada
+pnpm db:seed       # mengisi admin dan katalog template instrumen
+```
+
+Gunakan database branch terpisah untuk development, staging, dan production. Setelah mengambil perubahan schema terbaru, jalankan `pnpm db:migrate:deploy` pada environment tujuan sebelum memulai API.
+
+## Deployment
+
+Arsitektur deployment yang didukung adalah Next.js di Vercel, API NestJS di Railway, PostgreSQL di Neon, dan private Vercel Blob untuk template serta hasil ekspor. Instruksi lengkap tersedia di [DEPLOYMENT.md](./DEPLOYMENT.md).

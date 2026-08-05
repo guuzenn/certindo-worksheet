@@ -79,6 +79,16 @@ export const updateCalibrationSchema = createCalibrationSchema.omit({ instrument
   formData: calibrationFormDataSchema,
 });
 
+export const calibrationStatusTransitionSchema = z
+  .object({
+    status: z.enum(['DRAFT', 'UNDER_REVIEW', 'CONFIRMED', 'COMPLETED']),
+    note: z.string().trim().max(1000, 'Catatan maksimal 1000 karakter').optional(),
+  })
+  .refine((input) => input.status !== 'DRAFT' || Boolean(input.note), {
+    message: 'Catatan perbaikan wajib diisi',
+    path: ['note'],
+  });
+
 export const companySchema = z.object({
   name: z.string().trim().min(2, 'Nama perusahaan minimal 2 karakter'),
   address: z.string().trim().optional(),
@@ -120,11 +130,11 @@ export const changePasswordSchema = z
 export type CalibrationFormDataInput = z.infer<typeof calibrationFormDataSchema>;
 export type CreateCalibrationInput = z.infer<typeof createCalibrationSchema>;
 export type UpdateCalibrationInput = z.infer<typeof updateCalibrationSchema>;
+export type CalibrationStatusTransitionInput = z.infer<typeof calibrationStatusTransitionSchema>;
 export type CreateCompanyInput = z.infer<typeof companySchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
-
 
 

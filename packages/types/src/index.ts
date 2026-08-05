@@ -98,6 +98,7 @@ export interface CalibrationRecordSummary {
   recordNumber: string;
   certificateNumber: string | null;
   status: CalibrationStatus;
+  workflowNote: string | null;
   updatedAt: string;
   company: { id: string; name: string };
   instrumentForm: { id: string; name: string; code: string; revision: string };
@@ -107,6 +108,8 @@ export interface CalibrationRecordDetail extends CalibrationRecordSummary {
   formDataJson: CalibrationFormData;
   createdAt: string;
   createdBy: { id: string; name: string };
+  reviewedBy: { id: string; name: string } | null;
+  approvedBy: { id: string; name: string } | null;
 }
 
 export interface CalibrationOptions {
@@ -229,6 +232,5 @@ export interface UserItem {
   createdAt: string;
   updatedAt: string;
 }
-
 
 

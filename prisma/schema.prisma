@@ -79,6 +79,7 @@ model CalibrationRecord {
   createdById       String
   reviewedById      String?
   approvedById      String?
+  workflowNote      String?
   createdAt         DateTime              @default(now())
   updatedAt         DateTime              @updatedAt
   instrumentForm    InstrumentForm        @relation(fields: [instrumentFormId], references: [id])
