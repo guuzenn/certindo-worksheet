@@ -10,6 +10,11 @@ const headingFont = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['700', '800
 export const metadata: Metadata = {
   title: { default: 'Certindo Worksheet', template: '%s | Certindo Worksheet' },
   description: 'Sistem manajemen lembar kerja kalibrasi PT Certindonesia',
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
