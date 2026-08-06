@@ -2,6 +2,7 @@ import type { MeasurementTableDefinition } from '@certindo/types';
 import { describe, expect, it } from 'vitest';
 import {
   createMeasurementHeaderRows,
+  groupAdditionalFieldsBySection,
   measurementTableInitialRowCount,
   measurementTableMaximumRowCount,
   measurementTableMinimumRowCount,
@@ -41,5 +42,28 @@ describe('measurement table V2', () => {
     expect(measurementTableInitialRowCount(generalTable)).toBe(1);
     expect(measurementTableMinimumRowCount(generalTable)).toBe(1);
     expect(measurementTableMaximumRowCount(generalTable)).toBe(14);
+  });
+
+  it('membentuk tiga tingkat header untuk tabel volumetrik', () => {
+    const rows = createMeasurementHeaderRows([{
+      label: 'Massa Air',
+      children: [{
+        label: 'm = R’ − R',
+        children: [{ key: 'waterMass', label: 'g' }],
+      }],
+    }]);
+
+    expect(rows.map((row) => row.map((cell) => cell.label))).toEqual([
+      ['Massa Air'], ['m = R’ − R'], ['g'],
+    ]);
+  });
+
+  it('tidak mengulang field header tabel sebagai card section di bawah tabel', () => {
+    const sections = groupAdditionalFieldsBySection([
+      { key: 'pressureRange', label: 'Range Pressure', section: 'Data Pressure' },
+      { key: 'standardName', label: 'Standar', section: 'Data Standar' },
+    ], new Set(['pressureRange']));
+
+    expect(sections).toEqual([['Data Standar', [{ key: 'standardName', label: 'Standar', section: 'Data Standar' }]]]);
   });
 });

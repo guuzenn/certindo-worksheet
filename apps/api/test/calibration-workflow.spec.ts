@@ -10,6 +10,7 @@ import {
 describe('calibrationTransitionData', () => {
   it('memformat satuan kapasitas dan resolusi sesuai placeholder workbook umum', () => {
     expect(formatDynamicFieldValue('kg', { exportPrefix: '(', exportSuffix: ')' })).toBe('(kg)');
+    expect(formatDynamicFieldValue('3', { exportSuffix: ' garis' })).toBe('3 garis');
     expect(formatDynamicFieldValue('g')).toBe('g');
   });
 

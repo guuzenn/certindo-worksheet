@@ -1,10 +1,24 @@
 import {
+  type DynamicFieldDefinition,
   getMeasurementTableLeafColumns,
   isMeasurementTableLeafColumn,
   type MeasurementTableColumnDefinition,
   type MeasurementTableDefinition,
   type MeasurementTableLeafColumnDefinition,
 } from '@certindo/types';
+
+export function groupAdditionalFieldsBySection(
+  fields: DynamicFieldDefinition[],
+  measurementHeaderFieldKeys: Set<string>,
+): Array<[string, DynamicFieldDefinition[]]> {
+  return Array.from(fields.reduce((sections, field) => {
+    if (!field.section || measurementHeaderFieldKeys.has(field.key)) return sections;
+    const sectionFields = sections.get(field.section) ?? [];
+    sectionFields.push(field);
+    sections.set(field.section, sectionFields);
+    return sections;
+  }, new Map<string, DynamicFieldDefinition[]>()));
+}
 
 export interface MeasurementHeaderCell {
   id: string;

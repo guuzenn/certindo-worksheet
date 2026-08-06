@@ -23,6 +23,7 @@ import { apiRequest } from '@/lib/api';
 import { sortInstrumentForms } from '@/lib/instrument-forms';
 import {
   createMeasurementHeaderRows,
+  groupAdditionalFieldsBySection,
   measurementTableInitialRowCount,
   measurementTableMaximumRowCount,
   measurementTableMinimumRowCount,
@@ -253,14 +254,9 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
   const measurementHeaderFieldKeys = new Set(selectedTemplate?.measurementTables.flatMap((table) => table.headerFieldKeys ?? []) ?? []);
   const additionalFieldsByKey = new Map((selectedTemplate?.additionalFields ?? []).map((field) => [field.key, field]));
   const inlineAdditionalFields = selectedTemplate?.additionalFields.filter((field) => !field.section && !measurementHeaderFieldKeys.has(field.key)) ?? [];
-  const additionalFieldSections = Array.from(
-    (selectedTemplate?.additionalFields ?? []).reduce((sections, field) => {
-      if (!field.section) return sections;
-      const fields = sections.get(field.section) ?? [];
-      fields.push(field);
-      sections.set(field.section, fields);
-      return sections;
-    }, new Map<string, InstrumentFormOption['additionalFields']>()),
+  const additionalFieldSections = groupAdditionalFieldsBySection(
+    selectedTemplate?.additionalFields ?? [],
+    measurementHeaderFieldKeys,
   );
   const watchedMeasurementTables = useWatch({ control: form.control, name: 'formData.measurements.tables' }) ?? {};
   const isReadOnly = Boolean(recordId && record.data?.status !== 'DRAFT');
@@ -313,16 +309,27 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
     table: MeasurementTableDefinition,
     column: MeasurementTableLeafColumnDefinition,
     rowIndex: number,
+    compact = false,
   ) {
     const lockedValue = lockedColumnValue(column.lockedValues, rowIndex);
     const fieldName = `formData.measurements.tables.${table.id}.${rowIndex}.${column.key}` as const;
+    if (column.calculation?.operator === 'subtract') {
+      const row = watchedMeasurementTables[table.id]?.[rowIndex] ?? {};
+      const minuend = Number(String(row[column.calculation.minuendKey] ?? '').replace(',', '.'));
+      const subtrahend = Number(String(row[column.calculation.subtrahendKey] ?? '').replace(',', '.'));
+      const hasBothValues = row[column.calculation.minuendKey] !== '' && row[column.calculation.subtrahendKey] !== '';
+      const value = hasBothValues && Number.isFinite(minuend) && Number.isFinite(subtrahend)
+        ? String(minuend - subtrahend)
+        : '';
+      return <span className={`block rounded-[10px] bg-slate-50 text-center font-medium text-slate-600 ${compact ? 'min-h-9 px-1.5 py-2 text-xs' : 'min-h-10 px-3 py-2.5'}`}>{value || '—'}</span>;
+    }
     if (lockedValue !== undefined) {
-      return <><span className="block min-h-10 rounded-[10px] bg-slate-50 px-3 py-2.5 text-center text-slate-600">{lockedValue}</span><input type="hidden" value={lockedValue} {...form.register(fieldName)} /></>;
+      return <><span className={`block rounded-[10px] bg-slate-50 text-center text-slate-600 ${compact ? 'min-h-9 px-1.5 py-2 text-xs' : 'min-h-10 px-3 py-2.5'}`}>{lockedValue}</span><input type="hidden" value={lockedValue} {...form.register(fieldName)} /></>;
     }
     if (column.inputType === 'select') {
-      return <select className="h-10 w-full rounded-[10px] border border-[#DDE5EA] bg-white px-3 text-sm outline-none focus:border-[#1F5F8B]" aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)}><option value="">Pilih</option>{column.options?.map((option) => <option key={option} value={option}>{option}</option>)}</select>;
+      return <select className={`w-full min-w-0 rounded-[10px] border border-[#DDE5EA] bg-white outline-none focus:border-[#1F5F8B] ${compact ? 'h-9 px-1.5 text-xs' : 'h-10 px-3 text-sm'}`} aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)}><option value="">Pilih</option>{column.options?.map((option) => <option key={option} value={option}>{option}</option>)}</select>;
     }
-    return <Input inputMode={column.inputType === 'number' ? 'decimal' : 'text'} aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)} />;
+    return <Input className={compact ? 'h-9 min-w-0 px-1.5 text-center text-xs' : 'min-w-0'} inputMode={column.inputType === 'number' ? 'decimal' : 'text'} aria-label={`${table.title} ${column.label} baris ${rowIndex + 1}`} {...form.register(fieldName)} />;
   }
 
   function renderAdditionalField(field: DynamicFieldDefinition) {
@@ -373,6 +380,7 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
         const minimumRows = measurementTableMinimumRowCount(table);
         const maximumRows = measurementTableMaximumRowCount(table);
         const showRowActions = !table.fixedRows;
+        const useCompactTable = selectedTemplate.mappingVerified;
         const tableHeaderFields = (table.headerFieldKeys ?? []).flatMap((key) => {
           const field = additionalFieldsByKey.get(key);
           return field ? [field] : [];
@@ -385,14 +393,15 @@ export function CalibrationForm({ recordId }: { recordId?: string }) {
         <CardHeader className="flex-row items-center justify-between gap-4 border-b"><div><CardTitle>{table.title}</CardTitle><p className="mt-1 text-sm text-slate-400">{table.description ?? (table.fixedRows ? `Tabel mengikuti ${rows.length} baris tetap pada workbook.` : 'Baris Excel akan mengikuti jumlah baris yang diisi di sini.')}</p></div>{showRowActions && <Button type="button" onClick={() => addMeasurementRow(table)} disabled={maximumRows !== undefined && rows.length >= maximumRows}><Plus className="size-4" /> Tambah Baris</Button>}</CardHeader>
         <CardContent className="space-y-5 pt-6">
           {tableHeaderFields.length > 0 && <div className="grid gap-5 rounded-[10px] bg-[#F8FAFB] p-4 md:grid-cols-2">{tableHeaderFields.map((field) => <label key={field.key} className={`${inputClass} ${field.inputType === 'textarea' ? 'md:col-span-2' : ''}`}>{field.label}{renderAdditionalField(field)}</label>)}</div>}
-          <div className="overflow-x-auto rounded-[10px] border border-[#DDE5EA]">
-            <table className="w-full min-w-max border-collapse text-sm">
-              <thead className="bg-[#F8FAFB] text-[#526575]">{headerRows.map((headerRow, headerRowIndex) => <tr key={headerRowIndex}>{headerRow.map((cell) => <th key={cell.id} colSpan={cell.colSpan} rowSpan={cell.rowSpan} scope={cell.column ? 'col' : 'colgroup'} className="min-w-20 border-b border-r border-[#DDE5EA] px-2 py-2.5 text-center align-middle"><span className="font-semibold">{cell.label}</span>{cell.column?.unit && <span className="mt-0.5 block text-[11px] font-normal text-slate-400">({cell.column.unit})</span>}</th>)}{headerRowIndex === 0 && showRowActions && <th rowSpan={headerRows.length} className="w-16 border-b border-[#DDE5EA] px-2 py-2.5 text-center align-middle">Aksi</th>}</tr>)}</thead>
+          <div className="max-w-full overflow-x-auto rounded-[10px] border border-[#DDE5EA]">
+            <table className={useCompactTable ? 'w-full min-w-[560px] table-fixed border-collapse text-xs lg:min-w-0' : 'w-full min-w-max border-collapse text-sm'}>
+              <thead className="bg-[#F8FAFB] text-[#526575]">{headerRows.map((headerRow, headerRowIndex) => <tr key={headerRowIndex}>{headerRow.map((cell) => <th key={cell.id} colSpan={cell.colSpan} rowSpan={cell.rowSpan} scope={cell.column ? 'col' : 'colgroup'} className={useCompactTable ? 'break-words border-b border-r border-[#DDE5EA] px-1.5 py-2.5 text-center align-middle' : 'min-w-20 border-b border-r border-[#DDE5EA] px-2 py-2.5 text-center align-middle'}><span className="font-semibold">{cell.label}</span>{cell.column?.unit && <span className={`mt-0.5 block font-normal text-slate-400 ${useCompactTable ? 'text-[10px]' : 'text-[11px]'}`}>({cell.column.unit})</span>}</th>)}{headerRowIndex === 0 && showRowActions && <th rowSpan={headerRows.length} className={`${useCompactTable ? 'w-12 px-1' : 'w-16 px-2'} border-b border-[#DDE5EA] py-2.5 text-center align-middle`}>Aksi</th>}</tr>)}</thead>
               <tbody>{rows.map((_, rowIndex) => <tr key={rowIndex} className={table.rowGroupSize && rowIndex > 0 && rowIndex % table.rowGroupSize === 0 ? 'border-t-4 border-t-[#183247]' : undefined}>{columns.map((column) => {
-                return <td key={column.key} className="border-b border-r border-[#DDE5EA] p-2 last:border-r-0">
-                  {renderMeasurementInput(table, column, rowIndex)}
+                if (column.rowSpan && rowIndex % column.rowSpan !== 0) return null;
+                return <td key={column.key} rowSpan={column.rowSpan} className={`${useCompactTable ? 'min-w-0 p-1' : 'p-2'} border-b border-r border-[#DDE5EA] bg-white align-middle last:border-r-0`}>
+                  {renderMeasurementInput(table, column, rowIndex, useCompactTable)}
                 </td>;
-              })}{showRowActions && <td className="border-b border-[#DDE5EA] p-2 text-center"><button type="button" aria-label={`Hapus baris ${rowIndex + 1}`} disabled={rows.length <= minimumRows} className="inline-flex size-9 items-center justify-center rounded-lg text-[#D71920] hover:bg-[#FDEBEC] disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent" onClick={() => removeMeasurementRow(table, rowIndex)}><Trash2 className="size-4" /></button></td>}</tr>)}</tbody>
+              })}{showRowActions && <td className={`${useCompactTable ? 'p-1' : 'p-2'} border-b border-[#DDE5EA] text-center`}><button type="button" aria-label={`Hapus baris ${rowIndex + 1}`} disabled={rows.length <= minimumRows} className={`inline-flex items-center justify-center rounded-lg text-[#D71920] hover:bg-[#FDEBEC] disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent ${useCompactTable ? 'size-8' : 'size-9'}`} onClick={() => removeMeasurementRow(table, rowIndex)}><Trash2 className="size-4" /></button></td>}</tr>)}</tbody>
             </table>
           </div>
         </CardContent>

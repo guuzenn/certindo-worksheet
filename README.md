@@ -16,6 +16,8 @@ Satu kode formulir dapat memiliki lebih dari satu revisi. Contohnya, Timbangan m
 
 Template dengan revision yang sama juga dapat memiliki varian standar acuan. Mikrometer revision `03` mempertahankan dua template terpisah karena ketertelusuran SI-nya berbeda: `LK-054-IDN / JCC (Taiwan)` dan `LK-032-IDN / LK-070-IDN`.
 
+Rencana verifikasi seluruh katalog, urutan batch, dan definition of done berada di [`PROJECT_PLAN.md`](PROJECT_PLAN.md). Untuk melanjutkan pekerjaan tanpa mengulang instruksi per form, gunakan perintah singkat: **"lanjutkan project plan"**.
+
 ## Tech stack
 
 - Next.js 16, React 19, Tailwind CSS 4

@@ -4,6 +4,7 @@ import type { AuthUser, UserRole } from '@certindo/types';
 import type { CalibrationStatusTransitionInput, CreateCalibrationInput, UpdateCalibrationInput } from '@certindo/validation';
 import {
   instrumentFieldKeys,
+  getMeasurementTableLeafColumns,
   type DynamicFieldDefinition,
   type FormFieldLabelKey,
   type InstrumentFieldKey,
@@ -198,6 +199,13 @@ export class CalibrationsService {
       ? formSchema.additionalFields.filter(isDynamicFieldDefinition)
       : [];
     const additionalFieldDefinitionsByKey = new Map(additionalFieldDefinitions.map((field) => [field.key, field]));
+    const measurementTableDefinitions = Array.isArray(formSchema.measurementTables)
+      ? formSchema.measurementTables.filter(isMeasurementTableDefinition)
+      : [];
+    const measurementColumnDefinitions = new Map(measurementTableDefinitions.map((table) => [
+      table.id,
+      new Map(getMeasurementTableLeafColumns(table.columns).map((column) => [column.key, column])),
+    ]));
     const worksheetTables = parseWorksheetTableMappings(mapping.tables);
     const conditionalCells = parseConditionalCellMappings(mapping.conditionalCells);
     if (!sheet || !Object.keys(rawCells).length) {
@@ -276,8 +284,11 @@ export class CalibrationsService {
       for (let rowIndex = 0; rowIndex < table.rowCount; rowIndex += 1) {
         const row = asObject(table.rows[rowIndex]);
         for (const [key, column] of Object.entries(table.columns)) {
-          const value = toCellValue(row[key]);
-          if (value) cellsToWrite[`${column}${outputFirstRow + rowIndex}`] = value;
+          const rawValue = toCellValue(row[key]);
+          if (rawValue) {
+            const definition = measurementColumnDefinitions.get(table.id)?.get(key);
+            cellsToWrite[`${column}${outputFirstRow + rowIndex}`] = formatDynamicFieldValue(rawValue, definition);
+          }
         }
       }
       precedingOffset += table.renderedRowCount - table.templateRowCount;

@@ -62,6 +62,14 @@ export interface MeasurementTableLeafColumnSeed {
   label: string;
   lockedValues?: string[];
   unit?: string;
+  rowSpan?: number;
+  calculation?: {
+    operator: 'subtract';
+    minuendKey: string;
+    subtrahendKey: string;
+  };
+  exportPrefix?: string;
+  exportSuffix?: string;
   inputType?: 'text' | 'number' | 'select';
   options?: string[];
 }
@@ -334,6 +342,7 @@ function createPressureGaugeForm(code: string, name: string, sheet: string, work
         minRows: 1,
         maxRows: 18,
         preserveTemplateRows: true,
+        headerFieldKeys: ['instrumentIndicationUnit', 'standardIndicationUnit'],
         columns: [
           { key: 'instrumentIndication', label: 'Penunjukan Alat', inputType: 'number' },
           ...Array.from({ length: 3 }, (_, index) => ({
@@ -358,6 +367,66 @@ function createPressureGaugeForm(code: string, name: string, sheet: string, work
         'additionalFields.standardSerialNumber': ['C42'],
         'additionalFields.standardTraceability': ['C43'],
         'additionalFields.standardUncertainty': ['C44'],
+        ...createGenericTableMappings('pressure', 21, 18, {
+          instrumentIndication: 'A',
+          standard1Up: 'C', standard1Down: 'D',
+          standard2Up: 'E', standard2Down: 'F',
+          standard3Up: 'G', standard3Down: 'H',
+        }),
+      },
+    };
+  }
+
+  if (code === 'CCI-KAL-FOM-058') {
+    return {
+      code,
+      revision: '00',
+      name,
+      sheet,
+      workbook,
+      mappingVerified: true,
+      fieldLabels: verifiedFieldLabels,
+      additionalFields: [
+        { key: 'calibrationMethod', label: 'Metode Kalibrasi', defaultValue: 'CCI-KAL-WI-088' },
+        { key: 'additionalInformation', label: 'Informasi lainnya', exportPrefix: 'Informasi lainnya : ' },
+        { key: 'instrumentIndicationUnit', label: 'Satuan Penunjukan Alat', placeholder: 'Contoh: bar', exportPrefix: '(', exportSuffix: ')' },
+        { key: 'standardIndicationUnit', label: 'Satuan Penunjukan Standar', placeholder: 'Contoh: bar', exportPrefix: '(', exportSuffix: ')' },
+        ...standardDataFields({
+          name: 'Pressure Gauge STD 20 bar / 700 bar',
+          manufacturer: 'Additel / Additel',
+          serialNumber: '211H18830045 / 211H20070058',
+          traceability: 'LK-176-IDN / LK-023-IDN',
+        }),
+      ],
+      measurementTables: [{
+        id: 'pressure',
+        title: 'Data Pengukuran Tekanan',
+        description: 'Isi penunjukan alat dan tiga rangkaian penunjukan standar pada arah naik dan turun.',
+        rowCount: 18,
+        initialRowCount: 1,
+        templateRowCount: 18,
+        minRows: 1,
+        maxRows: 18,
+        preserveTemplateRows: true,
+        headerFieldKeys: ['instrumentIndicationUnit', 'standardIndicationUnit'],
+        columns: [
+          { key: 'instrumentIndication', label: 'Penunjukan Alat', inputType: 'number' },
+          ...Array.from({ length: 3 }, (_, index) => ({
+            label: `Penunjukan Standar ${index + 1}`,
+            children: [
+              { key: `standard${index + 1}Up`, label: 'Naik', inputType: 'number' as const },
+              { key: `standard${index + 1}Down`, label: 'Turun', inputType: 'number' as const },
+            ],
+          })),
+        ],
+      }],
+      cellMappings: {
+        'instrument.name': ['C8'],
+        'additionalFields.calibrationMethod': ['G9'],
+        'additionalFields.additionalInformation': ['A15'],
+        'additionalFields.standardIndicationUnit': ['C18'],
+        'additionalFields.instrumentIndicationUnit': ['A19'],
+        ...standardDataMappings(40),
         ...createGenericTableMappings('pressure', 21, 18, {
           instrumentIndication: 'A',
           standard1Up: 'C', standard1Down: 'D',
@@ -406,6 +475,278 @@ function createStandardVsUutForm(
         standard: 'B', reading1: 'D', reading2: 'E', reading3: 'F', reading4: 'G', reading5: 'H',
       }),
     },
+  };
+}
+
+const verifiedFieldLabels: NonNullable<InstrumentFormSeed['fieldLabels']> = {
+  calibrationDate: 'Tanggal Kalibrasi',
+  company: 'Nama Perusahaan',
+  certificateNumber: 'No. Sertifikat',
+  name: 'Nama Alat',
+  manufacturer: 'Merk',
+  model: 'Type/Model',
+  serialNumber: 'No. Seri',
+  identityNumber: 'No. Identitas',
+  capacity: 'Kapasitas',
+  capacityMin: 'Kapasitas Minimum',
+  capacityMax: 'Kapasitas Maksimum',
+  resolution: 'Resolusi',
+  calibrationLocation: 'Lokasi Kalibrasi',
+  ambientTemperatureStart: 'Temperature Ruang Awal',
+  ambientTemperatureMiddle: 'Temperature Ruang Tengah',
+  ambientTemperatureEnd: 'Temperature Ruang Akhir',
+  ambientHumidityStart: 'Kelembaban Awal',
+  ambientHumidityMiddle: 'Kelembaban Tengah',
+  ambientHumidityEnd: 'Kelembaban Akhir',
+};
+
+const standardDataFields = (
+  defaults: Partial<Record<'name' | 'manufacturer' | 'serialNumber' | 'traceability', string>> = {},
+): NonNullable<InstrumentFormSeed['additionalFields']> => [
+  { key: 'standardName', label: 'Standar yang digunakan', section: 'Data Standar', ...(defaults.name ? { defaultValue: defaults.name } : {}) },
+  { key: 'standardManufacturer', label: 'Merk', section: 'Data Standar', ...(defaults.manufacturer ? { defaultValue: defaults.manufacturer } : {}) },
+  { key: 'standardSerialNumber', label: 'No. Seri', section: 'Data Standar', ...(defaults.serialNumber ? { defaultValue: defaults.serialNumber } : {}) },
+  { key: 'standardTraceability', label: 'Tertelusur ke SI', section: 'Data Standar', ...(defaults.traceability ? { defaultValue: defaults.traceability } : {}) },
+  { key: 'standardUncertainty', label: 'Ketidakpastian', section: 'Data Standar' },
+];
+
+const standardDataMappings = (firstRow: number): Record<string, string[]> => ({
+  'additionalFields.standardName': [`C${firstRow}`],
+  'additionalFields.standardManufacturer': [`C${firstRow + 1}`],
+  'additionalFields.standardSerialNumber': [`C${firstRow + 2}`],
+  'additionalFields.standardTraceability': [`C${firstRow + 3}`],
+  'additionalFields.standardUncertainty': [`C${firstRow + 4}`],
+});
+
+function createTimerStopwatchForm(): InstrumentFormSeed {
+  const columns: MeasurementTableSeed['columns'] = [
+    { label: 'Nominal', children: [{ key: 'nominalMinutes', label: 'Menit' }, { key: 'nominalSeconds', label: 'Detik' }] },
+    ...Array.from({ length: 3 }, (_, index) => ({
+      label: `Pengukuran ${index + 1}`,
+      children: [{ key: `reading${index + 1}Minutes`, label: 'Menit' }, { key: `reading${index + 1}Seconds`, label: 'Detik' }],
+    })),
+  ];
+  const table = (id: string, title: string): MeasurementTableSeed => ({
+    id, title, rowCount: 6, initialRowCount: 1, templateRowCount: 6, minRows: 1, maxRows: 6,
+    preserveTemplateRows: true, columns,
+  });
+  const mappingColumns = {
+    nominalMinutes: 'A', nominalSeconds: 'B',
+    reading1Minutes: 'C', reading1Seconds: 'D',
+    reading2Minutes: 'E', reading2Seconds: 'F',
+    reading3Minutes: 'G', reading3Seconds: 'H',
+  };
+  return {
+    code: 'CCI-KAL-FOM-054', revision: '02', name: 'Timer / Stopwatch', sheet: 'Timer-Stopwatch 02', workbook: earlyWorkbookPath,
+    mappingVerified: true, fieldLabels: verifiedFieldLabels,
+    additionalFields: [
+      { key: 'calibrationMethod', label: 'Metode Kalibrasi', defaultValue: 'CCI-KAL-WI-016' },
+      ...standardDataFields(),
+    ],
+    measurementTables: [table('standard', 'Hasil Pengukuran Standar'), table('uut', 'Hasil Pengukuran Uji')],
+    cellMappings: {
+      'additionalFields.calibrationMethod': ['G9'],
+      ...standardDataMappings(40),
+      ...createGenericTableMappings('standard', 20, 6, mappingColumns),
+      ...createGenericTableMappings('uut', 31, 6, mappingColumns),
+    },
+  };
+}
+
+function createVolumetricGlasswareForm(): InstrumentFormSeed {
+  const labels = ['m₀₀', 'm₀', 'm₁', 'm₂', 'm₃', 'm₄', 'm₅', 'm₆'];
+  const table = (id: string, title: string, includeDiameter = false): MeasurementTableSeed => ({
+    id, title, rowCount: 8, initialRowCount: 8, templateRowCount: 8, minRows: 8, maxRows: 8,
+    fixedRows: true, preserveTemplateRows: true, ...(includeDiameter ? { headerFieldKeys: ['innerDiameter'] } : {}),
+    columns: [
+      {
+        label: 'Volume',
+        children: [{
+          label: 'Nominal',
+          children: [
+            { key: 'volume', label: 'ml', inputType: 'number', rowSpan: 8 },
+            { key: 'measurement', label: 'Data', lockedValues: labels },
+          ],
+        }],
+      },
+      { label: 'W kosong', children: [{ label: 'R', children: [{ key: 'emptyWeight', label: 'g', inputType: 'number' }] }] },
+      { label: 'W isi', children: [{ label: 'R’', children: [{ key: 'filledWeight', label: 'g', inputType: 'number' }] }] },
+      {
+        label: 'Massa Air',
+        children: [{
+          label: 'm = R’ − R',
+          children: [{
+            key: 'waterMass', label: 'g',
+            calculation: { operator: 'subtract', minuendKey: 'filledWeight', subtrahendKey: 'emptyWeight' },
+          }],
+        }],
+      },
+      { label: 'Suhu Air', children: [{ label: 'tₐ', children: [{ key: 'waterTemperature', label: '°C', inputType: 'number' }] }] },
+    ],
+  });
+  return {
+    code: 'CCI-KAL-FOM-055', revision: '04', name: 'Volumetric Glassware', sheet: 'Volumetric Glassware 04', workbook: earlyWorkbookPath,
+    mappingVerified: true,
+    fieldLabels: { ...verifiedFieldLabels, serialNumber: 'No. Seri / No. Identitas' },
+    omitFields: ['identityNumber'],
+    additionalFields: [
+      { key: 'calibrationMethod', label: 'Metode Kalibrasi', defaultValue: 'CCI-KAL-WI-' },
+      { key: 'innerDiameter', label: 'Ukuran Diameter Dalam', exportPrefix: 'Ukuran Diameter Dalam : ', exportSuffix: ' cm' },
+      ...standardDataFields(),
+    ],
+    measurementTables: [
+      table('volume1', 'Data Volume 1', true),
+      table('volume2', 'Data Volume 2'),
+      table('volume3', 'Data Volume 3'),
+    ],
+    cellMappings: {
+      'instrument.serialNumber': ['C11'],
+      'environment.temperatureStart': ['H12'], 'environment.temperatureEnd': ['I12'],
+      'environment.humidityStart': ['H13'], 'environment.humidityEnd': ['I13'],
+      'additionalFields.calibrationMethod': ['H9'],
+      'additionalFields.innerDiameter': ['A14'],
+      ...standardDataMappings(45),
+      ...createGenericTableMappings('volume1', 19, 8, { volume: 'A', measurement: 'B', emptyWeight: 'C', filledWeight: 'D', waterTemperature: 'F' }),
+      ...createGenericTableMappings('volume2', 27, 8, { volume: 'A', measurement: 'B', emptyWeight: 'C', filledWeight: 'D', waterTemperature: 'F' }),
+      ...createGenericTableMappings('volume3', 35, 8, { volume: 'A', measurement: 'B', emptyWeight: 'C', filledWeight: 'D', waterTemperature: 'F' }),
+    },
+  };
+}
+
+function createAutoclaveForm(): InstrumentFormSeed {
+  return {
+    code: 'CCI-KAL-FOM-056', revision: '04', name: 'Autoclave', sheet: 'Autoclave 04', workbook: earlyWorkbookPath,
+    mappingVerified: true, fieldLabels: verifiedFieldLabels,
+    additionalFields: [
+      { key: 'calibrationMethod', label: 'Metode Kalibrasi', defaultValue: 'CCI-KAL-WI-020' },
+      { key: 'pressureRange', label: 'Range Pressure', section: 'Data Pressure', exportPrefix: 'Range: ' },
+      { key: 'pressureResolution', label: 'Resolusi Pressure', section: 'Data Pressure', exportPrefix: 'Resolusi: ' },
+      { key: 'pressureNominalUnit', label: 'Satuan Nominal Pressure', section: 'Data Pressure', exportPrefix: '(', exportSuffix: ')' },
+      { key: 'pressureUutUnit', label: 'Satuan Pembacaan UUT', section: 'Data Pressure', exportPrefix: '(', exportSuffix: ')' },
+      { key: 'temperatureRange', label: 'Range Temperature', section: 'Data Temperature', exportPrefix: 'Range: ' },
+      { key: 'temperatureResolution', label: 'Resolusi Temperature', section: 'Data Temperature', exportPrefix: 'Resolusi: ' },
+    ],
+    measurementTables: [
+      {
+        id: 'pressure', title: 'Data Pressure', rowCount: 5, initialRowCount: 1, templateRowCount: 5, minRows: 1, maxRows: 5,
+        preserveTemplateRows: true, headerFieldKeys: ['pressureRange', 'pressureResolution', 'pressureNominalUnit', 'pressureUutUnit'],
+        columns: [
+          { key: 'nominal', label: 'Nominal' }, { key: 'uutReading', label: 'Pembacaan UUT' },
+          { label: 'Waktu Logger', children: [1, 2, 3].map((n) => ({ key: `loggerTime${n}`, label: String(n) })) },
+          { label: 'Standar Logger', children: [1, 2, 3].map((n) => ({ key: `standard${n}`, label: String(n) })) },
+        ],
+      },
+      {
+        id: 'temperature', title: 'Data Temperature', rowCount: 6, initialRowCount: 6, templateRowCount: 6, minRows: 6, maxRows: 6,
+        fixedRows: true, preserveTemplateRows: true, headerFieldKeys: ['temperatureRange', 'temperatureResolution'],
+        columns: [
+          { key: 'repeat', label: 'Repeat', lockedValues: ['1', '2', '3', '1', '2', '3'] },
+          { key: 'setPoint', label: 'Set Point UUT' },
+          { label: 'Waktu Sterilisasi', children: [{ key: 'sterilizationStart', label: 'Awal' }, { key: 'sterilizationEnd', label: 'Akhir' }] },
+          { key: 'loggerTime', label: 'Waktu Logger' },
+          { label: 'Standar Logger (°C)', children: [{ key: 'bottom', label: 'Bawah' }, { key: 'middle', label: 'Tengah' }, { key: 'top', label: 'Atas' }] },
+        ],
+      },
+    ],
+    cellMappings: {
+      'additionalFields.calibrationMethod': ['G9'],
+      'additionalFields.pressureRange': ['A17'], 'additionalFields.pressureResolution': ['D17'],
+      'additionalFields.pressureNominalUnit': ['A19'], 'additionalFields.pressureUutUnit': ['B19'],
+      'additionalFields.temperatureRange': ['A28'], 'additionalFields.temperatureResolution': ['D28'],
+      ...createGenericTableMappings('pressure', 20, 5, {
+        nominal: 'A', uutReading: 'B', loggerTime1: 'C', loggerTime2: 'D', loggerTime3: 'E', standard1: 'F', standard2: 'G', standard3: 'H',
+      }),
+      ...createGenericTableMappings('temperature', 31, 6, {
+        repeat: 'A', setPoint: 'B', sterilizationStart: 'C', sterilizationEnd: 'D', loggerTime: 'E', bottom: 'F', middle: 'G', top: 'H',
+      }),
+    },
+  };
+}
+
+function createVerifiedMicrometerForm(variant: 'A' | 'B'): InstrumentFormSeed {
+  const isFull = variant === 'B';
+  const code = isFull ? 'CCI-KAL-FOM-057-B' : 'CCI-KAL-FOM-057';
+  const traceability = isFull ? 'LK-032-IDN / LK-070-IDN' : 'LK-054-IDN / JCC (Taiwan)';
+  const nominalRows = isFull ? 10 : 11;
+  const additionalFields: NonNullable<InstrumentFormSeed['additionalFields']> = [
+    { key: 'arrivalDate', label: 'Tanggal Alat Datang', inputType: 'date' },
+    { key: 'calibrationMethod', label: 'Metode Kalibrasi', defaultValue: 'CCI-KAL-WI-012' },
+    { key: 'resolution1', label: 'Resolusi 1' }, { key: 'resolution2', label: 'Resolusi 2' },
+    { key: 'calibrationRange1', label: 'Rentang Kalibrasi 1' }, { key: 'calibrationRange2', label: 'Rentang Kalibrasi 2' },
+    ...standardDataFields({
+      name: 'Gauge Block Grade 0 / Grade K', manufacturer: 'Mitutoyo / Metrology',
+      serialNumber: '2000149 / 220003', traceability,
+    }).slice(0, 4),
+    ...(isFull ? [
+      { key: 'initialPositionTool', label: 'Identitas Pin Gauge / Gauge Block', section: 'Keterangan Tambahan' },
+      { key: 'standardCondition', label: 'Kondisi Standar', section: 'Keterangan Tambahan', inputType: 'select' as const, options: ['Baik', 'Tidak Baik'] },
+      { key: 'instrumentCondition', label: 'Kondisi Alat', section: 'Keterangan Tambahan', inputType: 'select' as const, options: ['Baik', 'Tidak Baik'] },
+    ] : []),
+  ];
+  const nominal: MeasurementTableSeed = {
+    id: 'nominal', title: 'Pengujian per Nominal', rowCount: nominalRows, initialRowCount: 1,
+    templateRowCount: nominalRows, minRows: 1, maxRows: nominalRows, preserveTemplateRows: true,
+    columns: fiveReadingColumns,
+  };
+  const tables: MeasurementTableSeed[] = isFull ? [
+    {
+      id: 'flatness', title: 'Pengujian Kerataan Muka Ukur',
+      description: 'Menggunakan optical flat.',
+      rowCount: 1, initialRowCount: 1, templateRowCount: 1, minRows: 1, maxRows: 1, fixedRows: true, preserveTemplateRows: true,
+      columns: Array.from({ length: 3 }, (_, repeat) => ({
+        label: `Ke-${repeat + 1}`,
+        children: ['Anvil', 'Spindel'].map((face) => ({
+          label: face,
+          children: [{ key: `repeat${repeat + 1}${face}`, label: 'garis', inputType: 'number' as const, exportSuffix: ' garis' }],
+        })),
+      })),
+    },
+    {
+      id: 'parallelism', title: 'Pengujian Keparalelan Muka Ukur',
+      description: 'Menggunakan gauge block.',
+      rowCount: 1, initialRowCount: 1, templateRowCount: 1, minRows: 1, maxRows: 1, fixedRows: true, preserveTemplateRows: true,
+      columns: Array.from({ length: 5 }, (_, index) => ({
+        label: `Posisi ${index + 1}`,
+        children: [{ key: `position${index + 1}`, label: 'mm', inputType: 'number' as const, exportSuffix: ' mm' }],
+      })),
+    },
+    nominal,
+    {
+      id: 'repeatability', title: 'Pengujian Keberulangan',
+      description: 'Pilih satu titik ukur yang memiliki penyimpangan signifikan.',
+      rowCount: 2, initialRowCount: 1, templateRowCount: 2, minRows: 1, maxRows: 2, preserveTemplateRows: true,
+      columns: tenReadingColumns,
+    },
+  ] : [nominal];
+  const mappings: Record<string, string[]> = {
+    'additionalFields.arrivalDate': ['I9'], 'additionalFields.calibrationMethod': ['I14'],
+    'additionalFields.standardName': ['I15'], 'additionalFields.standardManufacturer': ['I16'],
+    'additionalFields.standardSerialNumber': ['I17'], 'additionalFields.standardTraceability': ['I18'],
+    'additionalFields.resolution1': ['C15'], 'additionalFields.resolution2': ['C16'],
+    'additionalFields.calibrationRange1': ['C17'], 'additionalFields.calibrationRange2': ['C18'],
+    ...createGenericTableMappings('nominal', isFull ? 33 : 23, nominalRows, {
+      nominal: 'A', reading1: 'C', reading2: 'E', reading3: 'G', reading4: 'I', reading5: 'K',
+    }),
+  };
+  if (isFull) {
+    Object.assign(mappings, {
+      'additionalFields.initialPositionTool': ['K54'], 'additionalFields.standardCondition': ['K55'], 'additionalFields.instrumentCondition': ['K56'],
+      ...createGenericTableMappings('flatness', 23, 1, {
+        repeat1Anvil: 'A', repeat1Spindel: 'C', repeat2Anvil: 'E', repeat2Spindel: 'G', repeat3Anvil: 'I', repeat3Spindel: 'K',
+      }),
+      ...createGenericTableMappings('parallelism', 27, 1, {
+        position1: 'A', position2: 'C', position3: 'E', position4: 'G', position5: 'J',
+      }),
+      ...createGenericTableMappings('repeatability', 49, 2, {
+        nominal: 'A', reading1: 'C', reading2: 'D', reading3: 'E', reading4: 'F', reading5: 'G',
+        reading6: 'H', reading7: 'I', reading8: 'J', reading9: 'K', reading10: 'L',
+      }),
+    });
+  }
+  return {
+    code, revision: '03', name: `Mikrometer — ${traceability}`, sheet: isFull ? 'Mikrometer-03' : 'Mikrometer 03',
+    workbook: earlyWorkbookPath, mappingVerified: true, identityMappingKey: code,
+    fieldLabels: verifiedFieldLabels, additionalFields, measurementTables: tables, cellMappings: mappings,
   };
 }
 
@@ -775,41 +1116,167 @@ export const instrumentForms: InstrumentFormSeed[] = [
   createScaleForm('04'),
   {
     code: 'CCI-KAL-FOM-033', name: 'Enklosur', sheet: 'Enklosur 03', workbook: earlyWorkbookPath,
+    mappingVerified: true,
+    additionalFields: [
+      { key: 'calibrationMethod', label: 'Metode Kalibrasi' },
+      { key: 'additionalInformation', label: 'Keterangan Tambahan' },
+      { key: 'enclosureLength', label: 'Panjang (P)', section: 'Volume Enklosur', exportPrefix: 'P = ', exportSuffix: ' cm' },
+      { key: 'enclosureWidth', label: 'Lebar (L)', section: 'Volume Enklosur', exportPrefix: 'L = ', exportSuffix: ' cm' },
+      { key: 'enclosureHeight', label: 'Tinggi (T)', section: 'Volume Enklosur', exportPrefix: 'T = ', exportSuffix: ' cm' },
+      { key: 'temperatureSetting', label: 'Setting (°C)' },
+      { key: 'standardName', label: 'Standar yang digunakan', section: 'Data Standar' },
+      { key: 'standardManufacturer', label: 'Merk', section: 'Data Standar' },
+      { key: 'standardSerialNumber', label: 'No. Seri', section: 'Data Standar' },
+      { key: 'standardTraceability', label: 'Tertelusur ke SI', section: 'Data Standar' },
+      { key: 'standardUncertainty', label: 'Ketidakpastian', section: 'Data Standar' },
+    ],
     measurementTables: [{
-      id: 'enclosure', title: 'Data Pengukuran Distribusi Suhu Enklosur', rowCount: 1,
+      id: 'enclosure',
+      title: 'Data Pengukuran Distribusi Suhu Enklosur',
+      description: 'Setting diisi satu kali untuk seluruh pengukuran. Tambahkan data indikator sesuai kebutuhan, maksimal 30 baris mengikuti template asli.',
+      rowCount: 30,
+      initialRowCount: 1,
+      templateRowCount: 30,
+      minRows: 1,
+      maxRows: 30,
+      preserveTemplateRows: true,
+      headerFieldKeys: ['temperatureSetting'],
       columns: [
-        { key: 'setPoint', label: 'Indikator (°C)' },
-        { key: 'tu1', label: 'TU 1' }, { key: 'tu2', label: 'TU 2' }, { key: 'tu3', label: 'TU 3' },
-        { key: 'tu4', label: 'TU 4' }, { key: 'tu5', label: 'TU 5' }, { key: 'tu6', label: 'TU 6' },
-        { key: 'tu7', label: 'TU 7' }, { key: 'tu8', label: 'TU 8' }, { key: 'tu9', label: 'TU 9' },
+        { key: 'indicator', label: 'Indikator', unit: '°C', inputType: 'number' },
+        { key: 'dataNumber', label: 'Data', lockedValues: Array.from({ length: 30 }, (_, index) => String(index + 1)) },
+        {
+          label: 'Penunjukan Standard (°C)',
+          children: [
+            { key: 'tu1', label: 'TU 1', inputType: 'number' }, { key: 'tu2', label: 'TU 2', inputType: 'number' },
+            { key: 'tu3', label: 'TU 3', inputType: 'number' }, { key: 'tu4', label: 'TU 4', inputType: 'number' },
+            { key: 'tu5', label: 'TU 5', inputType: 'number' }, { key: 'tu6', label: 'TU 6', inputType: 'number' },
+            { key: 'tu7', label: 'TU 7', inputType: 'number' }, { key: 'tu8', label: 'TU 8', inputType: 'number' },
+            { key: 'tu9', label: 'TU 9', inputType: 'number' },
+          ],
+        },
       ],
     }],
     cellMappings: {
-      ...createGenericTableMappings('enclosure', 21, 20, {
-        setPoint: 'B', tu1: 'D', tu2: 'E', tu3: 'F', tu4: 'G', tu5: 'H', tu6: 'I', tu7: 'J', tu8: 'K', tu9: 'L',
+      'additionalFields.calibrationMethod': ['I9'],
+      'additionalFields.additionalInformation': ['I11'],
+      'additionalFields.enclosureLength': ['C16'],
+      'additionalFields.enclosureWidth': ['E16'],
+      'additionalFields.enclosureHeight': ['G16'],
+      'additionalFields.temperatureSetting': ['A21'],
+      'additionalFields.standardName': ['C53'],
+      'additionalFields.standardManufacturer': ['C54'],
+      'additionalFields.standardSerialNumber': ['C55'],
+      'additionalFields.standardTraceability': ['C56'],
+      'additionalFields.standardUncertainty': ['C57'],
+      ...createGenericTableMappings('enclosure', 21, 30, {
+        dataNumber: 'C', indicator: 'B', tu1: 'D', tu2: 'E', tu3: 'F', tu4: 'G', tu5: 'H', tu6: 'I', tu7: 'J', tu8: 'K', tu9: 'L',
       }),
     },
   },
   {
-    code: 'CCI-KAL-FOM-053', name: 'Thermohygrometer', sheet: 'Thermohygrometer 04', workbook: earlyWorkbookPath,
-    measurementTables: [{
-      id: 'thermohygrometer', title: 'Data Pengukuran Suhu & Kelembaban', rowCount: 1,
-      columns: [
-        { key: 'stdTemp', label: 'Standar Suhu (°C)' }, { key: 'uutTemp', label: 'UUT Suhu (°C)' },
-        { key: 'stdRh', label: 'Standar RH (%)' }, { key: 'uutRh', label: 'UUT RH (%)' },
-      ],
-    }],
+    code: 'CCI-KAL-FOM-053', revision: '04', name: 'Thermohygrometer', sheet: 'Thermohygrometer 04', workbook: earlyWorkbookPath,
+    mappingVerified: true,
+    fieldLabels: {
+      calibrationDate: 'Tanggal Kalibrasi',
+      company: 'Nama Perusahaan',
+      certificateNumber: 'No. Sertifikat',
+      name: 'Nama Alat',
+      manufacturer: 'Merek',
+      model: 'Type/Model',
+      serialNumber: 'No. Seri',
+      identityNumber: 'Identitas',
+      capacity: 'Kapasitas',
+      resolution: 'Resolusi',
+      calibrationLocation: 'Lokasi Kalibrasi',
+      ambientTemperatureStart: 'Temperature Ruang Awal',
+      ambientTemperatureEnd: 'Temperature Ruang Akhir',
+      ambientHumidityStart: 'Kelembaban Awal',
+      ambientHumidityEnd: 'Kelembaban Akhir',
+    },
+    additionalFields: [
+      { key: 'calibrationMethod', label: 'Metode Kalibrasi', defaultValue: 'CCI-KAL-WI-008' },
+      { key: 'additionalInformation', label: 'Keterangan Tambahan', defaultValue: 'IN / OUT' },
+      { key: 'operatingHumidity', label: 'Kelembaban Operasional', section: 'Kondisi Operasional', exportPrefix: 'Kelembaban Operasional : ', exportSuffix: ' %RH' },
+      { key: 'operatingTemperature', label: 'Suhu Operasional', section: 'Kondisi Operasional', exportPrefix: 'Suhu Operasional : ', exportSuffix: ' °C' },
+      { key: 'standardName', label: 'Standar yang digunakan', section: 'Data Standar', defaultValue: 'Climatic Chamber, Thermohygrometer' },
+      { key: 'standardManufacturer', label: 'Merk', section: 'Data Standar', defaultValue: 'Dahometer, Huato' },
+      { key: 'standardSerialNumber', label: 'No. Seri', section: 'Data Standar' },
+      { key: 'standardTraceability', label: 'Tertelusur ke SI', section: 'Data Standar' },
+      { key: 'standardUncertainty', label: 'Ketidakpastian', section: 'Data Standar' },
+    ],
+    measurementTables: [
+      {
+        id: 'temperature',
+        title: 'Data Suhu',
+        description: 'Isi setting suhu serta lima pembacaan standar dan alat pada setiap titik.',
+        rowCount: 10,
+        initialRowCount: 1,
+        templateRowCount: 10,
+        minRows: 1,
+        maxRows: 10,
+        preserveTemplateRows: true,
+        columns: [
+          { key: 'setting', label: 'Setting Suhu', inputType: 'number' },
+          {
+            label: 'Pembacaan Standar (STD)',
+            children: Array.from({ length: 5 }, (_, index) => ({ key: `standard${index + 1}`, label: String(index + 1), inputType: 'number' as const })),
+          },
+          {
+            label: 'Pembacaan Alat (UUT)',
+            children: Array.from({ length: 5 }, (_, index) => ({ key: `uut${index + 1}`, label: String(index + 1), inputType: 'number' as const })),
+          },
+        ],
+      },
+      {
+        id: 'humidity',
+        title: 'Data Kelembaban',
+        description: 'Isi setting RH serta lima pembacaan standar dan alat pada setiap titik.',
+        rowCount: 9,
+        initialRowCount: 1,
+        templateRowCount: 9,
+        minRows: 1,
+        maxRows: 9,
+        preserveTemplateRows: true,
+        columns: [
+          { key: 'setting', label: 'Setting RH', inputType: 'number' },
+          {
+            label: 'Pembacaan Standar (STD)',
+            children: Array.from({ length: 5 }, (_, index) => ({ key: `standard${index + 1}`, label: String(index + 1), inputType: 'number' as const })),
+          },
+          {
+            label: 'Pembacaan Alat (UUT)',
+            children: Array.from({ length: 5 }, (_, index) => ({ key: `uut${index + 1}`, label: String(index + 1), inputType: 'number' as const })),
+          },
+        ],
+      },
+    ],
     cellMappings: {
-      ...createGenericTableMappings('thermohygrometer', 17, 10, {
-        stdTemp: 'B', uutTemp: 'C', stdRh: 'F', uutRh: 'G',
+      'additionalFields.calibrationMethod': ['I9'],
+      'additionalFields.additionalInformation': ['I11'],
+      'additionalFields.operatingHumidity': ['A29'],
+      'additionalFields.operatingTemperature': ['A43'],
+      'additionalFields.standardName': ['C45'],
+      'additionalFields.standardManufacturer': ['C46'],
+      'additionalFields.standardSerialNumber': ['C47'],
+      'additionalFields.standardTraceability': ['C48'],
+      'additionalFields.standardUncertainty': ['C49'],
+      ...createGenericTableMappings('temperature', 19, 10, {
+        setting: 'A',
+        standard1: 'B', standard2: 'C', standard3: 'D', standard4: 'E', standard5: 'F',
+        uut1: 'G', uut2: 'H', uut3: 'I', uut4: 'J', uut5: 'K',
+      }),
+      ...createGenericTableMappings('humidity', 34, 9, {
+        setting: 'A',
+        standard1: 'B', standard2: 'C', standard3: 'D', standard4: 'E', standard5: 'F',
+        uut1: 'G', uut2: 'H', uut3: 'I', uut4: 'J', uut5: 'K',
       }),
     },
   },
-  createStandardVsUutForm('CCI-KAL-FOM-054', 'Timer / Stopwatch', 'Timer-Stopwatch 02', 18, 5),
-  createStandardVsUutForm('CCI-KAL-FOM-055', 'Volumetric Glassware', 'Volumetric Glassware 04', 17, 5),
-  createStandardVsUutForm('CCI-KAL-FOM-056', 'Autoclave', 'Autoclave 04', 19, 5),
-  createEarlyDimensionalInstrumentForm('CCI-KAL-FOM-057', 'Mikrometer — LK-054-IDN / JCC (Taiwan)', 'Mikrometer 03', 25, 41, '03'),
-  createEarlyDimensionalInstrumentForm('CCI-KAL-FOM-057-B', 'Mikrometer — LK-032-IDN / LK-070-IDN', 'Mikrometer-03', 25, 41, '03'),
+  createTimerStopwatchForm(),
+  createVolumetricGlasswareForm(),
+  createAutoclaveForm(),
+  createVerifiedMicrometerForm('A'),
+  createVerifiedMicrometerForm('B'),
   createPressureGaugeForm('CCI-KAL-FOM-058', 'Digital Pressure (FOM-058)', 'Digital Pressure', earlyWorkbookPath),
   createStandardVsUutForm('CCI-KAL-FOM-059', 'Thermometer Digital', 'Thermometer Digital', 18, 5),
   createStandardVsUutForm('CCI-KAL-FOM-060', 'Refractometer', 'Refractometer 03', 18, 5),

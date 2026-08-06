@@ -199,6 +199,7 @@ describe('metadata template instrumen', () => {
       minRows: 1,
       maxRows: 18,
       preserveTemplateRows: true,
+      headerFieldKeys: ['instrumentIndicationUnit', 'standardIndicationUnit'],
     });
     expect(getMeasurementTableLeafColumns(table?.columns ?? []).map((column) => column.key)).toEqual([
       'instrumentIndication',
@@ -358,5 +359,179 @@ describe('metadata template instrumen', () => {
       'Mikrometer — LK-032-IDN / LK-070-IDN',
     ]);
     expect(micrometers.map((form) => form.sheet)).toEqual(['Mikrometer 03', 'Mikrometer-03']);
+  });
+
+  it('memodelkan Enklosur 033 sesuai template asli 30 baris', () => {
+    const enclosure = instrumentForms.find((form) => form.code === 'CCI-KAL-FOM-033');
+    const table = enclosure?.measurementTables?.find((item) => item.id === 'enclosure');
+
+    expect(enclosure).toBeDefined();
+    expect(enclosure?.mappingVerified).toBe(true);
+    expect(table).toMatchObject({
+      rowCount: 30,
+      initialRowCount: 1,
+      templateRowCount: 30,
+      minRows: 1,
+      maxRows: 30,
+      preserveTemplateRows: true,
+      headerFieldKeys: ['temperatureSetting'],
+    });
+    expect(getMeasurementTableLeafColumns(table?.columns ?? []).map((column) => column.key)).toEqual([
+      'indicator', 'dataNumber', 'tu1', 'tu2', 'tu3', 'tu4', 'tu5', 'tu6', 'tu7', 'tu8', 'tu9',
+    ]);
+    expect(getMeasurementTableLeafColumns(table?.columns ?? [])[1]?.lockedValues).toEqual(
+      Array.from({ length: 30 }, (_, index) => String(index + 1)),
+    );
+    expect(getWorksheetTableMappings(enclosure!)).toEqual([{
+      id: 'enclosure',
+      firstRow: 21,
+      templateRowCount: 30,
+      preserveTemplateRows: true,
+      columns: {
+        indicator: 'B', dataNumber: 'C',
+        tu1: 'D', tu2: 'E', tu3: 'F', tu4: 'G', tu5: 'H', tu6: 'I', tu7: 'J', tu8: 'K', tu9: 'L',
+      },
+    }]);
+    expect(getInstrumentCellMappings(enclosure!)).toMatchObject({
+      'additionalFields.temperatureSetting': ['A21'],
+      'measurements.tables.enclosure.0.indicator': ['B21'],
+      'measurements.tables.enclosure.0.dataNumber': ['C21'],
+      'measurements.tables.enclosure.29.indicator': ['B50'],
+      'measurements.tables.enclosure.29.tu9': ['L50'],
+      'additionalFields.standardName': ['C53'],
+      'additionalFields.standardUncertainty': ['C57'],
+    });
+    expect(enclosure?.additionalFields?.filter((field) => field.section === 'Data Standar').map((field) => field.key)).toEqual([
+      'standardName', 'standardManufacturer', 'standardSerialNumber', 'standardTraceability', 'standardUncertainty',
+    ]);
+  });
+
+  it('memodelkan Thermohygrometer 053 sebagai tabel suhu dan kelembaban terpisah', () => {
+    const thermohygrometer = instrumentForms.find((form) => form.code === 'CCI-KAL-FOM-053');
+
+    expect(thermohygrometer).toBeDefined();
+    expect(thermohygrometer?.revision).toBe('04');
+    expect(thermohygrometer?.mappingVerified).toBe(true);
+    expect(thermohygrometer?.measurementTables?.map((table) => table.id)).toEqual(['temperature', 'humidity']);
+    expect(thermohygrometer?.measurementTables?.map((table) => table.templateRowCount)).toEqual([10, 9]);
+    for (const table of thermohygrometer?.measurementTables ?? []) {
+      expect(getMeasurementTableLeafColumns(table.columns).map((column) => column.key)).toEqual([
+        'setting',
+        'standard1', 'standard2', 'standard3', 'standard4', 'standard5',
+        'uut1', 'uut2', 'uut3', 'uut4', 'uut5',
+      ]);
+      expect(table).toMatchObject({ initialRowCount: 1, minRows: 1, preserveTemplateRows: true });
+    }
+    expect(getWorksheetTableMappings(thermohygrometer!)).toEqual([
+      {
+        id: 'temperature', firstRow: 19, templateRowCount: 10, preserveTemplateRows: true,
+        columns: {
+          setting: 'A',
+          standard1: 'B', standard2: 'C', standard3: 'D', standard4: 'E', standard5: 'F',
+          uut1: 'G', uut2: 'H', uut3: 'I', uut4: 'J', uut5: 'K',
+        },
+      },
+      {
+        id: 'humidity', firstRow: 34, templateRowCount: 9, preserveTemplateRows: true,
+        columns: {
+          setting: 'A',
+          standard1: 'B', standard2: 'C', standard3: 'D', standard4: 'E', standard5: 'F',
+          uut1: 'G', uut2: 'H', uut3: 'I', uut4: 'J', uut5: 'K',
+        },
+      },
+    ]);
+    expect(getInstrumentCellMappings(thermohygrometer!)).toMatchObject({
+      'additionalFields.calibrationMethod': ['I9'],
+      'additionalFields.operatingHumidity': ['A29'],
+      'additionalFields.operatingTemperature': ['A43'],
+      'measurements.tables.temperature.0.setting': ['A19'],
+      'measurements.tables.temperature.9.uut5': ['K28'],
+      'measurements.tables.humidity.0.setting': ['A34'],
+      'measurements.tables.humidity.8.uut5': ['K42'],
+      'additionalFields.standardName': ['C45'],
+      'additionalFields.standardUncertainty': ['C49'],
+    });
+    expect(thermohygrometer?.additionalFields?.find((field) => field.key === 'standardName')?.defaultValue).toBe('Climatic Chamber, Thermohygrometer');
+    expect(thermohygrometer?.additionalFields?.find((field) => field.key === 'standardManufacturer')?.defaultValue).toBe('Dahometer, Huato');
+  });
+
+  it('memodelkan Batch A1 FOM-054 sampai FOM-058 sesuai workbook sumber', () => {
+    const forms = Object.fromEntries(
+      instrumentForms
+        .filter((form) => ['CCI-KAL-FOM-054', 'CCI-KAL-FOM-055', 'CCI-KAL-FOM-056', 'CCI-KAL-FOM-057', 'CCI-KAL-FOM-057-B', 'CCI-KAL-FOM-058'].includes(form.code))
+        .map((form) => [form.code, form]),
+    );
+
+    expect(Object.keys(forms)).toHaveLength(6);
+    expect(Object.values(forms).every((form) => form.mappingVerified)).toBe(true);
+    expect(Object.values(forms).map((form) => form.revision)).toEqual(['02', '04', '04', '03', '03', '00']);
+
+    expect(getWorksheetTableMappings(forms['CCI-KAL-FOM-054']!)).toMatchObject([
+      { id: 'standard', firstRow: 20, templateRowCount: 6, columns: { nominalMinutes: 'A', reading3Seconds: 'H' } },
+      { id: 'uut', firstRow: 31, templateRowCount: 6, columns: { nominalMinutes: 'A', reading3Seconds: 'H' } },
+    ]);
+    expect(getWorksheetTableMappings(forms['CCI-KAL-FOM-055']!)).toMatchObject([
+      { id: 'volume1', firstRow: 19, templateRowCount: 8, columns: { volume: 'A', measurement: 'B', emptyWeight: 'C', filledWeight: 'D', waterTemperature: 'F' } },
+      { id: 'volume2', firstRow: 27, templateRowCount: 8 },
+      { id: 'volume3', firstRow: 35, templateRowCount: 8 },
+    ]);
+    expect(forms['CCI-KAL-FOM-055']?.measurementTables?.map((table) => table.headerFieldKeys)).toEqual([
+      ['innerDiameter'], undefined, undefined,
+    ]);
+    expect(getMeasurementTableLeafColumns(forms['CCI-KAL-FOM-055']?.measurementTables?.[0]?.columns ?? []).map((column) => column.key)).toEqual([
+      'volume', 'measurement', 'emptyWeight', 'filledWeight', 'waterMass', 'waterTemperature',
+    ]);
+    expect(getMeasurementTableLeafColumns(forms['CCI-KAL-FOM-055']?.measurementTables?.[0]?.columns ?? []).find((column) => column.key === 'waterMass')).toMatchObject({
+      calculation: { operator: 'subtract', minuendKey: 'filledWeight', subtrahendKey: 'emptyWeight' },
+    });
+    expect(getInstrumentCellMappings(forms['CCI-KAL-FOM-055']!)).toMatchObject({
+      'instrument.serialNumber': ['C11'],
+      'environment.temperatureStart': ['H12'],
+      'environment.humidityEnd': ['I13'],
+      'additionalFields.innerDiameter': ['A14'],
+      'measurements.tables.volume3.0.volume': ['A35'],
+      'additionalFields.standardUncertainty': ['C49'],
+    });
+
+    expect(getWorksheetTableMappings(forms['CCI-KAL-FOM-056']!)).toMatchObject([
+      { id: 'pressure', firstRow: 20, templateRowCount: 5, columns: { nominal: 'A', standard3: 'H' } },
+      { id: 'temperature', firstRow: 31, templateRowCount: 6, columns: { repeat: 'A', setPoint: 'B', top: 'H' } },
+    ]);
+    expect(forms['CCI-KAL-FOM-056']?.measurementTables?.[1]?.columns[0]).toMatchObject({
+      key: 'repeat', lockedValues: ['1', '2', '3', '1', '2', '3'],
+    });
+
+    expect(getWorksheetTableMappings(forms['CCI-KAL-FOM-057']!)).toMatchObject([
+      { id: 'nominal', firstRow: 23, templateRowCount: 11, columns: { nominal: 'A', reading5: 'K' } },
+    ]);
+    expect(getWorksheetTableMappings(forms['CCI-KAL-FOM-057-B']!)).toMatchObject([
+      { id: 'flatness', firstRow: 23, templateRowCount: 1, columns: { repeat1Anvil: 'A', repeat3Spindel: 'K' } },
+      { id: 'parallelism', firstRow: 27, templateRowCount: 1, columns: { position1: 'A', position5: 'J' } },
+      { id: 'nominal', firstRow: 33, templateRowCount: 10, columns: { nominal: 'A', reading5: 'K' } },
+      { id: 'repeatability', firstRow: 49, templateRowCount: 2, columns: { nominal: 'A', reading10: 'L' } },
+    ]);
+    expect(forms['CCI-KAL-FOM-057-B']?.measurementTables?.map((table) => table.id)).toEqual([
+      'flatness', 'parallelism', 'nominal', 'repeatability',
+    ]);
+    expect(getInstrumentCellMappings(forms['CCI-KAL-FOM-057-B']!)).toMatchObject({
+      'measurements.tables.flatness.0.repeat1Anvil': ['A23'],
+      'measurements.tables.flatness.0.repeat3Spindel': ['K23'],
+      'measurements.tables.parallelism.0.position5': ['J27'],
+      'additionalFields.initialPositionTool': ['K54'],
+      'additionalFields.instrumentCondition': ['K56'],
+    });
+
+    expect(getWorksheetTableMappings(forms['CCI-KAL-FOM-058']!)).toMatchObject([
+      { id: 'pressure', firstRow: 21, templateRowCount: 18, columns: { instrumentIndication: 'A', standard1Up: 'C', standard3Down: 'H' } },
+    ]);
+    expect(forms['CCI-KAL-FOM-058']?.measurementTables?.[0]?.headerFieldKeys).toEqual([
+      'instrumentIndicationUnit', 'standardIndicationUnit',
+    ]);
+    expect(getInstrumentCellMappings(forms['CCI-KAL-FOM-058']!)).toMatchObject({
+      'instrument.name': ['C8'],
+      'additionalFields.calibrationMethod': ['G9'],
+      'additionalFields.additionalInformation': ['A15'],
+      'additionalFields.standardTraceability': ['C43'],
+    });
   });
 });

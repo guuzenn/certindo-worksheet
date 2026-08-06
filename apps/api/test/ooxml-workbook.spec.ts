@@ -379,6 +379,109 @@ describe('replaceCellValue', () => {
     }
   });
 
+  it('mengisi Setting sekali, 30 data Enklosur, dan tabel standar FOM-033', async () => {
+    const form = instrumentForms.find((item) => item.code === 'CCI-KAL-FOM-033');
+    expect(form).toBeDefined();
+    const table = getWorksheetTableMappings(form!);
+    expect(table).toHaveLength(1);
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), 'certindo-enclosure-'));
+    const outputPath = join(temporaryDirectory, 'enclosure.xlsx');
+    const cells = {
+      A21: 'SETTING-ONCE', B21: 'INDICATOR-1', C21: '1', D21: 'TU1-ROW1',
+      B50: 'INDICATOR-30', C50: '30', L50: 'TU9-ROW30',
+      C53: 'STANDARD-NAME', C54: 'STANDARD-BRAND', C55: 'STANDARD-SERIAL',
+      C56: 'STANDARD-TRACEABILITY', C57: 'STANDARD-UNCERTAINTY',
+    };
+
+    try {
+      await new OoxmlWorkbookService().fillTemplate(
+        resolve(process.cwd(), '..', '..', form!.workbook ?? currentWorkbookPath),
+        outputPath,
+        form!.sheet,
+        cells,
+        table.map((item) => ({ ...item, rowCount: 30 })),
+      );
+      const zip = await JSZip.loadAsync(await readFile(outputPath));
+      await expectSingleWorksheet(zip, 'Enklosur 03');
+      const worksheet = Object.values(zip.files).find((file) => /^xl\/worksheets\/sheet\d+\.xml$/.test(file.name));
+      const xml = await worksheet!.async('string');
+      for (const marker of Object.values(cells)) expect(xml).toContain(marker);
+      expect(xml).toContain('ref="A21:A50"');
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it('mengisi tabel suhu, kelembaban, kondisi operasional, dan standar FOM-053', async () => {
+    const form = instrumentForms.find((item) => item.code === 'CCI-KAL-FOM-053');
+    expect(form).toBeDefined();
+    const tables = getWorksheetTableMappings(form!);
+    expect(tables).toHaveLength(2);
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), 'certindo-thermohygrometer-'));
+    const outputPath = join(temporaryDirectory, 'thermohygrometer.xlsx');
+    const cells = {
+      A19: 'TEMP-SETTING-1', B19: 'TEMP-STD-1', K19: 'TEMP-UUT-5',
+      A28: 'TEMP-SETTING-10', K28: 'TEMP-UUT-LAST', A29: 'OPERATING-HUMIDITY',
+      A34: 'RH-SETTING-1', B34: 'RH-STD-1', K34: 'RH-UUT-5',
+      A42: 'RH-SETTING-9', K42: 'RH-UUT-LAST', A43: 'OPERATING-TEMPERATURE',
+      C45: 'STANDARD-NAME', C46: 'STANDARD-BRAND', C47: 'STANDARD-SERIAL',
+      C48: 'STANDARD-TRACEABILITY', C49: 'STANDARD-UNCERTAINTY',
+    };
+
+    try {
+      await new OoxmlWorkbookService().fillTemplate(
+        resolve(process.cwd(), '..', '..', form!.workbook ?? currentWorkbookPath),
+        outputPath,
+        form!.sheet,
+        cells,
+        tables.map((table) => ({ ...table, rowCount: table.templateRowCount })),
+      );
+      const zip = await JSZip.loadAsync(await readFile(outputPath));
+      await expectSingleWorksheet(zip, 'Thermohygrometer 04');
+      const worksheet = Object.values(zip.files).find((file) => /^xl\/worksheets\/sheet\d+\.xml$/.test(file.name));
+      const xml = await worksheet!.async('string');
+      for (const marker of Object.values(cells)) expect(xml).toContain(marker);
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it('mengekspor tabel dan field utama Batch A1 FOM-054 sampai FOM-058', async () => {
+    const cases = [
+      { code: 'CCI-KAL-FOM-054', cells: { G9: 'METHOD-054', A20: 'STD-NOMINAL', H36: 'UUT-LAST' } },
+      { code: 'CCI-KAL-FOM-055', cells: { H9: 'METHOD-055', A19: 'VOLUME-1', C19: 'EMPTY-WEIGHT', F42: 'WATER-TEMP-LAST', C49: 'UNCERTAINTY-055' }, formula: 'D21-C21' },
+      { code: 'CCI-KAL-FOM-056', cells: { G9: 'METHOD-056', B20: 'PRESSURE-UUT', H36: 'TEMPERATURE-TOP-LAST' } },
+      { code: 'CCI-KAL-FOM-057', cells: { I14: 'METHOD-057-A', A23: 'NOMINAL-FIRST', K33: 'READING-LAST' } },
+      { code: 'CCI-KAL-FOM-057-B', cells: { I14: 'METHOD-057-B', A23: 'FLATNESS-FIRST', J27: 'PARALLELISM-LAST', A33: 'NOMINAL-FIRST', L50: 'REPEATABILITY-LAST', K56: 'INSTRUMENT-CONDITION' } },
+      { code: 'CCI-KAL-FOM-058', cells: { G9: 'METHOD-058', C18: '(STD-UNIT)', A19: '(UUT-UNIT)', A21: 'PRESSURE-FIRST', H38: 'PRESSURE-LAST', C43: 'TRACEABILITY-058' } },
+    ];
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), 'certindo-batch-a1-'));
+
+    try {
+      for (const item of cases) {
+        const form = instrumentForms.find((candidate) => candidate.code === item.code);
+        expect(form, item.code).toBeDefined();
+        const tables = getWorksheetTableMappings(form!);
+        const outputPath = join(temporaryDirectory, `${item.code}.xlsx`);
+        await new OoxmlWorkbookService().fillTemplate(
+          resolve(process.cwd(), '..', '..', form!.workbook ?? currentWorkbookPath),
+          outputPath,
+          form!.sheet,
+          item.cells,
+          tables.map((table) => ({ ...table, rowCount: table.templateRowCount })),
+        );
+        const zip = await JSZip.loadAsync(await readFile(outputPath));
+        await expectSingleWorksheet(zip, form!.sheet);
+        const worksheet = Object.values(zip.files).find((file) => /^xl\/worksheets\/sheet\d+\.xml$/.test(file.name));
+        const xml = await worksheet!.async('string');
+        for (const marker of Object.values(item.cells)) expect(xml, `${item.code}: ${marker}`).toContain(marker);
+        if (item.formula) expect(xml, `${item.code}: formula template`).toContain(item.formula);
+      }
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+
   it('mengisi mapping identitas dan mengekspor satu sheet untuk seluruh katalog instrumen', async () => {
     const temporaryDirectory = await mkdtemp(join(tmpdir(), 'certindo-catalog-'));
 

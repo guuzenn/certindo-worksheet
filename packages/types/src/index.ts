@@ -148,6 +148,14 @@ export interface MeasurementTableLeafColumnDefinition {
   label: string;
   lockedValues?: string[];
   unit?: string;
+  rowSpan?: number;
+  calculation?: {
+    operator: 'subtract';
+    minuendKey: string;
+    subtrahendKey: string;
+  };
+  exportPrefix?: string;
+  exportSuffix?: string;
   inputType?: 'text' | 'number' | 'select';
   options?: string[];
 }
